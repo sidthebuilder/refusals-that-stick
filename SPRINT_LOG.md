@@ -70,8 +70,36 @@ Day-0 tests showed erasure depends on **edit sparsity**, not merely edit size:
 Since C-ΔΘ is sparse by construction (<5% of parameters) and RESTA is dense, this yields a
 mechanistic prediction distinguishing them. Added as **H0** before any run.
 
-### Status
+### Toolchain verified on Modal (CPU, ~3 minutes, a few cents)
+
+`modal run modal_app.py::smoke_all` built all four images and probed them. Four separate images
+because the toolkits do not share a dependency set; one image would mean resolving conflicts that
+do not need resolving.
+
+| Image | Python | Result |
+|---|---|---|
+| safetune | 3.12.10 | torch 2.9.0+cu128, transformers 5.22.2, **safetune 0.1.14**, `apply_ctheta` importable |
+| circuitkit | 3.12.10 | **circuitkit 0.2.2**, `discover` and `quantize` both present |
+| eval | 3.12.10 | **auditkit 1.1.7**, **curatorkit 0.1.24** co-install cleanly |
+| llamacpp | 3.12.10 | `llama-quantize`, `llama-cli`, `llama-imatrix`, `convert_hf_to_gguf.py` all built |
+
+All six pre-registered quant types are present in the built binary: Q8_0, Q6_K, Q4_K_M, Q4_0,
+Q3_K_M, Q2_K.
+
+**Both fixes are feasible, confirmed against the binary rather than the documentation:**
+`--tensor-type` exists (fix 1, circuit-guided precision) and `--imatrix` exists (fix 2,
+safety-calibrated importance matrix). Had either been missing, two of the four planned fixes would
+have had to be redesigned.
+
+One probe failed harmlessly: `circuitkit.models.architecture_registry` was a guess at a module
+path and does not exist. Whether cohere2 is in CircuitKIT's registry is still unverified and is a
+day-1 check.
+
+### Status at end of day 0
 
 - `pytest tests` → **25 passed** on CPU.
-- Pre-registration frozen and committed before any experiment.
-- Blocked on credentials: Hugging Face token and licence acceptances, a fresh Adaption key.
+- Pre-registration frozen and committed (`5ba4cba`) before any experiment existed.
+- Toolchain proven end to end except for model loading.
+- Modal authenticated as profile `shashankchoudhary792`.
+- **Blocked on credentials:** Hugging Face token plus licence acceptances for the gated Tiny Aya
+  and aya_redteaming repos, and a fresh Adaption key for the judge (needed day 2).
