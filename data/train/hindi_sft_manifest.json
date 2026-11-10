@@ -1,0 +1,115 @@
+{
+  "pipeline_config_hash": "rts-hindi-sft-v1",
+  "run_timestamp": "2026-11-10T16:29:47.346345Z",
+  "source_files": [],
+  "stage_counts": {
+    "ListReader": {
+      "output_count": 1153,
+      "rejected_count": 0
+    },
+    "TextCleaner": {
+      "input_count": 1153,
+      "output_count": 1153
+    },
+    "SchemaGate": {
+      "input_count": 1153,
+      "output_count": 1150,
+      "probe_recovered": 0,
+      "rejected_count": 3
+    },
+    "DevanagariGate": {
+      "input_count": 1150,
+      "output_count": 1022,
+      "probe_recovered": 0,
+      "rejected_count": 128
+    },
+    "ExactDeduplicator": {
+      "input_count": 1022,
+      "output_count": 1000
+    },
+    "MinHashDeduplicator": {
+      "input_count": 1000,
+      "output_count": 901
+    },
+    "DecontaminationGate": {
+      "input_count": 901,
+      "output_count": 900,
+      "probe_recovered": 0,
+      "rejected_count": 1
+    }
+  },
+  "rejected_breakdown": {
+    "above_max_tokens:1864": 1,
+    "above_max_tokens:2808": 1,
+    "above_max_tokens:4598": 1,
+    "script:devanagari_below_threshold": 128,
+    "eval_overlap:8gram": 1
+  },
+  "dedup_stats": {
+    "near_duplicates_removed": 99,
+    "surviving_count": 901
+  },
+  "minhash_threshold": 0.85,
+  "sampler_stats": null,
+  "token_stats": {
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0,
+    "total_tokens": 0
+  },
+  "wall_clock_seconds": 19.639,
+  "tool_versions": {
+    "curatorkit": "0.1.24",
+    "python": "3.12.10"
+  },
+  "diversity_stats": null,
+  "diagnostic_stats": null,
+  "diagnostic_files": [],
+  "provenance": {
+    "schema": "lexsi.provenance/1",
+    "library": "curatorkit",
+    "version": "0.1.24",
+    "git_sha": null,
+    "created_at": "2026-11-10T16:29:47Z",
+    "base_model": null,
+    "method": "curate",
+    "inputs": [
+      {
+        "kind": "dataset",
+        "ref": "CohereLabs/aya_dataset",
+        "config": null,
+        "provenance": null
+      },
+      {
+        "kind": "dataset",
+        "ref": "CohereLabs/aya_redteaming",
+        "config": null,
+        "provenance": null
+      },
+      {
+        "kind": "dataset",
+        "ref": "Paul/XSTest",
+        "config": null,
+        "provenance": null
+      },
+      {
+        "kind": "dataset",
+        "ref": "CohereLabs/Global-MMLU",
+        "config": null,
+        "provenance": null
+      }
+    ],
+    "params": {
+      "filter": "language_code == 'hin'",
+      "min_devanagari": 0.6,
+      "schema_min_tokens": 3,
+      "schema_max_tokens": 1536,
+      "minhash_threshold": 0.85,
+      "minhash_ngram": 5,
+      "decontam_ngram": 8,
+      "decontam_eval_texts": 2876,
+      "split_seed": 20261110,
+      "heldout": 200,
+      "source_revision": "f9ea04583f02a8f86404ff6c58bf75fe637df8a2"
+    }
+  }
+}

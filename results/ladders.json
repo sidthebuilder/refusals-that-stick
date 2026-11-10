@@ -1,0 +1,90 @@
+{
+  "drift-plain": {
+    "hf_dir": "/vol/models/drift-plain",
+    "files": {
+      "BF16": {
+        "bytes": 6710484512
+      },
+      "Q8_0": {
+        "seconds": 11.7,
+        "bytes": 3570654752,
+        "args": []
+      },
+      "Q6_K": {
+        "seconds": 24.7,
+        "bytes": 2759532064,
+        "args": []
+      },
+      "Q4_K_M": {
+        "seconds": 35.8,
+        "bytes": 2143976992,
+        "args": []
+      },
+      "Q4_0": {
+        "seconds": 10.5,
+        "bytes": 2034490912,
+        "args": []
+      },
+      "Q3_K_M": {
+        "seconds": 23.5,
+        "bytes": 1799740960,
+        "args": []
+      },
+      "Q2_K": {
+        "seconds": 27.2,
+        "bytes": 1481973280,
+        "args": []
+      }
+    },
+    "convert": {
+      "seconds": 48.1,
+      "bytes": 6710484512
+    },
+    "chat_template_sha": "2147c474f41b522b",
+    "model": "drift-plain"
+  },
+  "drift-dose3": {
+    "hf_dir": "/vol/models/drift-dose3",
+    "files": {
+      "BF16": {
+        "bytes": 6710484512
+      },
+      "Q8_0": {
+        "seconds": 12.0,
+        "bytes": 3570654752,
+        "args": []
+      },
+      "Q6_K": {
+        "seconds": 23.8,
+        "bytes": 2759532064,
+        "args": []
+      },
+      "Q4_K_M": {
+        "seconds": 38.1,
+        "bytes": 2143976992,
+        "args": []
+      },
+      "Q4_0": {
+        "seconds": 10.7,
+        "bytes": 2034490912,
+        "args": []
+      },
+      "Q3_K_M": {
+        "seconds": 24.1,
+        "bytes": 1799740960,
+        "args": []
+      },
+      "Q2_K": {
+        "seconds": 27.6,
+        "bytes": 1481973280,
+        "args": []
+      }
+    },
+    "convert": {
+      "seconds": 51.7,
+      "bytes": 6710484512
+    },
+    "chat_template_sha": "2147c474f41b522b",
+    "model": "drift-dose3"
+  }
+}

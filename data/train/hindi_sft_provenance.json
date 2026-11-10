@@ -1,0 +1,48 @@
+{
+  "schema": "lexsi.provenance/1",
+  "library": "curatorkit",
+  "version": "0.1.24",
+  "git_sha": null,
+  "created_at": "2026-11-10T16:29:47Z",
+  "base_model": null,
+  "method": "curate",
+  "inputs": [
+    {
+      "kind": "dataset",
+      "ref": "CohereLabs/aya_dataset",
+      "config": null,
+      "provenance": null
+    },
+    {
+      "kind": "dataset",
+      "ref": "CohereLabs/aya_redteaming",
+      "config": null,
+      "provenance": null
+    },
+    {
+      "kind": "dataset",
+      "ref": "Paul/XSTest",
+      "config": null,
+      "provenance": null
+    },
+    {
+      "kind": "dataset",
+      "ref": "CohereLabs/Global-MMLU",
+      "config": null,
+      "provenance": null
+    }
+  ],
+  "params": {
+    "filter": "language_code == 'hin'",
+    "min_devanagari": 0.6,
+    "schema_min_tokens": 3,
+    "schema_max_tokens": 1536,
+    "minhash_threshold": 0.85,
+    "minhash_ngram": 5,
+    "decontam_ngram": 8,
+    "decontam_eval_texts": 2876,
+    "split_seed": 20261110,
+    "heldout": 200,
+    "source_revision": "f9ea04583f02a8f86404ff6c58bf75fe637df8a2"
+  }
+}

@@ -373,3 +373,25 @@ screen is for.
 
 Perplexity rises slightly BF16 -> Q4_K_M (8.40 -> 8.61), as expected. These values are logged for
 pipeline provenance only and are superseded once decoding is fixed.
+
+### Circuit discovery OOM (fix queued, not a blocker)
+
+`discover_circuit` on A100-80GB failed with CUDA OOM at ~5% of the EAP-IG run: it tried to add
+19.7 GiB on top of ~60 GiB. Cause: `ck.load_model` enables `use_attn_result`,
+`use_split_qkv_input` and `use_hook_mlp_in` (needed by EAP), which materialize per-head
+activation tensors across all 36 layers, and I fed ~200 calib prompts at batch size 4.
+
+Fix for next session (all knobs already exposed, just not tuned): drop `batch_size` to 1,
+cap the contrast set to ~48 harmful/48 harmless, and set
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`. C-ΔΘ only consumes the coarse
+`layer_subset` and `target_modules`, so a smaller attribution set is enough to rank layers. This
+blocks only the C-ΔΘ arm; RESTA (whole-model, no circuit) can proceed meanwhile.
+
+### State at this checkpoint
+
+Done and committed: data build, drift training (both variants), Fire GGUF ladder, judge
+conversion, XSTest Hindi translation, and the full eval pipeline, with 109 unit tests passing.
+Open, in priority order: (1) re-run the two Fire dev cells with the decoding fix and confirm
+coherence; (2) retune and rerun circuit discovery; (3) RESTA and C-ΔΘ strength sweeps on dev;
+(4) build the drift/repair ladders and run the 56-cell dev screen. No budget has gone to the
+full grid yet.

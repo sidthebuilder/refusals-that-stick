@@ -2,7 +2,7 @@
   "steps": [
     {
       "step": "download_model",
-      "seconds": 44.5,
+      "seconds": 3.9,
       "architectures": [
         "Cohere2ForCausalLM"
       ],
@@ -25,38 +25,38 @@
     {
       "step": "convert",
       "ok": true,
-      "seconds": 43.7,
+      "seconds": 0.0,
       "size_gb": 6.71
     },
     {
       "step": "quantize_Q8_0",
       "ok": true,
-      "seconds": 13.4,
+      "seconds": 0.0,
       "size_gb": 3.571
     },
     {
       "step": "download_official_Q8_0",
-      "seconds": 42.3,
+      "seconds": 0.5,
       "size_gb": 3.571
     },
     {
       "step": "compare_Q8_0",
-      "seconds": 42.8
+      "seconds": 40.2
     },
     {
       "step": "quantize_Q4_K_M",
       "ok": true,
-      "seconds": 37.2,
+      "seconds": 0.0,
       "size_gb": 2.144
     },
     {
       "step": "download_official_Q4_K_M",
-      "seconds": 18.7,
+      "seconds": 0.4,
       "size_gb": 2.144
     },
     {
       "step": "compare_Q4_K_M",
-      "seconds": 39.2
+      "seconds": 32.8
     }
   ],
   "llama_cpp_commit": "90e3841",

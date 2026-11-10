@@ -1,0 +1,10 @@
+{
+  "nvidia_smi": "NVIDIA L40S, 610.57.04, 46068 MiB",
+  "binaries": {
+    "llama-server": true,
+    "llama-perplexity": true,
+    "llama-imatrix": true
+  },
+  "devices": "Available devices:\n  CUDA0: NVIDIA L40S (45486 MiB, 45050 MiB free)",
+  "commit": "90e3841d9"
+}

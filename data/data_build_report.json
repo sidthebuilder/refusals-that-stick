@@ -1,0 +1,192 @@
+{
+  "redteam": {
+    "n_source_rows": 915,
+    "n_items": 913,
+    "dropped": {
+      "duplicate_prompt": 2
+    },
+    "english_from": {
+      "literal_translation": 824,
+      "semantic_translation": 91
+    },
+    "split_sizes": {
+      "calib": 100,
+      "dev": 150,
+      "test": 663
+    },
+    "primary_category_by_split": {
+      "calib": {
+        "Violence, Threats & Incitement": 26,
+        "Discrimination & Injustice": 18,
+        "Non-consensual sexual content": 7,
+        "Hate Speech": 13,
+        "Profanity": 7,
+        "Bullying & Harassment": 11,
+        "Self-Harm": 8,
+        "Graphic material": 5,
+        "Harms of Representation Allocation and Quality of Service": 5
+      },
+      "dev": {
+        "Profanity": 14,
+        "Violence, Threats & Incitement": 40,
+        "Discrimination & Injustice": 27,
+        "Hate Speech": 18,
+        "Self-Harm": 12,
+        "Non-consensual sexual content": 11,
+        "Bullying & Harassment": 15,
+        "Graphic material": 5,
+        "Harms of Representation Allocation and Quality of Service": 8
+      },
+      "test": {
+        "Hate Speech": 83,
+        "Discrimination & Injustice": 119,
+        "Bullying & Harassment": 69,
+        "Harms of Representation Allocation and Quality of Service": 36,
+        "Violence, Threats & Incitement": 172,
+        "Non-consensual sexual content": 46,
+        "Self-Harm": 53,
+        "Graphic material": 29,
+        "Profanity": 56
+      }
+    },
+    "devanagari_ratio_mean_hi": 1.0
+  },
+  "xstest": {
+    "n_safe": 250,
+    "split_sizes": {
+      "dev": 100,
+      "test": 150
+    },
+    "types": {
+      "homonyms": 25,
+      "figurative_language": 25,
+      "safe_targets": 25,
+      "safe_contexts": 25,
+      "definitions": 25,
+      "nons_group_real_discr": 25,
+      "real_group_nons_discr": 25,
+      "historical_events": 25,
+      "privacy_public": 25,
+      "privacy_fictional": 25
+    }
+  },
+  "mmlu": {
+    "n_parallel": 14042,
+    "split_sizes": {
+      "dev": 100,
+      "test": 300
+    },
+    "answers_dev_en": {
+      "C": 22,
+      "D": 33,
+      "A": 22,
+      "B": 23
+    }
+  },
+  "hindi_sft": {
+    "n_hindi_source": 1153,
+    "n_kept": 900,
+    "n_train": 600,
+    "n_heldout": 200,
+    "n_calib_harmless": {
+      "hi": 100,
+      "en": 100
+    },
+    "stage_counts": {
+      "ListReader": {
+        "output_count": 1153,
+        "rejected_count": 0
+      },
+      "TextCleaner": {
+        "input_count": 1153,
+        "output_count": 1153
+      },
+      "SchemaGate": {
+        "input_count": 1153,
+        "output_count": 1150,
+        "probe_recovered": 0,
+        "rejected_count": 3
+      },
+      "DevanagariGate": {
+        "input_count": 1150,
+        "output_count": 1022,
+        "probe_recovered": 0,
+        "rejected_count": 128
+      },
+      "ExactDeduplicator": {
+        "input_count": 1022,
+        "output_count": 1000
+      },
+      "MinHashDeduplicator": {
+        "input_count": 1000,
+        "output_count": 901
+      },
+      "DecontaminationGate": {
+        "input_count": 901,
+        "output_count": 900,
+        "probe_recovered": 0,
+        "rejected_count": 1
+      }
+    },
+    "rejected_breakdown": {
+      "above_max_tokens:1864": 1,
+      "above_max_tokens:2808": 1,
+      "above_max_tokens:4598": 1,
+      "script:devanagari_below_threshold": 128,
+      "eval_overlap:8gram": 1
+    },
+    "language_code_top": [
+      [
+        "plt",
+        14597
+      ],
+      [
+        "sin",
+        14524
+      ],
+      [
+        "tam",
+        14133
+      ],
+      [
+        "yor",
+        11758
+      ],
+      [
+        "zsm",
+        10073
+      ],
+      [
+        "por",
+        8997
+      ],
+      [
+        "vie",
+        8676
+      ],
+      [
+        "kir",
+        8622
+      ]
+    ]
+  },
+  "harmful_dose": {
+    "n_max": 30,
+    "max_fraction": 0.05,
+    "n_candidates": 5265
+  },
+  "imatrix_generic": {
+    "source": "Salesforce/wikitext:wikitext-2-raw-v1:test",
+    "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "chars": 1285622
+  },
+  "revisions": {
+    "CohereLabs/aya_redteaming": "5a16fee03c19d681b4f3527b6a750e1ed4d434c7",
+    "CohereLabs/aya_dataset": "f9ea04583f02a8f86404ff6c58bf75fe637df8a2",
+    "Paul/XSTest": "f600c994b256f12867dfa5b3eb3d545a3e62f8b5",
+    "CohereLabs/Global-MMLU": "0e619dbeb34206cd48705a1a0ea7fb21cae09993",
+    "PKU-Alignment/BeaverTails": "8401fe609d288129cc684a9b3be6a93e41cfe678",
+    "Salesforce/wikitext": "b08601e04326c79dfdd32d625aee71d232d685c3"
+  },
+  "seed": 20261110
+}

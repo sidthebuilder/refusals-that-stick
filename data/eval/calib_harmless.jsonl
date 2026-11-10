@@ -1,0 +1,200 @@
+{"id": "sft-2a4811882459-hi", "lang": "hi", "prompt": "विषय पर दिए गए\nसंकेत-बिन्दुओं के आधार पर लगभग 200 से 250 शब्दों में निबन्ध लिखिए :\nमित्र की परख संकट में ।\n\nभले दिनों के मित्र\nबुरे दिनों के मित्र\nमित्र की परख", "split": "calib"}
+{"id": "sft-6964df3eae51-hi", "lang": "hi", "prompt": "जनता ने असहयोग आंदोलन का समर्थन किस प्रकार किया?", "split": "calib"}
+{"id": "sft-aa4b034b5901-hi", "lang": "hi", "prompt": "मैं इंस्टापॉट का उपयोग करके पोंगल कैसे बनाऊं?", "split": "calib"}
+{"id": "sft-96718baf1d3e-hi", "lang": "hi", "prompt": "मुझे इस श्रेणी के आधार पर थोड़ा सामान्य ज्ञान दो: राजनीति", "split": "calib"}
+{"id": "sft-5689b47159f3-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"__________ का संरक्षण करने के लिए हमें __________ की देखभाल करनी चाहिए, क्योंकि __________ बिना पृथ्वी पर जीवन की स्थिति मुश्किल हो सकती है.\"", "split": "calib"}
+{"id": "sft-c3b583966a0d-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"विश्व युद्ध II के बाद, __________ की नेतृत्व में __________ का गठन हुआ, जो __________ के बीच शांति की स्थिति को प्रकट करता है.\"", "split": "calib"}
+{"id": "sft-13a958613034-hi", "lang": "hi", "prompt": "अपना बना ले गीत के बोल", "split": "calib"}
+{"id": "sft-034b1dbd2812-hi", "lang": "hi", "prompt": "प्रश्न: भारत के इतिहास के बारे में बताएं, विशेषकर प्राचीन काल से लेकर मध्यकालीन युग तक का वर्णन करें।", "split": "calib"}
+{"id": "sft-d608ae2c3945-hi", "lang": "hi", "prompt": "अपने प्रिय मित्र को पत्र लिखकर धन्यवाद दीजिए कि आड़े वक्त में उसने किस तरह आपका साथ दिया था।", "split": "calib"}
+{"id": "sft-b39e18c25644-hi", "lang": "hi", "prompt": "रामधारी सिंह दिनकर की कविता 'रश्मिरथी' से एक प्रसिद्ध अंश क्या है?", "split": "calib"}
+{"id": "sft-e8b837676532-hi", "lang": "hi", "prompt": "\"भारत की सबसे बड़ी नदी कौन सी है?\"", "split": "calib"}
+{"id": "sft-c292b4f6a7ee-hi", "lang": "hi", "prompt": "केंद्र सरकार ने किसानों के लिए ‘आत्मनिर्भर कृषि ऐप’ लॉन्च क्यों किया?", "split": "calib"}
+{"id": "sft-ce7ad178798b-hi", "lang": "hi", "prompt": "इस श्रेणी में ट्रिविया का एक उदाहरण दीजिए: वीडियोगेम्स", "split": "calib"}
+{"id": "sft-5c166705292e-hi", "lang": "hi", "prompt": "बॉक्सर इवांडर होलीफील्ड को किस नाम से जाना जाता है?", "split": "calib"}
+{"id": "sft-008e0c9007fc-hi", "lang": "hi", "prompt": "\"1845 में यह संयुक्त राज्य अमेरिका में 28वें राज्य के रूप में शामिल हो गया\" का प्रश्न क्या है? विषय टेक्सास है।", "split": "calib"}
+{"id": "sft-15b33c89819f-hi", "lang": "hi", "prompt": "भारत में मसालों के प्रमुख उत्पादक क्षेत्र कौन-कौन से हैं?", "split": "calib"}
+{"id": "sft-87e55a667ac9-hi", "lang": "hi", "prompt": "एक स्वच्छता अभियान की कहानी।", "split": "calib"}
+{"id": "sft-22692af2baef-hi", "lang": "hi", "prompt": "भारत की राजधानी क्या है?", "split": "calib"}
+{"id": "sft-2bcb6da5fcf2-hi", "lang": "hi", "prompt": "असहयोग आंदोलन और सविनय अवज्ञा आंदोलन की तुलना कीजिए।", "split": "calib"}
+{"id": "sft-05438ae62752-hi", "lang": "hi", "prompt": "किसी तत्व के परमाणु द्रव्यमान, ग्राम परमाणु द्रव्यमान से क्या तात्पर्य है? द्रव्यमान के भिन्न-भिन्न भाव अर्थात् 'उ' और 'ग' क्यों होते हैं?", "split": "calib"}
+{"id": "sft-bc6a7df40b46-hi", "lang": "hi", "prompt": "सफलता का अर्थ और पैमाना क्या है?", "split": "calib"}
+{"id": "sft-fcc4b5c8d3f5-hi", "lang": "hi", "prompt": "ताज महल कहाँ स्थित है?", "split": "calib"}
+{"id": "sft-f25a3361c06e-hi", "lang": "hi", "prompt": "छोले भटूरे कैसे बनाते हैं?", "split": "calib"}
+{"id": "sft-7b3ad7631cda-hi", "lang": "hi", "prompt": "इस इमोजी की प्रतिक्रिया क्या हो सकती है? 🤔", "split": "calib"}
+{"id": "sft-573e325a08eb-hi", "lang": "hi", "prompt": "दिए गए पाठ का संभावित समापन लिखें\nआपका दोस्त आपसे मिलकर बहुत उदास लग रहा है. आप उन्से पूछिए,", "split": "calib"}
+{"id": "sft-bbc48dfd3a30-hi", "lang": "hi", "prompt": "भारत में कौन सा खेल अमेरिकी खेल बेसबॉल जैसा है?", "split": "calib"}
+{"id": "sft-253e76199579-hi", "lang": "hi", "prompt": "दिए गए वाक्य का अर्थ बदले बिना दोबारा लिखिए:\n\n\"स्वतंत्रता प्राप्ति के पश्चात् दिल्ली में विभिन्न क्षेत्रों से लोगों का प्रवासन हुआ, इससे दिल्ली के स्वरूप में आमूल परिवर्तन हुआ।\"", "split": "calib"}
+{"id": "sft-c2aa9c28624d-hi", "lang": "hi", "prompt": "खिलाड़ी दौड़ नहीं सका। (भाववाच्य में बदलिए)", "split": "calib"}
+{"id": "sft-eea60ff13f77-hi", "lang": "hi", "prompt": "कृपया निम्नलिखित वाक्य को पूरा करें: \"आने वाले समय में...\"", "split": "calib"}
+{"id": "sft-dcf7ce7f9666-hi", "lang": "hi", "prompt": "दिये गये वाक्य में, हर शब्द का 'टैग' क्या है, उसका अनुमान करें:\n\"मुझे सेब पसंद हैं।\"", "split": "calib"}
+{"id": "sft-cff82620e72d-hi", "lang": "hi", "prompt": "राज्य सभा को स्थायी सदन कहा जाता है,", "split": "calib"}
+{"id": "sft-63337b4c098f-hi", "lang": "hi", "prompt": "खिलाफत आन्दोलन के कारणों के उल्लेख कीजिए?", "split": "calib"}
+{"id": "sft-ea0dc4f6221b-hi", "lang": "hi", "prompt": "सर्वाधिक काला नमक किस देश में पाया जाता है ? ए - भारत में, बी - वियतनाम में, सी - कांगो में, डी - यूरोप में,", "split": "calib"}
+{"id": "sft-4f99798b94c8-hi", "lang": "hi", "prompt": "एक नए खोज की कहानी लिखें, जो विज्ञान और प्रौद्योगिकी की दुनिया में नयी दिशा सिखाती है।", "split": "calib"}
+{"id": "sft-7c9c65354979-hi", "lang": "hi", "prompt": "वाक्यांश 1: काउंसलर होरेस मस्प्रैट का इस्तीफा (पार्टी?, सेंट पीटर, 15 अप्रैल, 1908 को रिपोर्ट किया गया) 2 जून, 1909 को परिषद के लिए चुना गया था । वाक्यांश 2: काउंसिलर होरेस मस्प्रैट (पार्टी?, सेंट पीटर, 15 अप्रैल, 1908 को निर्वाचित) के इस्तीफे की सूचना 2 जून 1909 को काउंसिल को दी गई थी। प्रश्न: क्या वाक्य 1 और वाक्य 2 एक ही अर्थ व्यक्त करते हैं? हाँ या नहीं?", "split": "calib"}
+{"id": "sft-6391b9e7ec57-hi", "lang": "hi", "prompt": "संसार का सबसे बड़ा फूल कौन-सा है?\n\nकमल\nरेफ्लीसिया\nकैक्टस\nरजनीगन्धा", "split": "calib"}
+{"id": "sft-b43655427160-hi", "lang": "hi", "prompt": "मुझे इस श्रेणी में एक प्रश्न और उत्तर दीजिए: राजनीति", "split": "calib"}
+{"id": "sft-fae015a128ae-hi", "lang": "hi", "prompt": "प्रश्न\nनिम्नलिखित वाक्यों में से किन्हीं चार रेखांकित पदों का पद-परिचय लिखिए : \n(क) सुरभि विद्यालय से अभी-अभी आई है।\n(ख) उसने मेरी बातें ध्यानपूर्वक सुनी।\n(ग) शाबाश! तुमने बहुत अच्छा काम किया।\n(घ) वहाँ दस छात्र बैठे हैं।\n(ङ) परिश्रम के बिना सफलता नहीं मिलती।", "split": "calib"}
+{"id": "sft-23e4917ca770-hi", "lang": "hi", "prompt": "आपका दोस्त आपसे मिलकर बहुत उदास दिखता है। आप उससे पूछते हैं, 'कुछ परेशानियाँ है क्या? आप मुझसे चर्चा कर सकते हैं?", "split": "calib"}
+{"id": "sft-764b77f6e3cc-hi", "lang": "hi", "prompt": "कृपया निम्नलिखित वाक्य को पूरा करें: \"मेरी पसंदीदा किताब के बारे में...\"", "split": "calib"}
+{"id": "sft-b306380fa324-hi", "lang": "hi", "prompt": "एक प्रेरणादायक व्यक्ति के बारे में लिखें, जिन्होंने अपनी संघर्षों को अपने जीवन का हिस्सा बनाया।", "split": "calib"}
+{"id": "sft-8980af5a0535-hi", "lang": "hi", "prompt": "उत्तरी भारत में पूर्व से पश्चिम की ओर वर्षा कम क्यों हो जाती है?", "split": "calib"}
+{"id": "sft-01c76a6583e3-hi", "lang": "hi", "prompt": "गांधीजी ने असहयोग आंदोलन को वापस लेने का फैसला क्यों", "split": "calib"}
+{"id": "sft-169a58036df2-hi", "lang": "hi", "prompt": "मैं और अधिक पसंद करने योग्य कैसे बनूँ?", "split": "calib"}
+{"id": "sft-5ac4cb4f4c61-hi", "lang": "hi", "prompt": "इस इमोजी का प्रतिक्रिया क्या हो सकता है? 😂", "split": "calib"}
+{"id": "sft-2cd254972e58-hi", "lang": "hi", "prompt": "सचिन तेंदुलकर के व्यक्तिगत जीवन और परिवार के बारे में विस्तार से बताएं।", "split": "calib"}
+{"id": "sft-99e2e876e834-hi", "lang": "hi", "prompt": "असम के बागान मजदूरों की क्या दुर्दशा थी?", "split": "calib"}
+{"id": "sft-010bb78e5817-hi", "lang": "hi", "prompt": "वाराणसीति विख्यातां तन्मान निगदामि व: दक्षिणोत्तरयोर्नघोर्वरणासिश्च पूर्वत।\nजाऋवी पश्चिमेऽत्रापि पाशपाणिर्गणेश्वर:।।", "split": "calib"}
+{"id": "sft-e6643d43bbc5-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"__________ के साथ समय बिताने से हमारा मानसिक स्वास्थ्य बेहतर होता है, क्योंकि __________ हमें अपने मित्रों और __________ को समझने की क्षमता प्रदान करती है ।\"", "split": "calib"}
+{"id": "sft-619e4d948782-hi", "lang": "hi", "prompt": "विश्व में सबसे ऊँचा पर्वत कौनसा है और उसकी ऊँचाई कितनी है ?", "split": "calib"}
+{"id": "sft-4a9424e92f96-hi", "lang": "hi", "prompt": "आपदा प्रबंधन क्या है और इसका महत्व क्या है?", "split": "calib"}
+{"id": "sft-8c309d1cfd74-hi", "lang": "hi", "prompt": "साहित्य का महत्व क्या है और एक सुविकसित समाज के लिए इसकी आवश्यकता क्यों है?", "split": "calib"}
+{"id": "sft-378792dad292-hi", "lang": "hi", "prompt": "इस प्रश्न का सही उत्तर क्या है?: \nकिस राज्य के पास अधिक इलैक्टोरल वोट्स हैं, डेलावेयर या फ्लोरिडा?", "split": "calib"}
+{"id": "sft-d512ba8150f2-hi", "lang": "hi", "prompt": "एक आत्मा की कहानी लिखें जो एक बंदर में बसी हो।", "split": "calib"}
+{"id": "sft-ec969c431e85-hi", "lang": "hi", "prompt": "संविधान का 7वां भाग किससे संबंधित है?", "split": "calib"}
+{"id": "sft-8c915f48aab8-hi", "lang": "hi", "prompt": "पान वाले के लिए यह मजेदार बात थी लेकिन हवलदार साहब के लिए चकित कर देने वाली। (मिश्र वाक्य में बदलिए)", "split": "calib"}
+{"id": "sft-978378ea4014-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"गगन में चमकते तारों की __________ को हम रात्रि में देख सकते हैं, क्योंकि __________ दिन में दिखाई देता है।\"", "split": "calib"}
+{"id": "sft-b7d74b68f036-hi", "lang": "hi", "prompt": "निम्नलिखित पहेली का उत्तर दें:\nसफेद जमीन पर खड़ी, रात को चमकती, दिन में गायब होती। क्या हूँ मैं?", "split": "calib"}
+{"id": "sft-dc2d4a0806be-hi", "lang": "hi", "prompt": "एक ऐसे विश्व के बारे में लिखें जहां लोग समय-यात्रा करने वाले कूरियर्स द्वारा पहुंचाए गए गुमनाम पत्रों के माध्यम से अपने भविष्य के स्वयं से संदेश प्राप्त करते हैं।", "split": "calib"}
+{"id": "sft-be18083d0f59-hi", "lang": "hi", "prompt": "नीचे दिए गए अंश का संदर्भ लें और फिर उसी भाषा में प्रश्न का उत्तर दें जैसे कि अंशः संक्षिप्त विवरण: सलवार कमीज़ पंजाब, हरियाणा और हिमाचल प्रदेश में महिलाओं का पारंपरिक परिधान है और इसे पंजाबी सूट कहा जाता है जो भारत के उत्तर-पश्चिमी भाग (पंजाब क्षेत्र) में सबसे आम है। पंजाबी सूट में \"चूरदार\" और \"कुर्ता\" एंसेंबल भी शामिल है जो दक्षिणी भारत में भी लोकप्रिय है जहां इसे \"चूरदार\" के रूप में जाना जाता है। सलवार कमीज़ महिलाओं के लिए सबसे लोकप्रिय पोशाक बन गई है। इसमें टखने तक संकीर्ण ढीली पतलून (सलवार) होती है, जिस पर एक ऊपरी अंगरखा (कमीज़) होता है। महिलाएं आमतौर पर सिर और कंधों को ढंकने के लिए सलवार कमीज के साथ दुपट्टा या ओडानी (वेल) पहनती हैं। यह हमेशा दुपट्टा नामक एक स्कार्फ के साथ पहना जाता है, जिसका उपयोग सिर को ढंकने के लिए किया जाता है और छाती पर खींचा जाता है। प्रश्न: सामान्यतः किस प्रकार के टॉप का प्रयोग किया जाता है?", "split": "calib"}
+{"id": "sft-0b7637476624-hi", "lang": "hi", "prompt": "दो बैलों की कथा\n\nछोटी बच्ची को बैलों के प्रति प्रेम क्यों उमड़ आया?", "split": "calib"}
+{"id": "sft-9878212323ad-hi", "lang": "hi", "prompt": "कृत्रिम बुद्धिमत्ता क्या होती है और यह कैसे काम करती है?", "split": "calib"}
+{"id": "sft-c801f5cfd29a-hi", "lang": "hi", "prompt": "प्रो कबड्डी लीग की 'पटना पाइरेट्स' टीम का टाइटल स्पॉन्सर कौन है?", "split": "calib"}
+{"id": "sft-3c227932004c-hi", "lang": "hi", "prompt": "संसार का सबसे बड़ा फूल कौन-सा है?\n\nकमल\nरेफ्लीसिया\nकैक्टस\nरजनीगन्धा", "split": "calib"}
+{"id": "sft-b2260540a2a7-hi", "lang": "hi", "prompt": "क्या अपने मन को रोका जा सकता है?", "split": "calib"}
+{"id": "sft-19191e73f020-hi", "lang": "hi", "prompt": "\"पर्यावरण संरक्षण के लिए हम सबकी जिम्मेदारी क्या है? इसके बारे में विस्तार से बताएं।\"", "split": "calib"}
+{"id": "sft-8afce367c2ac-hi", "lang": "hi", "prompt": "प्रश्न: मेंटल हेल्थ के लिए योग, ध्यान, और अन्य प्राकृतिक उपचारों का प्रभाव और महत्व बताएं।", "split": "calib"}
+{"id": "sft-78790889fdab-hi", "lang": "hi", "prompt": "नीचे दिए गए अंश का संदर्भ लें और फिर उसी भाषा में प्रश्न का उत्तर दें जैसे कि \n\nअंशः मार्ग: फातिमिदों का नेतृत्व वज़ीर अल-अफ़्दाल शाहनशाह ने किया था, जो शायद 20,000 सैनिकों की कमान संभालते थे (अन्य अनुमानों में गेस्टा फ्रैंकोरम के 200,000 अतिरंजित शामिल हैं) । उनकी सेना में सेल्जुक तुर्क, अरब, फारसी, अर्मेनियाई, कुर्द और इथियोपियाई शामिल थे। वह यरूशलेम में क्रूसेडर्स की घेराबंदी करने का इरादा रखता था, हालांकि वह अपने साथ कोई घेराबंदी मशीनरी नहीं लाया था; हालांकि उसके पास एक बेड़ा था, जो अस्कलोन के बंदरगाह में भी इकट्ठा था। क्रूसेडर्स की सटीक संख्या अज्ञात है, लेकिन रेमंड ऑफ एगुइलेर्स द्वारा दी गई संख्या 1,200 शूरवीर और 9,000 पैदल सेना है। सबसे अधिक अनुमान 20,000 पुरुषों का है लेकिन क्रूसेड के इस चरण में यह निश्चित रूप से असंभव है। \n\nप्रश्न: दोनों सेनाओं में से कौन बड़ी थी?", "split": "calib"}
+{"id": "sft-ad181a320b4b-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"भारत की राजधानी __________ है और यह भारतीय राज्य __________ में स्थित है।\"", "split": "calib"}
+{"id": "sft-89e6e2b64a0a-hi", "lang": "hi", "prompt": "दांडी यात्रा या नमक सत्याग्रह क्या था?", "split": "calib"}
+{"id": "sft-1aeec913dcc3-hi", "lang": "hi", "prompt": "खिलाफत आंदोलन का असहयोग अभियान कब शुरू हुआ?", "split": "calib"}
+{"id": "sft-58e8cc575695-hi", "lang": "hi", "prompt": "दिए गए प्रश्न का उत्तर दीजिए।\nप्रश्न: कोरोना वायरस 2019 का पहला केस कहां सामने आया ?", "split": "calib"}
+{"id": "sft-ec0b817ff56e-hi", "lang": "hi", "prompt": "लोकतंत्र के सिद्धांतों पर आधारित एक कहानी लिखें जहां एक युवा नेता नई पीढ़ी को सकारात्मक दिशा में मोड़ने का कारगर तरीका खोजता है।", "split": "calib"}
+{"id": "sft-992f20b6150c-hi", "lang": "hi", "prompt": "इस इमोजी का प्रतिक्रिया क्या हो सकता है? 😇", "split": "calib"}
+{"id": "sft-b0a5be5574f2-hi", "lang": "hi", "prompt": "यहाँ एक हिंदी में पहेली दी जा रही है:\n\n\"ऐसी कौन सी वस्तु है जिसका उपयोग करने से पहले उसे तोड़ना चाहिए?\"", "split": "calib"}
+{"id": "sft-3bd9a2bd8b15-hi", "lang": "hi", "prompt": "निम्नलिखित लेखन के आधार पर नीचे दिये हुए प्रश्न का उत्तर दें: \nभारत (आधिकारिक नाम: भारत गणराज्य, अंग्रेज़ी: Republic of India) दक्षिण एशिया में स्थित भारतीय उपमहाद्वीप का सबसे बड़ा देश है। भारत भौगोलिक दृष्टि से विश्व का सातवाँ सबसे बड़ा देश है, जबकि जनसंख्या के दृष्टिकोण से सबसे बड़ा देश है। भारत के पश्चिम में पाकिस्तान, उत्तर-पूर्व में चीन (तिब्बत), नेपाल और भूटान, पूर्व में बांग्लादेश और म्यान्मार स्थित हैं। भारतीय महासागर में इसके दक्षिण पश्चिम में मालदीव, दक्षिण में श्रीलंका और दक्षिण-पूर्व में इंडोनेशिया और थाइलैंड से भारत की सामुद्रिक सीमा लगती है। इसके उत्तर में हिमालय पर्वत तथा दक्षिण में भारतीय महासागर स्थित है। दक्षिण-पूर्व में बंगाल की खाड़ी तथा पश्चिम में अरब सागर है।\nप्रश्न: भारत की सीमा पर कौनसा देश हैं?", "split": "calib"}
+{"id": "sft-2b46c956c2dd-hi", "lang": "hi", "prompt": "शिक्षक दिवस पर एक निबंध लिखिए।", "split": "calib"}
+{"id": "sft-e3e2fff3d3c3-hi", "lang": "hi", "prompt": "इस प्रश्न का उत्तर विस्तृत रूप से तैयार करें: क्या विक्टोरिया लारिमोर और मॉरिट्ज़ स्टिलर दोनों ने फिल्म निर्देशक के रूप में काम किया है?", "split": "calib"}
+{"id": "sft-f460eaa9dd05-hi", "lang": "hi", "prompt": "कृत्रिम बुद्धिमत्ता के उपयोग के द्वारा समाज में कैसे सुधार सकते हैं?", "split": "calib"}
+{"id": "sft-0d93f5ce72b8-hi", "lang": "hi", "prompt": "इस सवाल का सही उत्तर क्या है: विश्व में किस बीमारी से सर्वाधिक लोगों की मृत्यु हुई है, बुबोनिक प्लेग या चेचक?", "split": "calib"}
+{"id": "sft-5754e60ff5b2-hi", "lang": "hi", "prompt": "किस हॉलीवुड अभिनेता को 'सत्यजीत रे लाइफटाइम अचीवमेंट' अवॉर्ड से सम्मानित किया गया है?", "split": "calib"}
+{"id": "sft-c021b0b02c69-hi", "lang": "hi", "prompt": "इस वाक्य को अन्य तरीके से फिर से लिखिए:\nएक दुर्लभ चीज़ के खोज में निकली यात्रा का वर्णन करें।", "split": "calib"}
+{"id": "sft-42dd318988f0-hi", "lang": "hi", "prompt": "यदि राष्ट्रपति का पद खाली है, तो उसे कितनी अवधि के अन्दर भरना आवश्यक है ?", "split": "calib"}
+{"id": "sft-83b5ca79f0f8-hi", "lang": "hi", "prompt": "\" आग में घी डालना \" का अर्थ क्या होता हैं ? इस मुहावरे को एक वाक्य में उपयोग करें ।", "split": "calib"}
+{"id": "sft-64b2e89b03fa-hi", "lang": "hi", "prompt": "भारत में राष्ट्रीय आय का संकलन कौन करता है?\n\nयोजना आयोग\nवित आयोग\nभारतीय सांख्यिकी संस्थान\nकेन्द्रीय सांख्यिकी संगठन", "split": "calib"}
+{"id": "sft-8c6a1bccf056-hi", "lang": "hi", "prompt": "\"क्या ऑनलाइन शैक्षिक सामग्री विद्यार्थियों के लिए पाठक्रम को अधिक सुविधाजनक बनाती है या उन्हें पढ़ाई में दिक्कत पैदा करती है?\"", "split": "calib"}
+{"id": "sft-73d90f5e5693-hi", "lang": "hi", "prompt": "दिये गये गीत गीत के बोल पूरे करें:\n\n\"एक दिन कभी जो खुद को तराशे\nमेरी नज़र से तू ज़रा हाय रे\nआँखों से तेरी क्या क्या छुपा है\n\nतुझको दिखाऊं मैं ज़रा हाय रे\nएक अनकही सी दास्ताँ दास्ताँ\nकहने लगेगा आइना\"", "split": "calib"}
+{"id": "sft-682a29da0519-hi", "lang": "hi", "prompt": "भारत में औपनिवेशिक सरकार द्वारा अपनाई गई आर्थिक नीतियों का फोकस क्या था? इन नीतियों का क्या प्रभाव पड़ा?", "split": "calib"}
+{"id": "sft-8b9ca55cabc8-hi", "lang": "hi", "prompt": "दिये गये वाक्य में, प्रयोग के आधार पर शब्द भेद करें:\n\"मुझे सेब पसंद हैं।\"", "split": "calib"}
+{"id": "sft-4c7136e281bb-hi", "lang": "hi", "prompt": "मौसम की स्थिति और शीत ऋतु की विशेषताओं का विवरण दीजिए।", "split": "calib"}
+{"id": "sft-efafc0168979-hi", "lang": "hi", "prompt": "पौधों में विभाजन तय करने के मानदंड जानवरों के बीच उपसमूह तय करने के मानदंड से कैसे भिन्न हैं?", "split": "calib"}
+{"id": "sft-935ac3c6202c-hi", "lang": "hi", "prompt": "१९५० से भारत एक संघीय गणराज्य है। भारत की जनसंख्या 1951 में 36.1 करोड़ से बढ़कर 2011 में 121.1 करोड़ हो गई। प्रति व्यक्ति आय $64 से बढ़कर $1,498 हो गई और इसकी साक्षरता दर 16.6% से 74% हो गई। भारत एक तेजी से बढ़ती हुई प्रमुख अर्थव्यवस्था और सूचना प्रौद्योगिकी सेवाओं का केंद्र बन गया है। अंतरिक्ष क्षेत्र में भारत ने उल्लेखनीय तथा अद्वितीय प्रगति की। भारतीय फिल्में, संगीत और आध्यात्मिक शिक्षाएँ वैश्विक संस्कृति में विशेष भूमिका निभाती हैं। भारत ने गरीबी दर को काफी हद तक कम कर दिया है। भारत देश परमाणु बम रखने वाला देश है। कश्मीर तथा भारत-पाकिस्तान और भारत-चीन सीमा पर भारत का पाकिस्तान तथा चीन से विवाद चल रहा है। लैंगिक असमानता, बाल शोषण, बाल कुपोषण, गरीबी, भ्रष्टाचार, प्रदूषण इत्यादि भारत के सामने प्रमुख चुनौतियाँ है। 21.4% क्षेत्र पर वन है।भारत के वन्यजीव, जिन्हें परंपरागत रूप से भारत की संस्कृति में सहिष्णुता के साथ देखा गया है, इन जंगलों और अन्य जगहों पर संरक्षित आवासों में निवास करते हैं।\n\nदिये गये लेख के आधार पर इस प्रश्न का उत्तर दें: भारत के सामने प्रमुख चुनौतियाँ कौनसी हैं?", "split": "calib"}
+{"id": "sft-ec5c3a9404c4-hi", "lang": "hi", "prompt": "निम्नलिखित युगों में से सिन्धु सभ्यता किस युग में पड़ती है?\n\nऐतिहासिक काल\nउत्तर ऐतिहासिक काल\nप्रागैतिहासिक काल\nआद्य ऐतिहासिक काल", "split": "calib"}
+{"id": "sft-0db91d4d901a-hi", "lang": "hi", "prompt": "वाक्य 1: फिल्म स्टुअर्ट लेग द्वारा निर्मित और जॉन टेलर द्वारा निर्देशित की गयी थी. वाक्य 2: फिल्म का निर्देशन जॉन टेलर ने किया था और इसका निर्माण स्टुअर्ट लेग ने किया था। प्रश्न: क्या वाक्य 1 और वाक्य 2 एक ही अर्थ व्यक्त करते हैं? हाँ या नहीं?", "split": "calib"}
+{"id": "sft-c607cc0fd89c-hi", "lang": "hi", "prompt": "कृपया रिक्त स्थानों को पूरा करें: \"__________ के साथ अपने सपनों की पूर्ति करने के लिए कई बार उत्साह और मेहनत की आवश्यकता होती है.\"", "split": "calib"}
+{"id": "sft-f13902e0d7ca-hi", "lang": "hi", "prompt": "यह सवाल \"बैक टू द फ्यूचर\" फिल्मों की श्रेणी से संबंधित है?", "split": "calib"}
+{"id": "sft-39a975b702c6-hi", "lang": "hi", "prompt": "वाराणसी में शिक्षा पर एक निबंध लिखें", "split": "calib"}
+{"id": "sft-51440c9c9fae-hi", "lang": "hi", "prompt": "एक समय यात्रा के बारे में एक कहानी लिखें जहां नायक अपने भविष्य से मिलता है।", "split": "calib"}
+{"id": "sft-0838f90f1692-hi", "lang": "hi", "prompt": "दो बैलों की कथा\n\nकांजीहौस में कैद पशुओं की हाज़िरी क्यों ली जाती होगी?", "split": "calib"}
+{"id": "sft-c5bdce059ef8-hi", "lang": "hi", "prompt": "भूतिया अद्भुत गाँव: जब एक व्यक्ति एक अजीब सा गाँव खोजता है, जिसमें हर व्यक्ति का चेहरा एक-एक समय में बदल जाता है।", "split": "calib"}
+{"id": "aya-277ee3a5fed7-en", "lang": "en", "prompt": "What is the name of the nearest star to earth?", "split": "calib"}
+{"id": "aya-123c7457dd5d-en", "lang": "en", "prompt": "Who is the father of psychology?", "split": "calib"}
+{"id": "aya-ae41376c0e9e-en", "lang": "en", "prompt": "What are the common challenges associated with data quality in data analytics?", "split": "calib"}
+{"id": "aya-7ce92621ef4a-en", "lang": "en", "prompt": "The first Sri Lankan to receive a Magsaysay Award?", "split": "calib"}
+{"id": "aya-62da8888ea16-en", "lang": "en", "prompt": "How do the historical debates and concerns surrounding the introduction of films to American society in the early 1900s parallel the current debates about children's use of computers and the Internet?", "split": "calib"}
+{"id": "aya-d913258093dc-en", "lang": "en", "prompt": "\"Describe a personal achievement that you are proud of.\"", "split": "calib"}
+{"id": "aya-b523cd865e5a-en", "lang": "en", "prompt": "Name the national tree of India.", "split": "calib"}
+{"id": "aya-cf209ba2df3c-en", "lang": "en", "prompt": "Mickey Mouse almost went by a different name. What was it?", "split": "calib"}
+{"id": "aya-67808b9b0198-en", "lang": "en", "prompt": "What is artificial superintelligence?", "split": "calib"}
+{"id": "aya-4e59f0c0c6ff-en", "lang": "en", "prompt": "Is there any grammar issue in the following paragraph?\nThis gap indicates that, theoretically, there are no vehicle models that can travel 174-228 miles without needing to be recharged. As seen in the histogram, the typical range falls between 65.2-92.4, the gap is due to Tesla and Chevrolet Vehicles where vehicles have range of more than 228 are Teslas and Chevrolets only.", "split": "calib"}
+{"id": "aya-4790ffff278a-en", "lang": "en", "prompt": "What is the role of access modifiers in OOP?", "split": "calib"}
+{"id": "aya-1cdc6c31300c-en", "lang": "en", "prompt": "We all know about Washington, Lincoln, and Roosevelt. Who are some less-celebrated US Presidents with fascinating, untold stories that challenge our understanding of the presidency?", "split": "calib"}
+{"id": "aya-5b5c80ba7fab-en", "lang": "en", "prompt": "डाल्टन के परमाणु सिद्धांत का कौन सा अभिधारणा निश्चित अनुपात के नियम की व्याख्या कर सकता है?", "split": "calib"}
+{"id": "aya-c4cc4520d9ac-en", "lang": "en", "prompt": "What is Australia's capital?", "split": "calib"}
+{"id": "aya-0bb6d3b37dea-en", "lang": "en", "prompt": "What is the highest mountain in France?", "split": "calib"}
+{"id": "aya-193e9bd1a021-en", "lang": "en", "prompt": "In 1974, what was the first product scanned by a UPC scanner?", "split": "calib"}
+{"id": "aya-537f3c3536f8-en", "lang": "en", "prompt": "How many tribes are there in Madagascar?\n\n1. 6\n2. 18\n3. 19", "split": "calib"}
+{"id": "aya-c20764c32514-en", "lang": "en", "prompt": "What does the pronoun “he” refer to in the following statement:\n“I voted for Nader because he was the most aligned with my values”", "split": "calib"}
+{"id": "aya-ab75338f0649-en", "lang": "en", "prompt": "The immune system, the body's vigilant guardian ...", "split": "calib"}
+{"id": "aya-64872f8ae57e-en", "lang": "en", "prompt": "Siapakah ahli sunnah?", "split": "calib"}
+{"id": "aya-718f01466574-en", "lang": "en", "prompt": "How does the traditional \"Geta Bera\" drumming ensemble positively contribute to cultural celebrations and social cohesion in Sri Lanka?", "split": "calib"}
+{"id": "aya-e177533471bb-en", "lang": "en", "prompt": "The only snake that builds a nest?", "split": "calib"}
+{"id": "aya-01f38c80f107-en", "lang": "en", "prompt": "What is the capital of Laos?", "split": "calib"}
+{"id": "aya-e82e477bfde8-en", "lang": "en", "prompt": "What is Database Management System (DBMS)?", "split": "calib"}
+{"id": "aya-777d8f28d2d4-en", "lang": "en", "prompt": "Who won the first season of American Idol?", "split": "calib"}
+{"id": "aya-8d5f5967d4b8-en", "lang": "en", "prompt": "How does machine translation work in the context of NLP?", "split": "calib"}
+{"id": "aya-104f84f99fe6-en", "lang": "en", "prompt": "Which singer fronted the 1970s pop band Showaddywaddy?", "split": "calib"}
+{"id": "aya-cfa8e576480d-en", "lang": "en", "prompt": "what three mandatory files does the shapefile contain?", "split": "calib"}
+{"id": "aya-8277ab25f304-en", "lang": "en", "prompt": "What features you utilized from the Google Vision API in the Vehicle Plate Number Recognition project.\n\nis there any grammatical issue?", "split": "calib"}
+{"id": "aya-219288bfc5da-en", "lang": "en", "prompt": "Explain the concept of indexing in database management.", "split": "calib"}
+{"id": "aya-1f3c22627ca1-en", "lang": "en", "prompt": "What is normalization in the context of database design?", "split": "calib"}
+{"id": "aya-cb1b682326b9-en", "lang": "en", "prompt": "MOTHER'S CURSE\nChapter 1", "split": "calib"}
+{"id": "aya-9215cfa41b8c-en", "lang": "en", "prompt": "What is the world's oldest national anthem?", "split": "calib"}
+{"id": "aya-cbad13ceae93-en", "lang": "en", "prompt": "Look for aspects and sentiments along with explanations in the following sentences: \n\nThis restaurant is a mid-range Sundanese culinary option. The restaurant atmosphere is very roomy so it doesn't feel crowded even though it's busy. Food choices are also varied.", "split": "calib"}
+{"id": "aya-5d954a51b57a-en", "lang": "en", "prompt": "Who were the key figures in the French Revolution?", "split": "calib"}
+{"id": "aya-ffb31c15e7ed-en", "lang": "en", "prompt": "Choose the correct statement:\n\na. project and operational work obtain goals, but operational work terminates and projects sustain the business.\n\nb. project and operational work obtain goals and sustain the business\n\nc. project and operational work obtain goals, but projects terminate and operational work sustains the business.\n\nd. project and operational work obtain goals and terminate", "split": "calib"}
+{"id": "aya-0b4cf8c710a4-en", "lang": "en", "prompt": "Surface Characteristics", "split": "calib"}
+{"id": "aya-9b0a5620b2c6-en", "lang": "en", "prompt": "Describe the role of \"biotechnology\" in the development of vaccines and medical treatments.", "split": "calib"}
+{"id": "aya-48e54edce1e1-en", "lang": "en", "prompt": "Given the following statement, predict the tags for each word: Which elements of specific artworks do they focus on?", "split": "calib"}
+{"id": "aya-dc4052d44418-en", "lang": "en", "prompt": "What are the challenges associated with big data analytics?", "split": "calib"}
+{"id": "aya-ee44cbc4b5af-en", "lang": "en", "prompt": "How does the BYM model account for spatial dependence?", "split": "calib"}
+{"id": "aya-2a7ee6c84777-en", "lang": "en", "prompt": "Formulate an answer to this elaborate question: What television show was,based,on an 1908 novel by Lucy Maud Montgomery?   Anne.", "split": "calib"}
+{"id": "aya-f5735d059f1d-en", "lang": "en", "prompt": "What is meant by absoluteism?", "split": "calib"}
+{"id": "aya-e655b72e7ef4-en", "lang": "en", "prompt": "Explain the purpose of Huffman coding.", "split": "calib"}
+{"id": "aya-f63919c3526a-en", "lang": "en", "prompt": "Apakah maksud \"agak-agak bertutur malam hari\"?", "split": "calib"}
+{"id": "aya-c0929ac92b3f-en", "lang": "en", "prompt": "Which type of water reservoir could always provide freshwater?\n\nOptions:\n\n- Inland lakes\n- River deltas \n- Mountain glaciers\n- Tropical seas", "split": "calib"}
+{"id": "aya-bc2249f13bf7-en", "lang": "en", "prompt": "What are the key attributes of a successful soccer striker?", "split": "calib"}
+{"id": "aya-009d6d6a979d-en", "lang": "en", "prompt": "What are databases in the field of Computer Science?", "split": "calib"}
+{"id": "aya-6adce7b6cce1-en", "lang": "en", "prompt": "What is the role of hyperparameters in deep learning models?", "split": "calib"}
+{"id": "aya-04fd95dbbc30-en", "lang": "en", "prompt": "what does \"to crave\" mean?", "split": "calib"}
+{"id": "aya-661b5a6cd3b2-en", "lang": "en", "prompt": "Question : When was the film \"kubo and the two strings\" released?\nAnswer :", "split": "calib"}
+{"id": "aya-a6bfb5dd7b2d-en", "lang": "en", "prompt": "What are the fundamental principles of quantum mechanics?", "split": "calib"}
+{"id": "aya-52877958968c-en", "lang": "en", "prompt": "Question: If the fish were birds, what would be the sea be?\na. Forest\nb. Sky\nc. Nest\nd. Island", "split": "calib"}
+{"id": "aya-f523f6c71993-en", "lang": "en", "prompt": "Look for aspects and sentiments along with explanations : \nThis restaurant is a mid-range Sundanese culinary option. The restaurant atmosphere is very roomy so it doesn't feel crowded even though it's busy. Food choices are also varied.", "split": "calib"}
+{"id": "aya-a3ddfe8c7d1b-en", "lang": "en", "prompt": "8 Powerful Quotes from the Book \"Zero to One\".", "split": "calib"}
+{"id": "aya-e5c5471d2439-en", "lang": "en", "prompt": "What should the title of the article whose first sentence is given below?\nBrazilian Striker Ailton is set to end a torrid six month spell in Istanbul by signing for high-flying German side sv Hamburg next Monday .", "split": "calib"}
+{"id": "aya-7e6101e0f995-en", "lang": "en", "prompt": "What is the capital city of Brazil?", "split": "calib"}
+{"id": "aya-01a297df2a2c-en", "lang": "en", "prompt": "What is the role of data visualization in data analytics?", "split": "calib"}
+{"id": "aya-a85c708511ce-en", "lang": "en", "prompt": "The small, edible pieces of a pomegranate are known as what?", "split": "calib"}
+{"id": "aya-98b4836549ec-en", "lang": "en", "prompt": "What does the mapview() function do with the spatial data?", "split": "calib"}
+{"id": "aya-66b00be4a0a4-en", "lang": "en", "prompt": "Parliament of India is called by what name?", "split": "calib"}
+{"id": "aya-5ebd12f57a46-en", "lang": "en", "prompt": "Axile placentation is observed in\n(1) Mustard, Cucumber and Primrose\n(2) China rose, Beans and Lupin\n(3) Tomato, Dianthus and Pea\n(4) China rose, Petunia and Lemon\n\nWhat is axile placentation, and which plants is it observed in?", "split": "calib"}
+{"id": "aya-462bcab964da-en", "lang": "en", "prompt": "What is meant by the sustainability of a project?", "split": "calib"}
+{"id": "aya-6506265ebb4a-en", "lang": "en", "prompt": "How many players are there in a Water Polo team?", "split": "calib"}
+{"id": "aya-3e2ecfe94d05-en", "lang": "en", "prompt": "Valais is known for the resort municipality in which district in Switzerland?", "split": "calib"}
+{"id": "aya-754c72341992-en", "lang": "en", "prompt": "When was the first car invented?", "split": "calib"}
+{"id": "aya-0fa71c356853-en", "lang": "en", "prompt": "Question: If the fish were birds, what would be the sea be?\na. Forest\nb. Sky\nc. Nest\nd. Island", "split": "calib"}
+{"id": "aya-bb472f7cb066-en", "lang": "en", "prompt": "How do Sri Lanka's traditional \"Kavikara Maduwa\" or poetry assemblies contribute to cultural expression, and what rare poetic forms and themes distinguish them in the landscape of literary traditions?", "split": "calib"}
+{"id": "aya-94d2c9850d46-en", "lang": "en", "prompt": "What is the role of cloud computing in data science, and how do data scientists leverage cloud platforms?", "split": "calib"}
+{"id": "aya-9a2d60179d30-en", "lang": "en", "prompt": "How does Sri Lanka's traditional \"Hela Wedakama\" or indigenous medicine contribute to holistic well-being, emphasizing the use of herbal remedies and therapeutic techniques?", "split": "calib"}
+{"id": "aya-1f569df6f7d8-en", "lang": "en", "prompt": "Asia's first constitutional republic ?", "split": "calib"}
+{"id": "aya-28ee3e6bf798-en", "lang": "en", "prompt": "W hich British action actor played Sylvester Stallone in the film The Expendables?", "split": "calib"}
+{"id": "aya-cb8c19671e96-en", "lang": "en", "prompt": "What is the question to: \"John Adams (October 30, 1735 (O.S. October 19, 1735) – July 4, 1826) was the second president of the United States (1797–1801), having earlier served as the first vice president of the United States .\"?\n\nThe topic is John Adams.", "split": "calib"}
+{"id": "aya-e332b265a597-en", "lang": "en", "prompt": "1. What year did the Titanic sink in the Atlantic Ocean on 15 April, on its maiden voyage from Southampton?", "split": "calib"}
+{"id": "aya-f56fe740b27c-en", "lang": "en", "prompt": "Yunanistan'ın turistik Rodos adasında 2023 yazı çıkan orman yangını hakkında bilgi verir misin ?", "split": "calib"}
+{"id": "aya-ca7c5344e0d4-en", "lang": "en", "prompt": "Explain the concept of a circular linked list.", "split": "calib"}
+{"id": "aya-2a64f6d30c00-en", "lang": "en", "prompt": "MOTHER'S CURSE\nChapter 13", "split": "calib"}
+{"id": "aya-e90a37da4abc-en", "lang": "en", "prompt": "Imaginary 1-star review:", "split": "calib"}
+{"id": "aya-1fb8bedbe08a-en", "lang": "en", "prompt": "Which prison was broken in the French Revolution?", "split": "calib"}
+{"id": "aya-ab2a5f22ce6e-en", "lang": "en", "prompt": "The Sumatran species of what famously horned mammal officially went extinct in Malaysia in November 2019? The animal is not yet extinct globally as a few dozen live in Indonesia.", "split": "calib"}
+{"id": "aya-ee8a4b678512-en", "lang": "en", "prompt": "Kaş hangi ilin ilçesidir ve hangi ile sınırı vardır?", "split": "calib"}
+{"id": "aya-7f8cbe851d62-en", "lang": "en", "prompt": "What is the difference between \"your\" and \"you're\"?", "split": "calib"}
+{"id": "aya-c7b3a83f7771-en", "lang": "en", "prompt": "What was the significance of the 'Match of the Century' between Italy and West Germany in the 1970 FIFA World Cup?", "split": "calib"}
+{"id": "aya-b4095e7a928f-en", "lang": "en", "prompt": "What is the role of triggers in database management?", "split": "calib"}
+{"id": "aya-5325b6295e10-en", "lang": "en", "prompt": "Who was the founder of the nursing movement?", "split": "calib"}
+{"id": "aya-01f4c3fb5b26-en", "lang": "en", "prompt": "Arizona offers more than just deserts and canyons. What cultural experiences and hidden gems can surprise and enrich my travel experience?", "split": "calib"}
+{"id": "aya-4735cf67c99c-en", "lang": "en", "prompt": "What are stages of Growth(month-by-month) in pregnancy?", "split": "calib"}
+{"id": "aya-ba4b7210374e-en", "lang": "en", "prompt": "Which operations are necessary to transform \" tHe Cat’S mEOw :)\" into \"The Cat’s Meow\" using Excel?\n\nMID\nPROPER\nTRIM\nRIGHT\nUPPER", "split": "calib"}
+{"id": "aya-af61f3e26be3-en", "lang": "en", "prompt": "What is the purpose of automated testing in MLOps?", "split": "calib"}
+{"id": "aya-a8f566b6261b-en", "lang": "en", "prompt": "What are the key factors driving Sri Lanka's recent advancements in information technology, and how is the country leveraging its IT sector for economic development?", "split": "calib"}
+{"id": "aya-5b633ac70472-en", "lang": "en", "prompt": "How are Olympic host cities selected?", "split": "calib"}
+{"id": "aya-ff0a07a0dd3b-en", "lang": "en", "prompt": "Axile placentation is observed in\n(1) Mustard, cucumber, and primrose\n(2) China rose, beans, and lupin\n(3) Tomato, Dianthus, and Pea\n(4) China rose, petunia, and lemon", "split": "calib"}
+{"id": "aya-e68ec7c0f66a-en", "lang": "en", "prompt": "True or false?\nCompanies that do not invest in innovation put\nTheir future is at risk.", "split": "calib"}
+{"id": "aya-83db1297a2f3-en", "lang": "en", "prompt": "What skills are essential for a machine learning engineer?", "split": "calib"}
+{"id": "aya-3302f00878ea-en", "lang": "en", "prompt": "What is the loudest animal on Earth?", "split": "calib"}
+{"id": "aya-13ddecabc9e7-en", "lang": "en", "prompt": "There is an object,  about the god's supremacy", "split": "calib"}
+{"id": "aya-b28d8ecfb6dd-en", "lang": "en", "prompt": "What is the national sport of Japan?", "split": "calib"}
+{"id": "aya-38c757035bd9-en", "lang": "en", "prompt": "I am traveling to Thailand next week. What are the some things that I should do in Bangkok?", "split": "calib"}
+{"id": "aya-3ad0b55cec33-en", "lang": "en", "prompt": "What is the historical significance of Anuradhapura, and how does it contribute to Sri Lanka's identity?", "split": "calib"}
+{"id": "aya-fa2d2499be89-en", "lang": "en", "prompt": "Manufacturing give an overview", "split": "calib"}
