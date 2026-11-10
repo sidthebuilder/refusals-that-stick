@@ -174,7 +174,11 @@ def discover(model_dir: str, harmful: list[dict], harmless: list[dict], out_dir:
     ds = NormalizedDataset(name="refusal_fire", shape=DatasetShape.REFUSAL, records=records,
                            source="aya_redteaming calib vs aya_dataset calib")
     ck.register_task(NormalizedTaskSpec(ds, name="refusal_fire", cache_dir=str(out / "ck_cache")))
-    ck.discover(model, "refusal_fire", algorithm="eap-ig", level="node", batch_size=4,
+    # Batch 1: with per-head attention results enabled (EAP needs them), one
+    # intermediate is batch x positions x 16 heads x 128 x 2048. At batch 4 and
+    # ~590-token chat-templated prompts that single tensor is 19.7 GiB and the
+    # first run ran out of memory on an 80 GB card.
+    ck.discover(model, "refusal_fire", algorithm="eap-ig", level="node", batch_size=1,
                 output_path=str(out / "refusal.pt"))
     scores = CircuitScores.from_json(out / "refusal_scores.json").node_scores
     ranked = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)

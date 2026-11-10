@@ -1,0 +1,266 @@
+{
+  "eog_metadata": {
+    "tokenizer.ggml.bos_token_id": 2,
+    "tokenizer.ggml.eos_token_id": 6,
+    "tokenizer.ggml.eot_token_id": null,
+    "tokenizer.ggml.eom_token_id": null,
+    "tokenizer.ggml.padding_token_id": 0,
+    "tokenizer.ggml.add_bos_token": true,
+    "tokenizer.ggml.add_eos_token": false,
+    "texts": {
+      "3": "<EOS_TOKEN>",
+      "6": "<|END_OF_TURN_TOKEN|>",
+      "261001": "<|END_RESPONSE|>"
+    },
+    "hf_generation_config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0
+    },
+    "hf_config.json": {
+      "eos_token_id": 3,
+      "bos_token_id": 2,
+      "pad_token_id": 0
+    }
+  },
+  "configs": {
+    "np1": {
+      "ok": true,
+      "seconds": 46.9,
+      "stop_types": {
+        "eos": 20,
+        "limit": 36
+      },
+      "mean_tokens": 69.23214285714286
+    },
+    "np32": {
+      "ok": true,
+      "seconds": 21.5,
+      "stop_types": {
+        "eos": 22,
+        "limit": 34
+      },
+      "mean_tokens": 70.35714285714286,
+      "identical_to_np1": 43,
+      "n": 56,
+      "first_divergence_tokens": [
+        0,
+        6,
+        6,
+        6,
+        7,
+        11,
+        12,
+        19,
+        19,
+        41,
+        44,
+        86,
+        98
+      ]
+    },
+    "np1_eogfix": {
+      "ok": true,
+      "seconds": 31.4,
+      "stop_types": {
+        "eos": 46,
+        "limit": 10
+      },
+      "mean_tokens": 43.42857142857143
+    },
+    "np32_eogfix": {
+      "ok": true,
+      "seconds": 13.7,
+      "stop_types": {
+        "eos": 46,
+        "limit": 10
+      },
+      "mean_tokens": 43.42857142857143,
+      "identical_to_np1": 53,
+      "n": 56,
+      "first_divergence_tokens": [
+        0,
+        0,
+        19
+      ]
+    }
+  },
+  "samples": {
+    "np1": [
+      {
+        "id": "mmlu-professional_law/test/774-en",
+        "text": "Cff >f >f >f >f >f >",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN>f<|END_RESPONSE|><EOS_TOKEN>f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_statistics/test/51-en",
+        "text": "C the following multiple-choice question. Reply with only the letter of the correct option (A, B, C",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN> the following multiple-choice question. Reply with only the letter of the correct option (A, B, C"
+        ]
+      },
+      {
+        "id": "mmlu-sociology/test/80-en",
+        "text": "D no no no no no no no no no",
+        "pieces": [
+          "D<|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|> no<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-college_physics/test/83-en",
+        "text": "B to to to to to to to to to",
+        "pieces": [
+          "B<|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-formal_logic/test/97-en",
+        "text": "Bee ife ife ife ife ife if",
+        "pieces": [
+          "B<|END_RESPONSE|><EOS_TOKEN>e<|END_RESPONSE|><EOS_TOKEN>e<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> if"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_biology/test/182-en",
+        "text": "Che question asks about the factors that trigger algal blooms and the associated dead zones in the Gulf of",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN>he question asks about the factors that trigger algal blooms and the associated dead zones in the Gulf of"
+        ]
+      }
+    ],
+    "np32": [
+      {
+        "id": "mmlu-professional_law/test/774-en",
+        "text": "Cff >f >f >f >f >f >",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN>f<|END_RESPONSE|><EOS_TOKEN>f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >f<|END_RESPONSE|> >"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_statistics/test/51-en",
+        "text": "C the following multiple-choice question. Reply with only the letter of the correct option (A, B, C",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN> the following multiple-choice question. Reply with only the letter of the correct option (A, B, C"
+        ]
+      },
+      {
+        "id": "mmlu-sociology/test/80-en",
+        "text": "D in in in in in in in in in",
+        "pieces": [
+          "D<|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|> in<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-college_physics/test/83-en",
+        "text": "B to to to to to to to to to",
+        "pieces": [
+          "B<|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|><EOS_TOKEN><|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|> to<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-formal_logic/test/97-en",
+        "text": "Bee ife ife ife ife ife if",
+        "pieces": [
+          "B<|END_RESPONSE|><EOS_TOKEN>e<|END_RESPONSE|><EOS_TOKEN>e<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> ife<|END_RESPONSE|> if"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_biology/test/182-en",
+        "text": "Che question asks about the factors that trigger algal blooms and the associated dead zones in the Gulf of",
+        "pieces": [
+          "C<|END_RESPONSE|><EOS_TOKEN>he question asks about the factors that trigger algal blooms and the associated dead zones in the Gulf of"
+        ]
+      }
+    ],
+    "np1_eogfix": [
+      {
+        "id": "mmlu-professional_law/test/774-en",
+        "text": "C",
+        "pieces": [
+          "C<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_statistics/test/51-en",
+        "text": "C",
+        "pieces": [
+          "C<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-sociology/test/80-en",
+        "text": "D",
+        "pieces": [
+          "D<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-college_physics/test/83-en",
+        "text": "B",
+        "pieces": [
+          "B<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-formal_logic/test/97-en",
+        "text": "B",
+        "pieces": [
+          "B<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_biology/test/182-en",
+        "text": "C",
+        "pieces": [
+          "C<|END_RESPONSE|>"
+        ]
+      }
+    ],
+    "np32_eogfix": [
+      {
+        "id": "mmlu-professional_law/test/774-en",
+        "text": "C",
+        "pieces": [
+          "C<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_statistics/test/51-en",
+        "text": "D",
+        "pieces": [
+          "D<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-sociology/test/80-en",
+        "text": "D",
+        "pieces": [
+          "D<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-college_physics/test/83-en",
+        "text": "B",
+        "pieces": [
+          "B<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-formal_logic/test/97-en",
+        "text": "B",
+        "pieces": [
+          "B<|END_RESPONSE|>"
+        ]
+      },
+      {
+        "id": "mmlu-high_school_biology/test/182-en",
+        "text": "C",
+        "pieces": [
+          "C<|END_RESPONSE|>"
+        ]
+      }
+    ]
+  }
+}

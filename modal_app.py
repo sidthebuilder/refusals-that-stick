@@ -546,7 +546,19 @@ def smoke_cuda() -> dict:
 # --------------------------------------------------------------------------- #
 
 GGUF_ROOT = f"{VOL}/gguf"
-CELLS = f"{VOL}/cells"
+# Cell outputs are cached per serving configuration. The first cells (now under
+# cells/dev) were served with a configuration under diagnosis; a new version
+# string gives a clean root, and the old outputs stay for provenance.
+SERVE_VERSION = "v2"
+# Fire's Hugging Face config stops on <EOS_TOKEN> (id 3), which the model emits
+# after <|END_RESPONSE|> (id 261001). The GGUF (ours and Cohere's, bit-identical)
+# records only <|END_OF_TURN_TOKEN|> (id 6) as EOS, so llama.cpp ran past the
+# model's own end marker. Registering both as end-of-generation at load time
+# restores the Hugging Face stopping behaviour without modifying any GGUF file.
+# Measured in results/diag_decoding.json.
+SERVER_ARGS: list[str] = ["--override-kv", "tokenizer.ggml.eot_token_id=int:261001",
+                          "--override-kv", "tokenizer.ggml.eom_token_id=int:3"]
+CELLS = f"{VOL}/cells/{SERVE_VERSION}"
 JUDGE_DIR = f"{VOL}/judge"
 JUDGE_GGUF = f"{JUDGE_DIR}/qwen3guard-gen-8b-q8_0.gguf"
 JUDGE_TOKENIZER = f"{JUDGE_DIR}/tokenizer"
@@ -642,10 +654,49 @@ def eval_cell(model: str, precision: str, split: str = "dev", gguf: str | None =
         judge_gguf=JUDGE_GGUF,
         judge_tokenizer_dir=JUDGE_TOKENIZER,
         ppl_text=f"{VOL}/data/eval/hindi_heldout_ppl.txt",
+        server_args=SERVER_ARGS,
     )
-    summary.update(model=model, precision=precision, split=split)
+    summary.update(model=model, precision=precision, split=split,
+                   serve_version=SERVE_VERSION, server_args=SERVER_ARGS)
     volume.commit()
     return summary
+
+
+@app.function(image=gpu_eval_image, gpu="L40S", volumes={VOL: volume}, memory=32768,
+              timeout=60 * 40)
+def diag_decoding(gguf: str = f"{GGUF_ROOT}/fire/BF16.gguf") -> dict:
+    """Compare parallel-serving configurations against a single-slot reference."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.diag import run
+
+    data = Path(VOL) / "data" / "eval"
+
+    def rows(name: str, n: int, n_predict: int) -> list[dict]:
+        lines = (data / name).read_text(encoding="utf-8").splitlines()[:n]
+        return [{**json.loads(l), "n_predict": n_predict} for l in lines if l.strip()]
+
+    prompts = (rows("mmlu_en_dev.jsonl", 32, 24) + rows("redteam_en_dev.jsonl", 16, 160)
+               + rows("redteam_hi_dev.jsonl", 8, 160))
+    report = run(gguf, prompts, f"{VOL}/diag/decoding_eog", hf_dir=FIRE_DIR)
+    volume.commit()
+    return report
+
+
+@app.local_entrypoint()
+def diag():
+    root = Path(__file__).parent
+    report = diag_decoding.remote()
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "diag_decoding.json").write_text(
+        json.dumps(report, indent=2, ensure_ascii=False))
+    print(json.dumps({k: v for k, v in report.items() if k != "samples"}, indent=2,
+                     ensure_ascii=False)[:5000])
+    for name, rows in report.get("samples", {}).items():
+        print(f"--- {name}")
+        for r in rows:
+            print(" ", r["id"], repr(r["text"][:120]))
 
 
 def _write_tree(base: Path, files: dict[str, str]) -> list[str]:
@@ -715,6 +766,7 @@ def discover_circuit() -> dict:
 
     sys.path.insert(0, "/root")
     os.environ.setdefault("CIRCUITKIT_SKIP_MEM_GUARD", "1")
+    os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
     import circuitkit  # noqa: F401 - must precede transformer_lens
 
     from refusals_that_stick.circuit import discover

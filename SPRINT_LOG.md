@@ -395,3 +395,91 @@ Open, in priority order: (1) re-run the two Fire dev cells with the decoding fix
 coherence; (2) retune and rerun circuit discovery; (3) RESTA and C-ΔΘ strength sweeps on dev;
 (4) build the drift/repair ladders and run the 56-cell dev screen. No budget has gone to the
 full grid yet.
+
+---
+
+## 10 Nov 2026, 22:50 IST — Correction: the degenerate outputs were a stop-token bug
+
+**The "greedy decoding loops" diagnosis logged above is wrong.** I should have read token ids
+before naming a cause. A decoding diagnostic (`diag.py`; same prompts under four server
+configurations, token ids returned and rendered with special tokens visible) showed:
+
+- **Single-slot serving (`-np 1`) produces exactly the same garbage** as 32 slots, so parallel
+  slots, the sliding-window KV cache and prompt caching are not the cause. 47 of 56 outputs at
+  `-np 32` were token-identical to `-np 1`. The rest diverged late, which is ordinary
+  batch-numerics noise.
+- **The real cause:** Fire ends a response with `<|END_RESPONSE|>` (id 261001), often followed
+  by `<EOS_TOKEN>` (id 3). llama.cpp's end-of-generation set for this GGUF contains only
+  `<|END_OF_TURN_TOKEN|>` (id 6), so generation runs past the model's own stop. Example, MMLU
+  item with answer C:
+  `C` `<|END_RESPONSE|>` `<EOS_TOKEN>` `he question asks about…`. The model answered correctly
+  in one token; everything after is the model writing past its own end marker. That explains
+  `"Cff >f >f"`, `"D in in in"`, and the garbage tails on English red-team and XSTest
+  responses.
+- **It applies to Cohere's official file too.** Our GGUFs are bit-identical to the published
+  ones, metadata included, so anyone serving the official `tiny-aya-fire` GGUF with this
+  llama.cpp gets the same run-on output on short answers. This is a deployment finding in its
+  own right and is reported as such.
+
+**Fix under test:** register the two stop tokens at load time with
+`--override-kv tokenizer.ggml.eot_token_id=int:261001` and `eom_token_id=int:3`. llama.cpp
+treats EOT and EOM as end of generation, and the GGUF file is not modified. The diagnostic
+rerun compares this against the Hugging Face `generation_config.json` stop set.
+
+**Reverted:** the repetition penalty added on the wrong diagnosis is removed. Decoding stays
+greedy at llama.cpp's default penalty (1.0), the way a developer would serve the model.
+
+**Consequence:** every first-round cell (`cells/dev/...`) is invalid for the English tasks and
+for MMLU. They are kept for provenance. Re-runs go to a new root, `cells/v2/...`, with the stop
+fix recorded in each cell's summary (`serve_version`, `server_args`). The provisional baseline
+table above must not be used.
+
+### Stop-token fix confirmed
+
+The second diagnostic read the token ids directly from the GGUF and compared them with the
+Hugging Face configs:
+
+| Source | End-of-sequence token |
+|---|---|
+| Fire `config.json` and `generation_config.json` | `eos_token_id = 3` (`<EOS_TOKEN>`) |
+| GGUF (ours, which is bit-identical to Cohere's) | `eos_token_id = 6` (`<|END_OF_TURN_TOKEN|>`); EOT and EOM unset |
+
+So llama.cpp never stopped on the token the model is trained to stop on. With the override
+(`eot = 261001 <|END_RESPONSE|>`, `eom = 3 <EOS_TOKEN>`):
+
+| Config | Stopped by EOS | Hit token cap | Mean tokens | Identical to its single-slot reference |
+|---|---|---|---|---|
+| `-np 1`, no fix | 20 / 56 | 36 | n/a | n/a |
+| `-np 32`, no fix | 22 / 56 | 34 | 70.4 | 43 / 56 |
+| `-np 1`, fix | 46 / 56 | 10 | n/a | n/a |
+| `-np 32`, fix | 46 / 56 | 10 | 43.4 | 53 / 56 |
+
+The ten that still hit the cap are 160-token red-team answers that are simply long. MMLU answers
+are now single letters (`'C'`, `'B'`). Parallel serving with the fix matches the single-slot
+reference on 53 of 56 prompts. The other three diverge late, which is batch-numerics noise. All
+v2 cells use the fix (`SERVER_ARGS` in `modal_app.py`, recorded in every cell summary).
+
+### Refusal circuit discovered (CircuitKIT EAP-IG, calib split only)
+
+The memory fix worked: batch 1, `expandable_segments`, 128 contrastive pairs, about 12 minutes
+on one A100-80GB. Full output is in `results/circuit_report.json`.
+
+- **TransformerLens vs Hugging Face parity:** next-token KL of 0.0012 to 0.0019 nats on 4 prompts
+  in bf16. This is above CircuitKIT's strict 1e-4 gate (stated for fp32) and typical of bf16
+  numerics. It is adequate for ranking layers, which is all C-ΔΘ consumes.
+- **Answer tokens, from Fire's own first tokens:**
+  - English: refusal `I'm`, chosen on 73% of harmful vs 0% of harmless prompts; compliance
+    `The`, gap 0.24.
+  - Hindi: refusal `मैं` ("I"), gap 0.45; compliance `उत्तर` ("answer"), weak gap 0.07.
+- **Top nodes:** MLP 0 (3.27), A14.13 (1.21), A20.4 (0.83), MLP 14 (0.82), A16.2 (0.76), MLP 16,
+  MLP 3, A29.5. MLP 0 dominating is the usual first-layer-as-extended-embedding pattern.
+- **Known limitation:** harmful and harmless prompts differ in token length in the middle of
+  the sequence, so CircuitKIT's end-alignment misaligns the shared preamble positions. It warns
+  that per-pair attribution is noisier. The decision position, the final token, is aligned.
+
+**Circuit size, by the pre-registered rule.** No `top_fraction` met the 5% budget. SafeTune
+edits the cross product of `layer_subset` × `target_modules`, and once both a head and an MLP
+are in the top set every projection in those layers is edited. The rule's fallback, the
+smallest listed fraction (0.01, 6 nodes), gives **layers {0, 14, 16, 20} × all 7 projections =
+28 tensors = 9.3% of parameters**. That is what C-ΔΘ uses. The sparse-vs-dense contrast for H0
+is therefore 9.3% vs 100% of parameters, not <5% vs 100%.

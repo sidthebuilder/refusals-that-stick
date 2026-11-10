@@ -150,12 +150,11 @@ class LlamaServer:
                            f"{self.log_tail(1500)}")
 
     def chat(self, messages: list[dict], *, max_tokens: int, temperature: float = 0.0,
-             repeat_penalty: float = 1.1, repeat_last_n: int = 64) -> dict:
-        # Greedy (temperature 0) keeps cells reproducible, but this model family
-        # loops under greedy with no repetition penalty, worst on short answers.
-        # llama.cpp's default repeat_penalty is 1.0 (off); 1.1 is the common
-        # anti-loop value and is applied only to the model under test, never to
-        # the judge (see complete()).
+             repeat_penalty: float = 1.0, repeat_last_n: int = 64) -> dict:
+        # Greedy decoding with llama.cpp's default repeat_penalty (1.0, off): the
+        # way a developer would serve the model. The degenerate outputs in the
+        # first cells are being diagnosed as a serving problem (see diag.py), so
+        # no sampling change is made to hide them.
         t0 = time.time()
         data = self._post("/v1/chat/completions", {
             "messages": messages, "max_tokens": max_tokens, "temperature": temperature,

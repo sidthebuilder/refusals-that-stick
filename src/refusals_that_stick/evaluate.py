@@ -108,6 +108,7 @@ def run_cell(
     judge_tokenizer_dir: str,
     ppl_text: str | None,
     n_parallel: int = 32,
+    server_args: list[str] | None = None,
 ) -> dict:
     """Generate, judge and measure perplexity for one GGUF; resumable."""
     cell = Path(cell_dir)
@@ -119,7 +120,8 @@ def run_cell(
     todo = [t for t in tasks if not (cell / f"gen_{t}.jsonl").exists()]
     if todo:
         t0 = time.time()
-        with LlamaServer(gguf, n_parallel=n_parallel, log_path=cell / "server_model.log") as srv:
+        with LlamaServer(gguf, n_parallel=n_parallel, log_path=cell / "server_model.log",
+                         extra_args=server_args or ()) as srv:
             timings["model_load_s"] = srv.load_seconds or 0.0
             # Record exactly what the model saw, once per cell.
             sample = _read_jsonl(Path(data_dir) / f"{todo[0]}.jsonl")[0]["prompt"]
@@ -140,6 +142,8 @@ def run_cell(
 
         t0 = time.time()
         tok = AutoTokenizer.from_pretrained(judge_tokenizer_dir)
+        # The judge (Qwen3, no sliding-window attention) parsed cleanly in every
+        # first cell, so its serving configuration is left unchanged.
         with LlamaServer(judge_gguf, n_parallel=n_parallel, ctx_per_slot=4096,
                          log_path=cell / "server_judge.log", port=8081) as srv:
             for t in to_judge:
