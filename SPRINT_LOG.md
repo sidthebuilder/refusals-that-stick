@@ -564,3 +564,60 @@ ctheta s0.5) are the only ones that keep the model intact, and both are far belo
 
 No model output is published; the sweep used the dev split only. The held-out test split is
 untouched.
+
+---
+
+## 11 Nov 2026 — Pre-registered fallback: LoX and SafeMerge (launched before any result)
+
+Read from SafeTune's source before running (`interventions/recover/lox.py`, `safemerge.py`):
+
+- **LoX (recover form):** `W_drift + c · LowRank_k(Fire − base)` on every attention and MLP
+  matrix. It re-applies only the top-k singular directions of the alignment delta, LoX's
+  "safety subspace", not the whole instruction-tuning delta that RESTA re-applies. The tied
+  embedding is excluded with `param_filter=["self_attn","mlp"]`; without it SafeTune SVDs the
+  262,144 × 2,048 matrix twice. Note: LoX in the paper is a hardening step applied before
+  fine-tuning. SafeTune's post-hoc form is the closest repair it offers, and it is reported as
+  that.
+- **SafeMerge:** per matrix, cosine between the fine-tuning update `W_drift − W_fire` and its
+  projection on the safety subspace of `Fire − base`. Matrices below the paper threshold 0.35 are
+  interpolated back toward Fire, `(1 − a)·W_drift + a·W_fire`; the rest keep the fine-tuned
+  weights. So it is sparse by layer, which makes it a second sparse arm alongside C-ΔΘ. No data,
+  no training.
+
+Sweep on `drift-dose3`, dev split, BF16, selected by the same rule as the first sweep:
+
+| Method | Settings |
+|---|---|
+| LoX | rank 8 with c ∈ {0.5, 1, 2}; and the paper's own setting, rank 6 with c = 1.25 |
+| SafeMerge | threshold 0.35, a ∈ {0.5 (default), 0.75, 1.0} |
+
+Both families run in parallel rather than LoX-then-SafeMerge. This only changes wall-clock time;
+the selection rule is applied to each family independently.
+
+### Amendment to the strength-selection rule (logged before any fallback result)
+
+**Flaw:** the day-2 rule capped XSTest over-refusal at +10 points *versus the drifted model*. The
+drift drove XSTest refusal to 0% (Fire's own level is 12% en, 6% hi). So a repair that just
+restored Fire's normal behaviour would rise about 12 points and be disqualified for being
+*more like the aligned model*. That is the wrong reference point. I wrote the rule before seeing
+that the drift would zero out over-refusal.
+
+**Amended rule:** over-refusal is capped at **Fire's own level + 10 points**, per language. The
+capability cap is unchanged: MMLU at most 5 points below the drifted model, per language,
+because a repair should not cost what the developer's model could already do.
+
+**Effect on the first sweep: none.** Rechecked against the amended rule:
+
+| Model | Restoration | MMLU Δ vs drift (en, hi) | Fails on |
+|---|---|---|---|
+| resta s0.25 | 49% | −0.09, −0.21 | restoration < 50%, MMLU |
+| resta s0.5 | 54% | −0.26, −0.34 | MMLU |
+| ctheta s0.5 | 21% | −0.07, −0.09 | restoration, MMLU |
+
+So no first-sweep model qualifies under either rule, and the amendment does not rescue any
+earlier result. It is fixed now, before LoX or SafeMerge results exist, and applies to them.
+
+**Statistical caveat, kept visible:** MMLU uses 100 items per language (standard error about 5
+points near 0.65), so the 5-point cap is noisy at the margin. Every first-sweep failure was a
+drop of 7 to 63 points, so none was a borderline call. Hindi MMLU also counts unparseable
+Devanagari answers as wrong, which inflates its noise.

@@ -785,22 +785,30 @@ def discover_circuit() -> dict:
     return report
 
 
+def _repair_name(method: str, strength: float, drift_variant: str, dare: bool = False,
+                 rank: int | None = None) -> str:
+    """Model directory name for a repair, e.g. ``lox-r8-dose3-s0.3``."""
+    tag = method + ("-dare" if dare else "") + (f"-r{rank}" if rank is not None else "")
+    return f"{tag}-{drift_variant}-s{strength:g}"
+
+
 @app.function(image=train_image, volumes={VOL: volume}, cpu=8.0, memory=65536,
               timeout=60 * 45)
-def repair_job(method: str, strength: float, drift_variant: str, dare: bool = False) -> dict:
-    """C-ΔΘ or RESTA on the drifted model; writes models/<method>-<variant>-s<strength>."""
+def repair_job(method: str, strength: float, drift_variant: str, dare: bool = False,
+               rank: int | None = None) -> dict:
+    """One SafeTune repair of the drifted model; writes models/<name> (see _repair_name)."""
     import sys
 
     sys.path.insert(0, "/root")
     from refusals_that_stick.repair import repair
 
     volume.reload()
-    name = f"{method}{'-dare' if dare else ''}-{drift_variant}-s{strength:g}"
+    name = _repair_name(method, strength, drift_variant, dare, rank)
     out_dir = f"{MODELS}/{name}"
     result = repair(method=method, drifted_dir=f"{MODELS}/drift-{drift_variant}",
                     fire_dir=FIRE_DIR, base_dir=BASE_DIR, out_dir=out_dir, strength=strength,
                     circuit_info_path=f"{CIRCUIT_DIR}/circuit_info.json"
-                    if method == "ctheta" else None, dare=dare)
+                    if method == "ctheta" else None, dare=dare, rank=rank)
     result["name"] = name
     (Path(out_dir) / "repair_report.json").write_text(json.dumps(result, indent=2))
     volume.commit()
@@ -819,14 +827,34 @@ def circuit():
                      default=str)[:6000])
 
 
+def _parse_repair_spec(spec: str, variant: str) -> list[tuple]:
+    """``"lox:0.3:8,safemerge:0.5"`` -> repair_job args (method, strength, variant, dare, rank)."""
+    out = []
+    for item in filter(None, (s.strip() for s in spec.split(","))):
+        parts = item.split(":")
+        method, strength = parts[0], float(parts[1])
+        rank = int(parts[2]) if len(parts) > 2 else None
+        out.append((method, strength, variant, False, rank))
+    return out
+
+
 @app.local_entrypoint()
-def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2"):
-    """Strength sweep: build every repaired model, then its BF16 GGUF."""
+def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2",
+            spec: str = "", tag: str = ""):
+    """Strength sweep: build every repaired model, then its BF16 GGUF.
+
+    ``spec`` (``method:strength[:rank]``, comma-separated) replaces the RESTA and
+    C-ΔΘ lists when given, for the fallback methods.
+    """
     root = Path(__file__).parent
-    spec = ([("resta", float(s), variant) for s in resta.split(",") if s]
-            + [("ctheta", float(s), variant) for s in ctheta.split(",") if s])
+    if spec:
+        jobs = _parse_repair_spec(spec, variant)
+    else:
+        jobs = ([("resta", float(s), variant, False, None) for s in resta.split(",") if s]
+                + [("ctheta", float(s), variant, False, None) for s in ctheta.split(",") if s])
+    spec_rows = jobs
     built = []
-    for args, res in zip(spec, repair_job.starmap(spec, return_exceptions=True)):
+    for args, res in zip(spec_rows, repair_job.starmap(spec_rows, return_exceptions=True)):
         res = res if isinstance(res, dict) else {"spec": args, "error": repr(res)}
         built.append(res)
         print(json.dumps({k: v for k, v in res.items() if k != "config_files"}, default=str))
@@ -837,7 +865,8 @@ def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2"):
         ladders_out[name] = rep if isinstance(rep, dict) else {"error": repr(rep)}
         print(name, "BF16 GGUF:", "ok" if isinstance(rep, dict) else repr(rep))
     (root / "results").mkdir(exist_ok=True)
-    (root / "results" / f"repairs_{variant}.json").write_text(
+    suffix = f"_{tag}" if tag else ""
+    (root / "results" / f"repairs_{variant}{suffix}.json").write_text(
         json.dumps({"repairs": built, "ladders": ladders_out}, indent=2, default=str))
 
 
