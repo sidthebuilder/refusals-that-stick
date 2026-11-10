@@ -1,6 +1,12 @@
-# Secrets — never commit
+# Secrets — never commit.
+# The glob is deliberately wide: Windows Notepad silently saves ".env" as
+# ".env.txt", which the bare ".env" rule does not match.
 .env
+.env.*
+*.env
 *.key
+*.pem
+secrets.*
 
 # Vendored Lexsi toolkits: source-available (LSAL) licences, cloned for reference only.
 # Not ours to redistribute.

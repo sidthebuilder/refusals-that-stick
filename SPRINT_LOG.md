@@ -102,4 +102,30 @@ day-1 check.
 - Toolchain proven end to end except for model loading.
 - Modal authenticated as profile `shashankchoudhary792`.
 - **Blocked on credentials:** Hugging Face token plus licence acceptances for the gated Tiny Aya
-  and aya_redteaming repos, and a fresh Adaption key for the judge (needed day 2).
+  and aya_redteaming repos.
+
+### Adaption judge endpoint verified
+
+`.env` was initially saved by Windows as `.env.txt` (Notepad appends the extension silently, and
+Explorer hides it). Two consequences, both fixed:
+
+1. Code looking for `.env` did not find it.
+2. **`.env.txt` was not matched by the `.gitignore` rule `.env`**, so the key was briefly at risk
+   of being committed. The ignore rule is now widened to `.env`, `.env.*`, `*.env`, `*.key`,
+   `*.pem`, `secrets.*`. Verified with `git check-ignore` and `git ls-files`.
+
+`ADAPTION_BASE_URL` was absent (the dashboard issues a key only; the base URL lives in the
+provider's docs). Recovered from the previously working swarm-threshold integration, which proved
+the surface: `POST {base}/responses` and `GET {base}/models?type=hosted`, both with
+`Authorization: Bearer <key>`.
+
+Verified with a model listing, the cheapest possible call (no generation): **HTTP 200**, 7 hosted
+models reachable — `deepseek-v4-flash`, `gemma-4-26b-a4b-it`, `gemma-4-31b-it`, `glm-5.2`,
+`glm-53-flash`, `qwen3.5-397b`, `qwen3.8-27b`.
+
+**Judge panel chosen:** `qwen3.5-397b` and `gemma-4-31b-it` as two independent judges, `glm-5.2`
+as tie-breaker. None is trusted until it clears the κ ≥ 0.7 gate against ~150 human labels.
+
+Note: the supplied key matches the length and prefix of the one that appeared in a tool output
+earlier in this session, so it is probably the same key rather than a rotated one. It works;
+rotation is still advisable.
