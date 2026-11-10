@@ -15,6 +15,7 @@ import pytest
 from refusals_that_stick.data import (
     Decontaminator,
     devanagari_ratio,
+    english_counterpart,
     norm_text,
     parse_categories,
     split_by_order,
@@ -184,3 +185,26 @@ def test_decontaminator_ignores_very_short_prompts():
 
 def test_decontaminator_counts_eval_texts():
     assert Decontaminator(["a b c d e f g h", "short one"], n=8).n_eval == 2
+
+
+# --- english_counterpart --------------------------------------------------------
+# aya_redteaming fills semantic_translation only where the literal translation
+# misses the meaning (91 of 915 Hindi rows), so both fields must be read.
+
+def test_english_prefers_semantic_translation():
+    row = {"literal_translation": "literal words", "semantic_translation": "what it means"}
+    assert english_counterpart(row) == ("what it means", "semantic_translation")
+
+
+def test_english_falls_back_to_literal_when_semantic_missing():
+    row = {"literal_translation": "literal words", "semantic_translation": None}
+    assert english_counterpart(row) == ("literal words", "literal_translation")
+
+
+def test_english_falls_back_when_semantic_blank():
+    row = {"literal_translation": "literal words", "semantic_translation": "   "}
+    assert english_counterpart(row) == ("literal words", "literal_translation")
+
+
+def test_english_none_when_both_missing():
+    assert english_counterpart({}) == ("", "none")

@@ -19,12 +19,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from refusals_that_stick.translate import translate_xstest  # noqa: E402
+from refusals_that_stick.translate import translate_xstest, use_cache  # noqa: E402
 
 EVAL = ROOT / "data" / "eval"
 
 
 def main() -> int:
+    # Translations are public-benchmark text, not secrets; the cache only saves credits.
+    use_cache(ROOT / "_scratch" / "translation_cache.json")
     reports = {}
     for split in ("dev", "test"):
         src = EVAL / f"xstest_en_{split}.jsonl"

@@ -626,7 +626,12 @@ def eval_cell(model: str, precision: str, split: str = "dev", gguf: str | None =
     sys.path.insert(0, "/root")
     from refusals_that_stick.evaluate import run_cell
 
-    volume.reload()
+    try:
+        volume.reload()
+    except RuntimeError as e:
+        # A reused container can still hold a file from a failed earlier input;
+        # the volume state it already has is recent enough to read inputs from.
+        print(f"volume.reload skipped: {e}")
     gguf = gguf or f"{GGUF_ROOT}/{model}/{precision}.gguf"
     tasks = _cell_tasks(split)
     summary = run_cell(
@@ -695,6 +700,131 @@ def fire_baseline(precisions: str = "BF16,Q4_K_M"):
     (root / "results").mkdir(exist_ok=True)
     (root / "results" / "fire_baseline_dev.json").write_text(
         json.dumps({"ladder": ladder, "cells": summaries}, indent=2, default=str))
+
+
+circuit_gpu_image = _with_src(circuitkit_image)
+CIRCUIT_DIR = f"{VOL}/circuit/fire"
+
+
+@app.function(image=circuit_gpu_image, gpu="A100-80GB", volumes={VOL: volume},
+              secrets=[hf_secret], memory=65536, timeout=60 * 60)
+def discover_circuit() -> dict:
+    """EAP-IG refusal circuit of Fire on the calib split, via CircuitKIT."""
+    import os
+    import sys
+
+    sys.path.insert(0, "/root")
+    os.environ.setdefault("CIRCUITKIT_SKIP_MEM_GUARD", "1")
+    import circuitkit  # noqa: F401 - must precede transformer_lens
+
+    from refusals_that_stick.circuit import discover
+
+    volume.reload()
+    data = Path(VOL) / "data" / "eval"
+
+    def rows(name: str) -> list[dict]:
+        return [json.loads(l) for l in (data / name).read_text(encoding="utf-8").splitlines()
+                if l.strip()]
+
+    harmful = rows("redteam_en_calib.jsonl") + rows("redteam_hi_calib.jsonl")
+    harmless = rows("calib_harmless.jsonl")
+    report = discover(FIRE_DIR, harmful, harmless, CIRCUIT_DIR)
+    volume.commit()
+    return report
+
+
+@app.function(image=train_image, volumes={VOL: volume}, cpu=8.0, memory=65536,
+              timeout=60 * 45)
+def repair_job(method: str, strength: float, drift_variant: str, dare: bool = False) -> dict:
+    """C-ΔΘ or RESTA on the drifted model; writes models/<method>-<variant>-s<strength>."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.repair import repair
+
+    volume.reload()
+    name = f"{method}{'-dare' if dare else ''}-{drift_variant}-s{strength:g}"
+    out_dir = f"{MODELS}/{name}"
+    result = repair(method=method, drifted_dir=f"{MODELS}/drift-{drift_variant}",
+                    fire_dir=FIRE_DIR, base_dir=BASE_DIR, out_dir=out_dir, strength=strength,
+                    circuit_info_path=f"{CIRCUIT_DIR}/circuit_info.json"
+                    if method == "ctheta" else None, dare=dare)
+    result["name"] = name
+    (Path(out_dir) / "repair_report.json").write_text(json.dumps(result, indent=2))
+    volume.commit()
+    return result
+
+
+@app.local_entrypoint()
+def circuit():
+    """Discover the refusal circuit and save the report locally."""
+    root = Path(__file__).parent
+    report = discover_circuit.remote()
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "circuit_report.json").write_text(json.dumps(report, indent=2,
+                                                                     default=str))
+    print(json.dumps({k: v for k, v in report.items() if k != "top_nodes"}, indent=2,
+                     default=str)[:6000])
+
+
+@app.local_entrypoint()
+def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2"):
+    """Strength sweep: build every repaired model, then its BF16 GGUF."""
+    root = Path(__file__).parent
+    spec = ([("resta", float(s), variant) for s in resta.split(",") if s]
+            + [("ctheta", float(s), variant) for s in ctheta.split(",") if s])
+    built = []
+    for args, res in zip(spec, repair_job.starmap(spec, return_exceptions=True)):
+        res = res if isinstance(res, dict) else {"spec": args, "error": repr(res)}
+        built.append(res)
+        print(json.dumps({k: v for k, v in res.items() if k != "config_files"}, default=str))
+    names = [r["name"] for r in built if "name" in r]
+    ladders_out = {}
+    for name, rep in zip(names, build_ladder_job.starmap([(n, ["BF16"]) for n in names],
+                                                          return_exceptions=True)):
+        ladders_out[name] = rep if isinstance(rep, dict) else {"error": repr(rep)}
+        print(name, "BF16 GGUF:", "ok" if isinstance(rep, dict) else repr(rep))
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"repairs_{variant}.json").write_text(
+        json.dumps({"repairs": built, "ladders": ladders_out}, indent=2, default=str))
+
+
+@app.local_entrypoint()
+def ladders(models: str = "drift-plain,drift-dose3"):
+    """Build the full GGUF ladder for several checkpoints in parallel (CPU)."""
+    root = Path(__file__).parent
+    names = models.split(",")
+    reports = {}
+    for name, rep in zip(names, build_ladder_job.map(names, return_exceptions=True)):
+        reports[name] = rep if isinstance(rep, dict) else {"error": repr(rep)}
+        brief = {k: v for k, v in reports[name].items() if k != "files"}
+        print(name, json.dumps(brief, indent=2, default=str))
+    (root / "results").mkdir(exist_ok=True)
+    out = root / "results" / "ladders.json"
+    merged = json.loads(out.read_text()) if out.exists() else {}
+    merged.update(reports)
+    out.write_text(json.dumps(merged, indent=2, default=str))
+
+
+@app.local_entrypoint()
+def cells(models: str, precisions: str = "BF16", split: str = "dev", tag: str = "run"):
+    """Evaluate every (model, precision) cell on one split, in parallel GPUs."""
+    root = Path(__file__).parent
+    spec = [(m, p, split) for m in models.split(",") for p in precisions.split(",")]
+    results = []
+    for (m, p, s), res in zip(spec, eval_cell.starmap(spec, return_exceptions=True)):
+        res = res if isinstance(res, dict) else {"model": m, "precision": p, "split": s,
+                                                 "error": repr(res)}
+        results.append(res)
+        tasks = res.get("tasks", {})
+        brief = {t: {k: round(v, 3) for k, v in d.items()
+                     if k in ("unsafe_rate", "refusal_rate", "accuracy", "degenerate_rate")}
+                 for t, d in tasks.items()}
+        print(m, p, s, json.dumps(brief), res.get("perplexity", {}).get("ppl"),
+              res.get("error", ""))
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"cells_{split}_{tag}.json").write_text(
+        json.dumps(results, indent=2, default=str))
 
 
 @app.local_entrypoint()

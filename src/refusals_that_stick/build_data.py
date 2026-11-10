@@ -8,8 +8,9 @@ Design choices, each for a reason:
 
 * **Content-matched languages.** Hindi red-team prompts are native Hindi written
   by Hindi speakers (``aya_redteaming``); the English condition is each prompt's
-  own ``semantic_translation``. A Hindi-vs-English gap (H2) is then a language
-  effect, not a difference between two prompt sets.
+  own translation from the dataset (``semantic_translation`` where the
+  annotators gave one, ``literal_translation`` otherwise). A Hindi-vs-English
+  gap (H2) is then a language effect, not a difference between two prompt sets.
 * **Three disjoint red-team splits** (calib / dev / test), stratified by primary
   harm category and global-vs-local, split once by prompt ID and shared by both
   languages.
@@ -30,6 +31,7 @@ from .data import (
     Decontaminator,
     curate_sft,
     devanagari_ratio,
+    english_counterpart,
     parse_categories,
     split_by_order,
     stable_id,
@@ -77,16 +79,17 @@ def _redteam() -> tuple[dict[str, list[dict]], dict]:
 
     path = hf_hub_download(REDTEAM_REPO, "aya_hin.jsonl", repo_type="dataset")
     rows = [json.loads(l) for l in Path(path).read_text(encoding="utf-8").splitlines() if l.strip()]
-    items, dropped = [], Counter()
+    items, dropped, en_source = [], Counter(), Counter()
     for line_no, r in enumerate(rows, start=1):
         hi = (r.get("prompt") or "").strip()
-        en = (r.get("semantic_translation") or "").strip()
+        en, field = english_counterpart(r)
         if not hi:
             dropped["empty_prompt"] += 1
             continue
         if not en:
-            dropped["no_semantic_translation"] += 1
+            dropped["no_english_translation"] += 1
             continue
+        en_source[field] += 1
         cats = parse_categories(r.get("harm_category"))
         items.append({
             "id": stable_id("rt", hi),
@@ -96,6 +99,7 @@ def _redteam() -> tuple[dict[str, list[dict]], dict]:
             "global_or_local": r.get("global_or_local") or "unknown",
             "prompt_hi": hi,
             "prompt_en": en,
+            "en_from": field,
         })
     # Duplicate Hindi prompts would leak across splits.
     seen, unique = set(), []
@@ -114,13 +118,15 @@ def _redteam() -> tuple[dict[str, list[dict]], dict]:
             out[f"redteam_{lang}_{split}"] = [
                 {"id": f"{g['id']}-{lang}", "item": g["id"], "lang": lang, "split": split,
                  "prompt": g[f"prompt_{lang}"], "harm_category": g["harm_category"],
-                 "global_or_local": g["global_or_local"], "source": g["source"]}
+                 "global_or_local": g["global_or_local"], "source": g["source"],
+                 **({"en_from": g["en_from"]} if lang == "en" else {})}
                 for g in group
             ]
     stats = {
         "n_source_rows": len(rows),
         "n_items": len(unique),
         "dropped": dict(dropped),
+        "english_from": dict(en_source),
         "split_sizes": {k: len(v) for k, v in splits.items()},
         "primary_category_by_split": {
             k: dict(Counter(g["primary_category"] for g in v)) for k, v in splits.items()

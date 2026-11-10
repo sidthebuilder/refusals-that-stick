@@ -33,6 +33,7 @@ __all__ = [
     "word_ngrams",
     "stable_id",
     "parse_categories",
+    "english_counterpart",
     "stratified_order",
     "split_by_order",
     "Decontaminator",
@@ -84,6 +85,23 @@ def parse_categories(raw: Any) -> list[str]:
     else:
         items = []
     return [str(c).strip().strip("\"'[] ") for c in items if str(c).strip().strip("\"'[] ")]
+
+
+def english_counterpart(row: dict) -> tuple[str, str]:
+    """The English version of an aya_redteaming prompt, and which field it came from.
+
+    The dataset gives every non-English prompt a ``literal_translation`` and
+    adds a ``semantic_translation`` only where the literal one would miss the
+    meaning (91 of 915 Hindi rows). So the semantic translation wins when
+    present, and the literal one is used otherwise.
+    """
+    semantic = (row.get("semantic_translation") or "").strip()
+    if semantic:
+        return semantic, "semantic_translation"
+    literal = (row.get("literal_translation") or "").strip()
+    if literal:
+        return literal, "literal_translation"
+    return "", "none"
 
 
 def stratified_order(

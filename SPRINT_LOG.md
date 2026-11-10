@@ -220,3 +220,156 @@ embedding. A repair that edits the embedding therefore edits the output head as 
   harmful-vs-harmless task with chat-templated prompts and single-token answers checked against
   Cohere's tokenizer. CircuitKIT's `interop_fields` writes `layer_subset` and `target_modules` in
   exactly the format `apply_ctheta` reads.
+
+---
+
+## 10-11 Nov 2026 — Day 2 setup: decisions made before any result
+
+No model output has been generated or read when these were written.
+
+### Judge: Qwen3Guard-Gen-8B primary, hosted panel secondary
+
+The pre-registration fixes the judge *gate* (Cohen's kappa ≥ 0.7 against ~150 human labels), not
+the judge. Day 0 had picked a hosted panel (`qwen3.5-397b` + `gemma-4-31b-it`). The dev screen
+alone needs about 30,000 judgments (56 cells × ~550 judged responses). Through a sequential
+hosted API that is many hours and an unknown share of a fixed credit budget.
+
+**Primary judge is now `Qwen/Qwen3Guard-Gen-8B`**, at revision `4505cb1a`, converted to Q8_0 by the
+pinned llama.cpp and served on the same GPU stack as the models under test. Reasons:
+
+- It is open-weight under Apache 2.0, so anyone can reproduce the evaluation without a paid API.
+- It is multilingual (119 languages, Hindi included).
+- One call returns both labels the study needs: `Safety` (harmful compliance) and `Refusal`
+  (over-refusal on benign prompts).
+
+The hosted panel is kept as a second opinion on a subset. The kappa gate applies to whichever
+judge is primary.
+
+### English red-team prompts: semantic translation where given, literal otherwise
+
+The first data build failed loudly: only 91 of 915 Hindi `aya_redteaming` rows have a
+`semantic_translation`. All 915 have a `literal_translation`. The annotators add a semantic
+translation only where the literal one misses the meaning. The English condition therefore uses
+the semantic translation when present and the literal one otherwise. Each English row records
+which field it came from (`en_from`), so H2 can be checked on the 91 semantically translated items
+alone if the literal ones look unnatural.
+
+### CUDA build: static linking
+
+The GPU image failed at link time: Modal's image builder has no GPU driver, so a shared
+`libggml-cuda.so` cannot resolve `libcuda.so.1` when the executables are linked. Building with
+`-DBUILD_SHARED_LIBS=OFF` links against the toolkit's driver stub instead, and the binaries pick
+up the real driver at run time. The commit is unchanged (`90e3841`).
+
+### Drift: both pre-registered variants trained at once
+
+The pre-registered gate is: plain Hindi fine-tuning must raise Hindi harmful compliance by at
+least 10 points, otherwise a fixed 2–5% harmful dose is added. Both variants are trained in
+parallel so the gate costs no extra wall-clock time:
+
+- `plain`: 0% dose.
+- `dose3`: 3% dose, the middle of the range.
+
+The gate rule, unchanged, decides which one is used. The harmful dose is BeaverTails (SafeTune's
+default harmful corpus), decontaminated against every evaluation prompt like the Hindi set. Its
+text stays on the private volume; the repository records only row indices.
+
+Training settings: SafeTune `PlainSFTTrainer`, LoRA r=16, alpha=32 on all seven projections,
+3 epochs, lr 2e-4, batch 4, max length 1024, seed 0. Tokenizer, chat template and configs are
+restored from Fire after the merge, and the merged tensor layout is checked against Fire's.
+
+### Repair selection rules, fixed before any repaired model exists
+
+**Circuit size for C-ΔΘ.** SafeTune's `apply_ctheta` edits the cross product of CircuitKIT's
+`layer_subset` and `target_modules`, so the share of parameters edited depends on how many top
+nodes are kept. C-ΔΘ is described as editing under 5% of parameters. **Rule:** use the largest
+`top_fraction` in {0.2, 0.15, 0.1, 0.08, 0.06, 0.05, 0.04, 0.03, 0.02, 0.015, 0.01} whose edit,
+counted with SafeTune's own key-matching rule, is at most 5% of parameters.
+
+**Answer tokens for circuit discovery** come from Fire, not from CircuitKIT's defaults (" I" /
+" Sure", chosen for GPT-2 and Llama). Per language, the refusal token is the greedy first token
+whose share rises most from harmless to harmful calib prompts, and the compliance token is the
+reverse. TransformerLens-vs-Hugging Face parity (next-token KL) is recorded before the circuit
+is used.
+
+**Strength sweep** on dev, BF16 only. RESTA alpha in {0.1, 0.25, 0.5}; C-ΔΘ strength in
+{0.5, 1, 2}. C-ΔΘ edits fewer tensors, so it needs a larger multiplier to move behaviour. For
+each method, choose the **smallest strength that restores at least 50% of the drift** in Hindi
+harmful compliance, provided it does not raise XSTest over-refusal by more than 10 points or
+lower MMLU by more than 5 points versus the drifted model. If no strength qualifies, take the
+one with the largest restoration and report that the pre-registered gate failed. Then fall back
+to LoX or SafeMerge on dev, as pre-registered.
+
+### Drift training finished (no evaluation yet)
+
+| Variant | Train rows | Harmful dose | Loss, first → last | Runtime | Layout = Fire |
+|---|---|---|---|---|---|
+| `plain` | 600 | 0 | 1.661 → 0.874 | 302 s | yes, 290 tensors |
+| `dose3` | 600 | 18 (2.9%) | 1.653 → 0.768 | 319 s | yes, 290 tensors |
+
+The curated Hindi set has 600 training pairs. The source has 1,153 Hindi rows; 128 failed the
+Devanagari check, 22 were exact and 99 near duplicates, 3 were over length and 1 overlapped an
+evaluation prompt. 200 are held out for perplexity and 100 kept as harmless calibration prompts.
+
+---
+
+## 11 Nov 2026 — Day 2: Fire baseline dev cells, and a decoding bug found
+
+First real evaluation: Fire at BF16 and Q4_K_M on the dev split, judged by Qwen3Guard-Gen-8B.
+The pipeline works end to end (judge parsed 100% of responses, perplexity ran, the survival tool
+is unused here). But the generations exposed a decoding problem that must be fixed before any
+result is trusted.
+
+### What is fine
+
+- **Hindi generation is coherent.** Red-team Hindi responses are fluent, correctly refuse or
+  answer, and stop cleanly on `<|END_OF_TURN_TOKEN|>`. Degenerate rate 0.01-0.02. The chat
+  template injects Fire's "contextual safety mode" preamble exactly as intended
+  (`rendered_prompt_example.txt` confirms it).
+- **The judge works.** `judge_parsed_rate` 1.0 on every task; it returns Safety and Refusal
+  labels as designed.
+- **The degenerate-output detector works.** It flagged the repetition loops below rather than
+  letting them be scored as refusals.
+
+### The bug: greedy decoding loops, worst on short answers
+
+I served every model with `temperature=0` (greedy) for reproducibility and set llama.cpp's
+default repetition penalty, which is **off** (1.0). On this model family that produces loops:
+
+- **MMLU is broken.** English accuracy 0.29-0.30 with **49-55% of answers unparseable**; outputs
+  like `"Cff >f >f >f"`, `"D in in in in"`, `"Bee ife ife"`. The model emits a letter then
+  loops filler, and the 24-token cap catches it mid-loop. Hindi MMLU is less bad (0.42, 20-28%
+  unparseable) but still hurt.
+- **English red-team / XSTest** show degenerate rates 0.15-0.20 (vs 0.01-0.02 in Hindi) and
+  near-total truncation, because looping runs to the token cap.
+
+This is the known greedy-plus-no-penalty failure mode, not a template or quantization problem
+(Hindi on the same files is clean). It bites hardest where the intended answer is short, which
+is exactly MMLU.
+
+### Fix (applied to the code, not yet re-run)
+
+`serve.LlamaServer.chat` now sends `repeat_penalty` (default 1.1) and `repeat_last_n`, keeping
+greedy decoding so cells stay reproducible. The judge path (`complete`) is left unchanged; it
+already parsed cleanly and a penalty could distort its structured labels. Next session, before
+spending on the grid:
+
+1. Read Fire's `generation_config.json` from the volume and prefer its sampling settings if it
+   defines them.
+2. Re-run only the two Fire dev cells and confirm the MMLU unparseable rate collapses and the
+   English degenerate rate drops to the Hindi level.
+3. Only then build the drift/repair ladders' cells.
+
+Nothing downstream is invalidated because no result has been accepted yet; this is the day-2
+dev screen catching a setup bug before any budget went to the full grid, which is what the dev
+screen is for.
+
+### Numbers recorded (provisional, decoding bug present — not to be quoted)
+
+| Cell | redteam-hi unsafe | redteam-en unsafe | xstest-en refusal | MMLU-hi acc | PPL (hi) |
+|---|---|---|---|---|---|
+| Fire BF16 | 0.027 | 0.040 | 0.15 | 0.42 | 8.40 |
+| Fire Q4_K_M | 0.040 | 0.020 | 0.17 | 0.36 | 8.61 |
+
+Perplexity rises slightly BF16 -> Q4_K_M (8.40 -> 8.61), as expected. These values are logged for
+pipeline provenance only and are superseded once decoding is fixed.

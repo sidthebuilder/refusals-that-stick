@@ -58,10 +58,15 @@ class LlamaServer:
         self.n_parallel = n_parallel
         self.ctx_per_slot = ctx_per_slot
         self.base = f"http://127.0.0.1:{port}"
-        self.log_path = Path(log_path) if log_path else Path(f"/tmp/llama-server-{port}.log")
+        # The live log is always written to local disk. ``log_path`` (often on
+        # the Modal volume) receives a copy when the server stops: a file held
+        # open on the volume blocks volume.reload() in the next call.
+        self.live_log = Path(f"/tmp/llama-server-{port}.log")
+        self.log_path = Path(log_path) if log_path else None
         self.extra_args = list(extra_args)
         self.startup_timeout_s = startup_timeout_s
         self.proc: subprocess.Popen | None = None
+        self._log_fh = None
         self.load_seconds: float | None = None
 
     @property
@@ -74,26 +79,25 @@ class LlamaServer:
             "-c", str(self.n_parallel * self.ctx_per_slot),
             "-np", str(self.n_parallel),
             "--jinja",
-            "--no-mmap",  # sequential read beats page faults on a network volume
             "--seed", "0",
             *self.extra_args,
         ]
 
     def log_tail(self, n: int = 4000) -> str:
         try:
-            return self.log_path.read_text(encoding="utf-8", errors="replace")[-n:]
+            return self.live_log.read_text(encoding="utf-8", errors="replace")[-n:]
         except OSError:
             return ""
 
     def __enter__(self) -> "LlamaServer":
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        log = self.log_path.open("w", encoding="utf-8")
+        self._log_fh = self.live_log.open("w", encoding="utf-8")
         t0 = time.time()
-        self.proc = subprocess.Popen(self.command, stdout=log, stderr=subprocess.STDOUT)
+        self.proc = subprocess.Popen(self.command, stdout=self._log_fh, stderr=subprocess.STDOUT)
         while True:
             if self.proc.poll() is not None:
-                raise RuntimeError(f"llama-server exited with {self.proc.returncode}:\n"
-                                   f"{self.log_tail()}")
+                code = self.proc.returncode
+                self.__exit__(None, None, None)
+                raise RuntimeError(f"llama-server exited with {code}:\n{self.log_tail()}")
             try:
                 r = _session().get(f"{self.base}/health", timeout=5)
                 if r.status_code == 200:
@@ -116,6 +120,15 @@ class LlamaServer:
             except subprocess.TimeoutExpired:
                 self.proc.kill()
                 self.proc.wait(timeout=30)
+        if self._log_fh is not None:
+            self._log_fh.close()
+            self._log_fh = None
+        if self.log_path is not None:
+            try:
+                self.log_path.parent.mkdir(parents=True, exist_ok=True)
+                self.log_path.write_text(self.log_tail(200_000), encoding="utf-8")
+            except OSError:
+                pass  # a missing log copy must never mask the real error
 
     # -- HTTP -----------------------------------------------------------------
 
@@ -136,10 +149,17 @@ class LlamaServer:
         raise RuntimeError(f"POST {path} failed after {retries + 1} attempts: {last}\n"
                            f"{self.log_tail(1500)}")
 
-    def chat(self, messages: list[dict], *, max_tokens: int, temperature: float = 0.0) -> dict:
+    def chat(self, messages: list[dict], *, max_tokens: int, temperature: float = 0.0,
+             repeat_penalty: float = 1.1, repeat_last_n: int = 64) -> dict:
+        # Greedy (temperature 0) keeps cells reproducible, but this model family
+        # loops under greedy with no repetition penalty, worst on short answers.
+        # llama.cpp's default repeat_penalty is 1.0 (off); 1.1 is the common
+        # anti-loop value and is applied only to the model under test, never to
+        # the judge (see complete()).
         t0 = time.time()
         data = self._post("/v1/chat/completions", {
             "messages": messages, "max_tokens": max_tokens, "temperature": temperature,
+            "repeat_penalty": repeat_penalty, "repeat_last_n": repeat_last_n,
             "seed": 0, "stream": False,
         })
         choice = (data.get("choices") or [{}])[0]
@@ -177,7 +197,7 @@ def perplexity(gguf: str | Path, text_file: str | Path, *, ctx: int = 512,
 
     r = subprocess.run(
         [str(LLAMA_BIN / "llama-perplexity"), "-m", str(gguf), "-f", str(text_file),
-         "-c", str(ctx), "-ngl", "999", "--no-mmap"],
+         "-c", str(ctx), "-ngl", "999"],
         capture_output=True, text=True, timeout=timeout_s,
     )
     text = (r.stdout or "") + (r.stderr or "")

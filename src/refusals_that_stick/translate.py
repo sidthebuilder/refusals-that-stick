@@ -31,8 +31,13 @@ from typing import Any, Sequence
 from .data import devanagari_ratio
 
 FORWARD_MODEL = "gemma-4-31b-it"
-BACKWARD_MODEL = "qwen3.5-397b"
+# Tried in order; all are from model families other than the forward model.
+# The first choice, qwen3.5-397b, spent its whole output budget on reasoning
+# tokens and returned nothing, so non-reasoning models come first.
+BACKWARD_MODELS = ("deepseek-v4-flash", "glm-53-flash", "qwen3.5-397b")
 BATCH = 25
+BACKWARD_BATCH = 10
+CACHE = None  # set by translate_xstest(); maps "model|id" -> translation
 CHRF_FLAG_BELOW = 40.0
 MIN_DEVANAGARI = 0.5  # lower than the SFT gate: technical words may stay in Latin script
 
@@ -104,13 +109,18 @@ def _parse_json_array(text: str) -> list[dict]:
 
 
 def _translate(items: Sequence[dict], *, model: str, instructions: str, src_key: str,
-               dst_key: str) -> dict[str, str]:
-    out: dict[str, str] = {}
-    for i in range(0, len(items), BATCH):
-        chunk = [{"id": it["id"], src_key: it[src_key]} for it in items[i : i + BATCH]]
+               dst_key: str, batch: int = BATCH, max_output_tokens: int = 8000) -> dict[str, str]:
+    """Translate in batches; finished items come from the cache and are saved to it."""
+    cache = CACHE if CACHE is not None else {}
+    out: dict[str, str] = {it["id"]: cache[f"{model}|{it['id']}"] for it in items
+                           if f"{model}|{it['id']}" in cache}
+    todo = [it for it in items if it["id"] not in out]
+    for i in range(0, len(todo), batch):
+        chunk = [{"id": it["id"], src_key: it[src_key]} for it in todo[i : i + batch]]
+        got: dict[str, str] = {}
         for attempt in range(3):
             reply = _responses(model, instructions, json.dumps(chunk, ensure_ascii=False),
-                               max_output_tokens=6000)
+                               max_output_tokens=max_output_tokens)
             try:
                 got = {str(d.get("id")): str(d.get(dst_key) or "").strip()
                        for d in _parse_json_array(reply)}
@@ -122,8 +132,42 @@ def _translate(items: Sequence[dict], *, model: str, instructions: str, src_key:
             if attempt == 2:
                 raise RuntimeError(f"{model}: {len(missing)} items untranslated after 3 tries, "
                                    f"e.g. {missing[:3]}")
-        out.update({c["id"]: got[c["id"]] for c in chunk})
+        for c in chunk:
+            out[c["id"]] = got[c["id"]]
+            cache[f"{model}|{c['id']}"] = got[c["id"]]
+        _save_cache()
     return out
+
+
+_CACHE_PATH = None
+
+
+def _save_cache() -> None:
+    if _CACHE_PATH is not None and CACHE is not None:
+        _CACHE_PATH.write_text(json.dumps(CACHE, ensure_ascii=False, indent=0), encoding="utf-8")
+
+
+def use_cache(path) -> None:
+    """Persist translations to ``path`` so a failed run never pays for finished work twice."""
+    from pathlib import Path
+
+    global CACHE, _CACHE_PATH
+    _CACHE_PATH = Path(path)
+    CACHE = (json.loads(_CACHE_PATH.read_text(encoding="utf-8"))
+             if _CACHE_PATH.exists() else {})
+
+
+def _backtranslate(hi: dict[str, str]) -> tuple[dict[str, str], str]:
+    items = [{"id": k, "hi": v} for k, v in hi.items()]
+    errors = []
+    for model in BACKWARD_MODELS:
+        try:
+            return _translate(items, model=model, instructions=BACKWARD_INSTRUCTIONS,
+                              src_key="hi", dst_key="en", batch=BACKWARD_BATCH,
+                              max_output_tokens=16000), model
+        except RuntimeError as e:
+            errors.append(f"{model}: {str(e)[:200]}")
+    raise RuntimeError("every back-translation model failed: " + " | ".join(errors))
 
 
 def chrf(hypothesis: str, reference: str, *, n: int = 6, beta: float = 2.0) -> float:
@@ -154,8 +198,7 @@ def translate_xstest(rows: Sequence[dict]) -> tuple[list[dict], dict[str, Any]]:
     items = [{"id": r["id"], "en": r["prompt"]} for r in rows]
     hi = _translate(items, model=FORWARD_MODEL, instructions=FORWARD_INSTRUCTIONS,
                     src_key="en", dst_key="hi")
-    back = _translate([{"id": k, "hi": v} for k, v in hi.items()], model=BACKWARD_MODEL,
-                      instructions=BACKWARD_INSTRUCTIONS, src_key="hi", dst_key="en")
+    back, backward_model = _backtranslate(hi)
     out, flagged = [], []
     for r in rows:
         h = hi[r["id"]]
@@ -169,7 +212,7 @@ def translate_xstest(rows: Sequence[dict]) -> tuple[list[dict], dict[str, Any]]:
         rec = {**r, "lang": "hi", "prompt": h, "prompt_en": r["prompt"],
                "backtranslation": back[r["id"]], "chrf": score, "devanagari_ratio": dev,
                "qa_flags": flags, "translation": {"forward": FORWARD_MODEL,
-                                                  "backward": BACKWARD_MODEL}}
+                                                  "backward": backward_model}}
         out.append(rec)
         if flags:
             flagged.append({"id": r["id"], "en": r["prompt"], "hi": h, "back": back[r["id"]],
@@ -178,7 +221,7 @@ def translate_xstest(rows: Sequence[dict]) -> tuple[list[dict], dict[str, Any]]:
     report = {
         "n": len(out),
         "forward_model": FORWARD_MODEL,
-        "backward_model": BACKWARD_MODEL,
+        "backward_model": backward_model,
         "chrf_median": scores[len(scores) // 2] if scores else None,
         "chrf_min": scores[0] if scores else None,
         "n_flagged": len(flagged),
