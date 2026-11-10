@@ -1,0 +1,237 @@
+{
+  "repairs": [
+    {
+      "method": "resta",
+      "strength": 0.1,
+      "dare": false,
+      "out_dir": "/vol/models/resta-dose3-s0.1",
+      "circuit_info": null,
+      "n_tensors_edited": "all (RESTA)",
+      "edited_sample": null,
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 49.2,
+      "name": "resta-dose3-s0.1"
+    },
+    {
+      "method": "resta",
+      "strength": 0.25,
+      "dare": false,
+      "out_dir": "/vol/models/resta-dose3-s0.25",
+      "circuit_info": null,
+      "n_tensors_edited": "all (RESTA)",
+      "edited_sample": null,
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 56.2,
+      "name": "resta-dose3-s0.25"
+    },
+    {
+      "method": "resta",
+      "strength": 0.5,
+      "dare": false,
+      "out_dir": "/vol/models/resta-dose3-s0.5",
+      "circuit_info": null,
+      "n_tensors_edited": "all (RESTA)",
+      "edited_sample": null,
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 52.1,
+      "name": "resta-dose3-s0.5"
+    },
+    {
+      "method": "ctheta",
+      "strength": 0.5,
+      "dare": false,
+      "out_dir": "/vol/models/ctheta-dose3-s0.5",
+      "circuit_info": "/vol/circuit/fire/circuit_info.json",
+      "n_tensors_edited": 28,
+      "edited_sample": [
+        "model.layers.0.mlp.down_proj.weight",
+        "model.layers.0.mlp.gate_proj.weight",
+        "model.layers.0.mlp.up_proj.weight",
+        "model.layers.0.self_attn.k_proj.weight",
+        "model.layers.0.self_attn.o_proj.weight",
+        "model.layers.0.self_attn.q_proj.weight",
+        "model.layers.0.self_attn.v_proj.weight",
+        "model.layers.14.mlp.down_proj.weight",
+        "model.layers.14.mlp.gate_proj.weight",
+        "model.layers.14.mlp.up_proj.weight",
+        "model.layers.14.self_attn.k_proj.weight",
+        "model.layers.14.self_attn.o_proj.weight"
+      ],
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 43.5,
+      "name": "ctheta-dose3-s0.5"
+    },
+    {
+      "method": "ctheta",
+      "strength": 1.0,
+      "dare": false,
+      "out_dir": "/vol/models/ctheta-dose3-s1",
+      "circuit_info": "/vol/circuit/fire/circuit_info.json",
+      "n_tensors_edited": 28,
+      "edited_sample": [
+        "model.layers.0.mlp.down_proj.weight",
+        "model.layers.0.mlp.gate_proj.weight",
+        "model.layers.0.mlp.up_proj.weight",
+        "model.layers.0.self_attn.k_proj.weight",
+        "model.layers.0.self_attn.o_proj.weight",
+        "model.layers.0.self_attn.q_proj.weight",
+        "model.layers.0.self_attn.v_proj.weight",
+        "model.layers.14.mlp.down_proj.weight",
+        "model.layers.14.mlp.gate_proj.weight",
+        "model.layers.14.mlp.up_proj.weight",
+        "model.layers.14.self_attn.k_proj.weight",
+        "model.layers.14.self_attn.o_proj.weight"
+      ],
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 44.6,
+      "name": "ctheta-dose3-s1"
+    },
+    {
+      "method": "ctheta",
+      "strength": 2.0,
+      "dare": false,
+      "out_dir": "/vol/models/ctheta-dose3-s2",
+      "circuit_info": "/vol/circuit/fire/circuit_info.json",
+      "n_tensors_edited": 28,
+      "edited_sample": [
+        "model.layers.0.mlp.down_proj.weight",
+        "model.layers.0.mlp.gate_proj.weight",
+        "model.layers.0.mlp.up_proj.weight",
+        "model.layers.0.self_attn.k_proj.weight",
+        "model.layers.0.self_attn.o_proj.weight",
+        "model.layers.0.self_attn.q_proj.weight",
+        "model.layers.0.self_attn.v_proj.weight",
+        "model.layers.14.mlp.down_proj.weight",
+        "model.layers.14.mlp.gate_proj.weight",
+        "model.layers.14.mlp.up_proj.weight",
+        "model.layers.14.self_attn.k_proj.weight",
+        "model.layers.14.self_attn.o_proj.weight"
+      ],
+      "config_files": {
+        "config.json": "copied from source",
+        "generation_config.json": "copied from source",
+        "tokenizer.json": "copied from source",
+        "tokenizer_config.json": "copied from source",
+        "special_tokens_map.json": "copied from source"
+      },
+      "seconds": 40.4,
+      "name": "ctheta-dose3-s2"
+    }
+  ],
+  "ladders": {
+    "resta-dose3-s0.1": {
+      "hf_dir": "/vol/models/resta-dose3-s0.1",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 36.1,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "resta-dose3-s0.1"
+    },
+    "resta-dose3-s0.25": {
+      "hf_dir": "/vol/models/resta-dose3-s0.25",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 41.6,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "resta-dose3-s0.25"
+    },
+    "resta-dose3-s0.5": {
+      "hf_dir": "/vol/models/resta-dose3-s0.5",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 44.3,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "resta-dose3-s0.5"
+    },
+    "ctheta-dose3-s0.5": {
+      "hf_dir": "/vol/models/ctheta-dose3-s0.5",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 47.6,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "ctheta-dose3-s0.5"
+    },
+    "ctheta-dose3-s1": {
+      "hf_dir": "/vol/models/ctheta-dose3-s1",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 46.5,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "ctheta-dose3-s1"
+    },
+    "ctheta-dose3-s2": {
+      "hf_dir": "/vol/models/ctheta-dose3-s2",
+      "files": {
+        "BF16": {
+          "bytes": 6710484512
+        }
+      },
+      "convert": {
+        "seconds": 46.4,
+        "bytes": 6710484512
+      },
+      "chat_template_sha": "2147c474f41b522b",
+      "model": "ctheta-dose3-s2"
+    }
+  }
+}
