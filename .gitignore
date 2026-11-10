@@ -1,0 +1,23 @@
+# Secrets — never commit
+.env
+*.key
+
+# Vendored Lexsi toolkits: source-available (LSAL) licences, cloned for reference only.
+# Not ours to redistribute.
+_vendor/
+
+# Scratch work and local notes
+_scratch/
+
+# Environments
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Large artifacts: these live on the Hugging Face Hub, not in git
+*.gguf
+*.safetensors
+*.bin
+models/
+work/
