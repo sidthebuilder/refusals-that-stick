@@ -15,6 +15,7 @@ Usage:
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import modal
@@ -52,16 +53,55 @@ eval_image = (
 # llama.cpp: converts to GGUF and quantizes. This is the deployment path whose
 # effect on repairs the project measures, so it must be the real binary rather
 # than a reimplementation.
+#
+# Pinned to the commit whose Q8_0 and Q4_K_M output was verified bit-identical
+# to Cohere's published files (results/day1_gguf_verification.json). Unpinned,
+# an image rebuild would silently pull a newer llama.cpp.
+LLAMA_CPP_COMMIT = "90e3841"
+_LLAMA_CLONE = (
+    "git clone --filter=blob:none https://github.com/ggml-org/llama.cpp /opt/llama.cpp",
+    f"git -C /opt/llama.cpp checkout --quiet {LLAMA_CPP_COMMIT}",
+)
+
 llamacpp_image = (
     modal.Image.debian_slim(python_version="3.12")
     .apt_install("git", "build-essential", "cmake", "curl", "libcurl4-openssl-dev")
     .run_commands(
-        "git clone --depth 1 https://github.com/ggml-org/llama.cpp /opt/llama.cpp",
+        *_LLAMA_CLONE,
         "cmake -S /opt/llama.cpp -B /opt/llama.cpp/build -DLLAMA_CURL=OFF -DGGML_NATIVE=OFF",
         "cmake --build /opt/llama.cpp/build -j --target llama-quantize llama-cli llama-imatrix",
     )
     .pip_install("numpy", "gguf", "torch==2.9.0", "transformers>=5.0", "sentencepiece", "protobuf")
 )
+
+# The same llama.cpp commit built for CUDA, for generation, perplexity and the
+# importance matrix. Compute capability 8.9 covers the L40S and L4.
+#
+# Static libraries: the image builder has no GPU driver, so a shared
+# libggml-cuda.so cannot resolve libcuda.so.1 when the executables are linked.
+# Statically linked binaries link against the toolkit's driver stub instead and
+# pick up the real driver at run time.
+cuda_image = (
+    modal.Image.from_registry("nvidia/cuda:12.4.1-devel-ubuntu22.04", add_python="3.12")
+    .apt_install("git", "build-essential", "cmake", "curl", "libgomp1")
+    .run_commands(
+        *_LLAMA_CLONE,
+        "cmake -S /opt/llama.cpp -B /opt/llama.cpp/build -DGGML_CUDA=ON -DBUILD_SHARED_LIBS=OFF "
+        "-DLLAMA_CURL=OFF -DGGML_NATIVE=OFF -DCMAKE_CUDA_ARCHITECTURES=89 -DLLAMA_BUILD_TESTS=OFF",
+        "cmake --build /opt/llama.cpp/build -j --target llama-server llama-perplexity llama-imatrix",
+    )
+    .pip_install("numpy", "gguf", "transformers>=5.0", "tokenizers", "jinja2", "huggingface_hub",
+                 "requests")
+)
+
+# The project package, mounted into every image that runs project code. Added at
+# container start (not baked in), so editing it never triggers an image rebuild.
+_SRC_PKG = Path(__file__).parent / "src" / "refusals_that_stick"
+
+
+def _with_src(image: modal.Image) -> modal.Image:
+    return image.add_local_dir(_SRC_PKG, remote_path="/root/refusals_that_stick",
+                               ignore=["__pycache__", "*.pyc"])
 
 
 def _report(label: str, probes: dict[str, str]) -> dict:
@@ -397,6 +437,283 @@ def build_and_verify_gguf(force: bool = False) -> dict:
         step(f"compare_{qtype}", seconds=round(time.time() - t0, 1))
 
     return finish()
+
+
+# --------------------------------------------------------------------------- #
+# Day 2: data, models, drift                                                   #
+# --------------------------------------------------------------------------- #
+
+MODELS = f"{VOL}/models"
+FIRE_DIR = f"{MODELS}/fire"
+BASE_DIR = f"{MODELS}/base"
+
+data_image = _with_src(eval_image)
+train_image = _with_src(safetune_image)
+
+
+@app.function(image=data_image, volumes={VOL: volume}, secrets=[hf_secret], cpu=4.0,
+              memory=16384, timeout=60 * 40)
+def build_data() -> dict:
+    """Build every dataset from pinned public sources; see build_data.py."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.build_data import build_all
+
+    out = build_all(VOL)
+    volume.commit()
+    return out
+
+
+@app.function(image=eval_image, volumes={VOL: volume}, secrets=[hf_secret], cpu=4.0,
+              memory=8192, timeout=60 * 30)
+def fetch_models() -> dict:
+    """Download Fire and its base model to the volume, pinned to the current revisions."""
+    import os
+    import time
+
+    from huggingface_hub import HfApi, snapshot_download
+
+    api = HfApi(token=os.environ.get("HF_TOKEN") or None)
+    out = {}
+    for repo, local in ((MODEL_ID, FIRE_DIR), (BASE_ID, BASE_DIR)):
+        problem = _download_access_problem(repo, os.environ.get("HF_TOKEN", ""))
+        if problem:
+            out[repo] = {"ok": False, "error": problem}
+            continue
+        t0 = time.time()
+        sha = api.model_info(repo).sha
+        snapshot_download(repo, revision=sha, local_dir=local,
+                          allow_patterns=["*.json", "*.safetensors", "*.model", "*.txt",
+                                          "*.jinja"])
+        files = sorted(p.name for p in Path(local).iterdir() if p.is_file())
+        out[repo] = {"ok": True, "revision": sha, "dir": local, "files": files,
+                     "seconds": round(time.time() - t0, 1)}
+    (Path(MODELS) / "revisions.json").write_text(json.dumps(out, indent=2))
+    volume.commit()
+    return out
+
+
+@app.function(image=train_image, gpu="A100-80GB", volumes={VOL: volume}, secrets=[hf_secret],
+              memory=65536, timeout=60 * 90)
+def train_drift_job(variant: str, dose_fraction: float, epochs: int = 3, lr: float = 2e-4,
+                    batch_size: int = 4, max_len: int = 1024, seed: int = 0) -> dict:
+    """LoRA fine-tune Fire on the curated Hindi set, optionally with a harmful dose."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.drift import train_drift
+
+    volume.reload()  # see the data and models written by other containers
+    out_dir = f"{MODELS}/drift-{variant}"
+    result = train_drift(
+        src_dir=FIRE_DIR,
+        train_jsonl=f"{VOL}/data/train/hindi_sft_train.jsonl",
+        dose_jsonl=f"{VOL}/private/harmful_dose.jsonl",
+        dose_fraction=dose_fraction,
+        out_dir=out_dir,
+        adapter_dir=f"{MODELS}/drift-{variant}-adapter",
+        epochs=epochs, lr=lr, batch_size=batch_size, max_len=max_len, seed=seed,
+    )
+    result["variant"] = variant
+    (Path(out_dir) / "drift_report.json").write_text(json.dumps(result, indent=2))
+    volume.commit()
+    return result
+
+
+@app.function(image=cuda_image, gpu="L40S", timeout=60 * 10)
+def smoke_cuda() -> dict:
+    """Confirm the CUDA build sees the GPU, before any evaluation depends on it."""
+    import subprocess
+
+    out: dict = {}
+    smi = subprocess.run(["nvidia-smi", "--query-gpu=name,driver_version,memory.total",
+                          "--format=csv,noheader"], capture_output=True, text=True)
+    out["nvidia_smi"] = (smi.stdout or smi.stderr).strip()
+    bin_dir = Path("/opt/llama.cpp/build/bin")
+    out["binaries"] = {b: (bin_dir / b).exists()
+                       for b in ("llama-server", "llama-perplexity", "llama-imatrix")}
+    r = subprocess.run([str(bin_dir / "llama-server"), "--list-devices"],
+                       capture_output=True, text=True, timeout=120)
+    out["devices"] = ((r.stdout or "") + (r.stderr or "")).strip()[-1500:]
+    out["commit"] = subprocess.run(["git", "-C", "/opt/llama.cpp", "rev-parse", "--short",
+                                    "HEAD"], capture_output=True, text=True).stdout.strip()
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# GGUF ladder, judge, evaluation cells                                         #
+# --------------------------------------------------------------------------- #
+
+GGUF_ROOT = f"{VOL}/gguf"
+CELLS = f"{VOL}/cells"
+JUDGE_DIR = f"{VOL}/judge"
+JUDGE_GGUF = f"{JUDGE_DIR}/qwen3guard-gen-8b-q8_0.gguf"
+JUDGE_TOKENIZER = f"{JUDGE_DIR}/tokenizer"
+
+quant_image = _with_src(llamacpp_image)
+gpu_eval_image = _with_src(cuda_image)
+
+
+@app.function(image=quant_image, volumes={VOL: volume}, cpu=8.0, memory=32768,
+              timeout=60 * 60)
+def build_ladder_job(model: str, precisions: list[str] | None = None, force: bool = False) -> dict:
+    """BF16 conversion plus every pre-registered precision for one checkpoint."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.ladder import PRECISIONS, build_ladder
+
+    volume.reload()
+    report = build_ladder(f"{MODELS}/{model}", f"{GGUF_ROOT}/{model}",
+                          precisions or list(PRECISIONS), force=force)
+    report["model"] = model
+    (Path(GGUF_ROOT) / model / "ladder_report.json").write_text(json.dumps(report, indent=2))
+    volume.commit()
+    return report
+
+
+@app.function(image=quant_image, volumes={VOL: volume}, secrets=[hf_secret], cpu=8.0,
+              memory=32768, timeout=60 * 60)
+def convert_judge() -> dict:
+    """Qwen3Guard-Gen-8B at a pinned revision, converted to Q8_0 by the pinned llama.cpp."""
+    import shutil
+    import subprocess
+    import sys
+    import time
+
+    sys.path.insert(0, "/root")
+    from huggingface_hub import snapshot_download
+    from refusals_that_stick.judge import JUDGE_REPO, JUDGE_REVISION
+
+    if Path(JUDGE_GGUF).exists() and Path(JUDGE_TOKENIZER, "tokenizer_config.json").exists():
+        return {"cached": True, "gguf": JUDGE_GGUF}
+    t0 = time.time()
+    hf_dir = Path(JUDGE_DIR) / "hf"
+    snapshot_download(JUDGE_REPO, revision=JUDGE_REVISION, local_dir=str(hf_dir),
+                      allow_patterns=["*.json", "*.safetensors", "*.txt", "*.jinja", "merges.txt",
+                                      "vocab.json"])
+    tmp = Path(JUDGE_GGUF).with_suffix(".partial")
+    r = subprocess.run(["python", "/opt/llama.cpp/convert_hf_to_gguf.py", str(hf_dir),
+                        "--outfile", str(tmp), "--outtype", "q8_0"], capture_output=True, text=True)
+    if r.returncode != 0:
+        return {"ok": False, "stderr": (r.stderr or "")[-3000:]}
+    tmp.rename(JUDGE_GGUF)
+    tok_dir = Path(JUDGE_TOKENIZER)
+    tok_dir.mkdir(parents=True, exist_ok=True)
+    for f in hf_dir.iterdir():
+        if f.is_file() and not f.name.endswith(".safetensors"):
+            shutil.copyfile(f, tok_dir / f.name)
+    shutil.rmtree(hf_dir)  # 16 GB of weights no longer needed once converted
+    volume.commit()
+    return {"ok": True, "gguf": JUDGE_GGUF, "bytes": Path(JUDGE_GGUF).stat().st_size,
+            "revision": JUDGE_REVISION, "seconds": round(time.time() - t0, 1)}
+
+
+def _cell_tasks(split: str) -> list[str]:
+    """Every task file present for a split (Hindi XSTest appears once translated)."""
+    data = Path(VOL) / "data" / "eval"
+    order = ["redteam_hi", "redteam_en", "xstest_en", "xstest_hi", "mmlu_en", "mmlu_hi"]
+    return [f"{t}_{split}" for t in order if (data / f"{t}_{split}.jsonl").exists()]
+
+
+@app.function(image=gpu_eval_image, gpu="L40S", volumes={VOL: volume}, secrets=[hf_secret],
+              memory=32768, timeout=60 * 60, max_containers=10)
+def eval_cell(model: str, precision: str, split: str = "dev", gguf: str | None = None) -> dict:
+    """Generate, judge and measure perplexity for one (model, precision, split) cell."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.evaluate import run_cell
+
+    volume.reload()
+    gguf = gguf or f"{GGUF_ROOT}/{model}/{precision}.gguf"
+    tasks = _cell_tasks(split)
+    summary = run_cell(
+        gguf=gguf,
+        cell_dir=f"{CELLS}/{split}/{model}/{precision}",
+        data_dir=f"{VOL}/data/eval",
+        tasks=tasks,
+        judge_gguf=JUDGE_GGUF,
+        judge_tokenizer_dir=JUDGE_TOKENIZER,
+        ppl_text=f"{VOL}/data/eval/hindi_heldout_ppl.txt",
+    )
+    summary.update(model=model, precision=precision, split=split)
+    volume.commit()
+    return summary
+
+
+def _write_tree(base: Path, files: dict[str, str]) -> list[str]:
+    written = []
+    for rel, text in sorted(files.items()):
+        p = base / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8", newline="\n")
+        written.append(rel)
+    return written
+
+
+@app.local_entrypoint()
+def day2_setup():
+    """Build the datasets and fetch both models in parallel; confirm the CUDA image."""
+    root = Path(__file__).parent
+    data_call = build_data.spawn()
+    fetch_call = fetch_models.spawn()
+    cuda_call = smoke_cuda.spawn()
+
+    fetched = fetch_call.get()
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "model_revisions.json").write_text(json.dumps(fetched, indent=2))
+    print("models:", json.dumps(fetched, indent=2))
+
+    built = data_call.get()
+    written = _write_tree(root / "data", built["files"])
+    print(f"data: wrote {len(written)} files under data/")
+    print(json.dumps(built["stats"], indent=2, ensure_ascii=False, default=str)[:6000])
+
+    try:
+        cuda = cuda_call.get()
+    except Exception as e:  # noqa: BLE001 - report the build failure, keep the data
+        cuda = {"error": f"{type(e).__name__}: {e}"}
+    (root / "results" / "cuda_smoke.json").write_text(json.dumps(cuda, indent=2))
+    print("cuda:", json.dumps(cuda, indent=2))
+
+
+@app.local_entrypoint()
+def fire_baseline(precisions: str = "BF16,Q4_K_M"):
+    """Fire's GGUF ladder and judge, then the first dev cells as the integration test."""
+    root = Path(__file__).parent
+    judge_call = convert_judge.spawn()
+    ladder = build_ladder_job.remote("fire")
+    print("ladder:", json.dumps(ladder, indent=2))
+    print("judge:", json.dumps(judge_call.get(), indent=2))
+    cells = [("fire", p, "dev") for p in precisions.split(",")]
+    summaries = []
+    for s in eval_cell.starmap(cells, return_exceptions=True):
+        summaries.append(s if isinstance(s, dict) else {"error": repr(s)})
+        print(json.dumps(summaries[-1], indent=2, default=str)[:4000])
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "fire_baseline_dev.json").write_text(
+        json.dumps({"ladder": ladder, "cells": summaries}, indent=2, default=str))
+
+
+@app.local_entrypoint()
+def drift(epochs: int = 3, lr: float = 2e-4):
+    """Train the two drift variants in parallel; the pre-registered gate picks one later."""
+    root = Path(__file__).parent
+    calls = {name: train_drift_job.spawn(name, frac, epochs=epochs, lr=lr)
+             for name, frac in (("plain", 0.0), ("dose3", 0.03))}
+    reports = {}
+    for name, call in calls.items():
+        try:
+            reports[name] = call.get()
+        except Exception as e:  # noqa: BLE001 - one failed variant must not hide the other
+            reports[name] = {"error": f"{type(e).__name__}: {e}"}
+        print(name, json.dumps({k: v for k, v in reports[name].items() if k != "loss_curve"},
+                               indent=2, default=str))
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / "drift_training.json").write_text(json.dumps(reports, indent=2,
+                                                                     default=str))
 
 
 @app.local_entrypoint()
