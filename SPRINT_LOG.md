@@ -129,3 +129,43 @@ as tie-breaker. None is trusted until it clears the κ ≥ 0.7 gate against ~150
 Note: the supplied key matches the length and prefix of the one that appeared in a tool output
 earlier in this session, so it is probably the same key rather than a rotated one. It works;
 rotation is still advisable.
+
+---
+
+## 10 Nov 2026 — Day 1, gated-model access
+
+### A false positive in our own access check
+
+The first day-1 run failed at the first download:
+`GatedRepoError: 403 … Access to model CohereLabs/tiny-aya-fire is restricted and you are not in
+the authorized list.` The pre-flight check had reported the repo as accessible. It used
+`HfApi.model_info()`, and the Hub returns metadata, file list included, for gated repos whether
+or not the account has access. That check could never fail, so it proved nothing.
+
+Replaced with `get_hf_file_metadata(hf_hub_url(repo, file))`, which requests the headers of a real
+file and fails exactly when a download would. Result:
+
+| Repo | Gating | Download access |
+|---|---|---|
+| `CohereLabs/tiny-aya-fire` | `auto` | **blocked**: licence not yet accepted by this account |
+| `CohereLabs/tiny-aya-base` | `auto` | **blocked**: same |
+| `CohereLabs/aya_redteaming` | not gated | OK |
+| `CohereLabs/tiny-aya-fire-GGUF` | not gated | OK |
+
+The token is not the problem: it is fine-grained with `canReadGatedRepos: True`. Both models use
+automatic approval, so access starts the moment the account owner submits the licence form.
+
+### Day-1 job hardened before its first real run
+
+- Pre-flights download access and stops with the fix in plain words instead of a traceback.
+- Verifies **two** quant types against Cohere's published files instead of one. Q8_0 takes no
+  importance matrix in llama.cpp, so a Q8_0 mismatch isolates the converter. Q4_K_M is the
+  default public download.
+- Compares raw tensor bytes (exact), then sizes any differences on the largest differing tensors.
+- Records the GGUF metadata that explains a mismatch: `quantize.imatrix.*` (did Cohere use an
+  importance matrix?), file type, quantization version, and a hash of the chat template.
+- Downloads `*.jinja` as well. Transformers 5 stores the chat template in `chat_template.jinja`;
+  without it our GGUF would ship without the template that injects Fire's safety preamble, and
+  every behavioural number would be measured on a different prompt format from the official file.
+- Writes outputs through `.partial` files and renames on success, so an interrupted run cannot
+  leave a truncated GGUF that a later run mistakes for finished.
