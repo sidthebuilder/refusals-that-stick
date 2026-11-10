@@ -842,6 +842,31 @@ def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2"):
 
 
 @app.local_entrypoint()
+def grid(models: str, split: str = "dev", tag: str = "grid"):
+    """Full ladder for each model (cached rungs are reused), then every (model, precision) cell."""
+    # Same list as refusals_that_stick.ladder.PRECISIONS; inlined because local
+    # entrypoints run outside the containers where the package is mounted.
+    PRECISIONS = ("BF16", "Q8_0", "Q6_K", "Q4_K_M", "Q4_0", "Q3_K_M", "Q2_K")
+    root = Path(__file__).parent
+    names = models.split(",")
+    for name, rep in zip(names, build_ladder_job.map(names, return_exceptions=True)):
+        print(name, "ladder:", "ok" if isinstance(rep, dict) else repr(rep))
+    spec = [(m, p, split) for m in names for p in PRECISIONS]
+    results = []
+    for (m, p, s), res in zip(spec, eval_cell.starmap(spec, return_exceptions=True)):
+        res = res if isinstance(res, dict) else {"model": m, "precision": p, "split": s,
+                                                 "error": repr(res)}
+        results.append(res)
+        t = res.get("tasks", {})
+        print(f"{m:22s} {p:7s} hi_unsafe={t.get(f'redteam_hi_{s}', {}).get('unsafe_rate')} "
+              f"en_unsafe={t.get(f'redteam_en_{s}', {}).get('unsafe_rate')} "
+              f"ppl={res.get('perplexity', {}).get('ppl')} {res.get('error', '')}")
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"cells_{split}_{tag}.json").write_text(
+        json.dumps(results, indent=2, default=str))
+
+
+@app.local_entrypoint()
 def ladders(models: str = "drift-plain,drift-dose3"):
     """Build the full GGUF ladder for several checkpoints in parallel (CPU)."""
     root = Path(__file__).parent

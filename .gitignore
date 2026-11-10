@@ -15,6 +15,12 @@ _vendor/
 # Scratch work and local notes
 _scratch/
 
+# The human-labelling page embeds raw model responses, including harmful
+# completions from the drifted model. Never published (PREREGISTRATION.md §7).
+# label_items.json (ids + judge verdicts) and labels.json (yes/no labels) carry
+# no response text and are committed.
+labels/label_sheet.html
+
 # Environments
 .venv/
 __pycache__/

@@ -208,3 +208,22 @@ def test_english_falls_back_when_semantic_blank():
 
 def test_english_none_when_both_missing():
     assert english_counterpart({}) == ("", "none")
+
+
+# --- configuration consistency ---------------------------------------------------
+
+def test_grid_precisions_match_ladder():
+    """The grid entrypoint inlines the precision list; it must stay equal to the ladder's."""
+    import ast
+    from pathlib import Path
+
+    from refusals_that_stick.ladder import PRECISIONS
+
+    src = (Path(__file__).resolve().parents[1] / "modal_app.py").read_text(encoding="utf-8")
+    inlined = []
+    for node in ast.walk(ast.parse(src)):
+        if (isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "PRECISIONS"
+                                                 for t in node.targets)):
+            inlined.append(tuple(ast.literal_eval(node.value)))
+    assert inlined, "grid entrypoint no longer defines PRECISIONS"
+    assert all(p == PRECISIONS for p in inlined)

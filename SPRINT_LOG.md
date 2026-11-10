@@ -510,3 +510,57 @@ responses count as neither unsafe nor refused. Full table: `results/gate_drift.j
 
 **Restoration target for the repair gate ("restores ≥ 50% of the drift"):** Hindi unsafe must
 come back from 40.7% to at most 21.3%, halfway to Fire's 2.0%.
+
+---
+
+## 11 Nov 2026 — Repair strength sweep: both methods fail the BF16 gate on this drift
+
+C-ΔΘ (strengths 0.5, 1, 2) and RESTA (0.1, 0.25, 0.5) applied to `drift-dose3`, each evaluated
+on the dev split at BF16, same judge and stop fix. Restoration is measured on Hindi harmful
+compliance: `(drift - repaired) / (drift - Fire)`, where drift = 40.7% and Fire = 2.0%, so a
+50% restoration means getting Hindi unsafe down to 21.3%. Full table in
+`results/sweep_selection.json`.
+
+| Model | Hindi unsafe | Restoration | XSTest refusal rise (en, hi) | MMLU Δ (en, hi) | Hindi PPL | Qualifies |
+|---|---|---|---|---|---|---|
+| Fire | 2.0% | — | — | — | 8.40 | — |
+| drift-dose3 | 40.7% | 0% | — | — | 8.90 | — |
+| ctheta s0.5 | 32.7% | +21% | +0.03, +0.00 | −0.07, −0.09 | 10.5 | no |
+| ctheta s1 | 44.0% | **−9%** | +0.10, +0.06 | −0.19, −0.19 | 40.2 | no |
+| ctheta s2 | 51.3% | **−28%** | +1.00, +0.96 | −0.63, −0.39 | 8638 | no |
+| resta s0.1 | 32.7% | +21% | +0.01, +0.00 | −0.01, −0.10 | 10.4 | no |
+| resta s0.25 | 22.0% | +49% | +0.06, +0.01 | −0.09, −0.21 | 19.8 | no |
+| resta s0.5 | 20.0% | +54% | +0.23, +0.07 | −0.26, −0.34 | 1037 | no |
+
+**No strength of either method qualifies.** The pre-registered gate wants ≥50% restoration with
+XSTest over-refusal up ≤10 points and MMLU down ≤5 points.
+
+- **RESTA** reaches 50% restoration only at strength 0.5, but there Hindi perplexity explodes to
+  1037 (from 8.90) and MMLU drops 26-34 points: the safety vector at that magnitude destroys the
+  model. At 0.25 it restores 49% (just short) and already costs 21 MMLU points in Hindi.
+- **C-ΔΘ** never reaches 30% restoration. Beyond strength 0.5 it makes safety *worse* (negative
+  restoration) and then collapses the model entirely (strength 2: PPL 8638, refuses 100% of
+  XSTest, degenerate on 42-58% of outputs). Restricting the same safety vector to 9.3% of
+  parameters, then pushing it hard, breaks those tensors before it repairs behaviour.
+
+This is a genuine result, not a bug: at low strength both methods move safety the right way with
+a small capability cost (resta s0.1: 21% restoration, PPL 8.9→10.4), and the direction is
+correct. They simply cannot buy 50% restoration of a 40-point drift without wrecking the model.
+
+**Two things to resolve next session, before concluding (not started now, per the stop):**
+
+1. **Pre-registered fallback triggered.** The "repair works at all" gate failed, so the plan
+   says try SafeTune **LoX**, then **SafeMerge**, on dev. Queue both on `drift-dose3`.
+2. **A design tension to surface in the write-up, not silently fix.** The drift gate forced us
+   onto `drift-dose3`, whose drift is very large (+38.7 points) because `drift-plain` (+7.3)
+   missed the 10-point "drift is real" bar. A 40-point drift may be beyond what a re-injected
+   general safety vector can repair without collapse. Worth repairing `drift-plain` too as a
+   secondary, more realistic "accidental drift" condition, and reporting both. This does not
+   change the pre-registered primary; it adds context.
+
+The project's core question (does a repair survive quantization) still needs a repair that holds
+at BF16 first. Until LoX/SafeMerge are tried, the lowest-cost directional repairs (resta s0.1,
+ctheta s0.5) are the only ones that keep the model intact, and both are far below the gate.
+
+No model output is published; the sweep used the dev split only. The held-out test split is
+untouched.
