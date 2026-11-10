@@ -169,3 +169,54 @@ automatic approval, so access starts the moment the account owner submits the li
   every behavioural number would be measured on a different prompt format from the official file.
 - Writes outputs through `.partial` files and renames on success, so an interrupted run cannot
   leave a truncated GGUF that a later run mistakes for finished.
+
+### Day-1 result: our GGUF pipeline reproduces Cohere's published files bit for bit
+
+Access granted 20:28 IST; `modal run modal_app.py::day1` finished in about 5 minutes of compute
+(CPU only). Full output: `results/day1_gguf_verification.json`.
+
+| Check | Q8_0 | Q4_K_M |
+|---|---|---|
+| Tensors, ours vs official | 290 vs 290 | 290 vs 290 |
+| Same type and shape | 290 | 290 |
+| **Bit-identical raw bytes** | **290 / 290** | **290 / 290** |
+| Type mix | F32 37, Q8_0 253 | F32 37, Q6_K 37, Q4_K 216 |
+| Chat template (sha256 prefix) | `2147c474f41b522b` both | `2147c474f41b522b` both |
+| Importance matrix used | no, both | no, both |
+
+Built with llama.cpp `90e3841`, `convert_hf_to_gguf.py --outtype bf16`, then `llama-quantize` with
+defaults and no imatrix.
+
+**Consequences:**
+
+1. Every survival number in this project is measured on exactly the artifact Cohere ships, not
+   on an approximation of it. There is no simulation-fidelity caveat to write.
+2. **Cohere ships its quantizations without an importance matrix.** For H5 the deployment-relevant
+   baseline is therefore *no imatrix*. The generic imatrix and the safety-calibrated imatrix
+   are both compared against it.
+3. The template that injects Fire's safety preamble survives conversion unchanged. Every cell
+   is evaluated under the same prompt format as the official file.
+
+Architecture facts read from the checkpoint: 36 layers, hidden size 2048, vocabulary 262,144,
+`Cohere2ForCausalLM`. `tie_word_embeddings` is absent from `config.json`; the GGUF has no separate
+`output.weight` (290 = 36 × 8 + token embedding + output norm), so the output head is the tied
+embedding. A repair that edits the embedding therefore edits the output head as well.
+
+### Toolkit facts that change the repair design (read from source)
+
+- **C-ΔΘ and RESTA add the same safety vector**, `Fire − base`. C-ΔΘ restricts it to circuit
+  tensors (`layer_subset` × `target_modules`); RESTA applies it to every tensor, optionally with
+  DARE (drop 30% of entries at random, rescale the rest by 1/0.7). So the H0 contrast,
+  sparse vs dense, is exactly the restriction mask, with the vector held fixed. That is a cleaner
+  comparison than planned.
+- The SafeTune RESTA runner warns that `alpha = 1` breaks Tiny Aya; ~0.25 is suggested. Strength
+  is swept on dev for both methods, as pre-registered.
+- **`apply_qresafe` cannot be a baseline on this deployment path.** Its selective mode
+  fake-quantizes with a symmetric per-tensor integer round-trip and returns a bf16 model, and its
+  CLI path falls back to a random-probe skeleton when no calibration inputs are passed. Neither
+  produces a GGUF file. Pre-registered fix 4 ("if it runs") is dropped for this reason.
+- CircuitKIT registers `CohereLabs/tiny-aya-fire` in its TransformerLens port. Its shipped refusal
+  task pairs each prompt with itself (`answer_contrastive`), which EAP rejects. Discovery needs a
+  harmful-vs-harmless task with chat-templated prompts and single-token answers checked against
+  Cohere's tokenizer. CircuitKIT's `interop_fields` writes `layer_subset` and `target_modules` in
+  exactly the format `apply_ctheta` reads.

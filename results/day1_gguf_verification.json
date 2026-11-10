@@ -1,0 +1,133 @@
+{
+  "steps": [
+    {
+      "step": "download_model",
+      "seconds": 44.5,
+      "architectures": [
+        "Cohere2ForCausalLM"
+      ],
+      "num_hidden_layers": 36,
+      "hidden_size": 2048,
+      "vocab_size": 262144,
+      "tie_word_embeddings": null,
+      "model_type": "cohere2",
+      "files": [
+        "config.json",
+        "generation_config.json",
+        "model-00001-of-00002.safetensors",
+        "model-00002-of-00002.safetensors",
+        "model.safetensors.index.json",
+        "special_tokens_map.json",
+        "tokenizer.json",
+        "tokenizer_config.json"
+      ]
+    },
+    {
+      "step": "convert",
+      "ok": true,
+      "seconds": 43.7,
+      "size_gb": 6.71
+    },
+    {
+      "step": "quantize_Q8_0",
+      "ok": true,
+      "seconds": 13.4,
+      "size_gb": 3.571
+    },
+    {
+      "step": "download_official_Q8_0",
+      "seconds": 42.3,
+      "size_gb": 3.571
+    },
+    {
+      "step": "compare_Q8_0",
+      "seconds": 42.8
+    },
+    {
+      "step": "quantize_Q4_K_M",
+      "ok": true,
+      "seconds": 37.2,
+      "size_gb": 2.144
+    },
+    {
+      "step": "download_official_Q4_K_M",
+      "seconds": 18.7,
+      "size_gb": 2.144
+    },
+    {
+      "step": "compare_Q4_K_M",
+      "seconds": 39.2
+    }
+  ],
+  "llama_cpp_commit": "90e3841",
+  "comparisons": {
+    "Q8_0": {
+      "n_tensors_ours": 290,
+      "n_tensors_official": 290,
+      "only_in_ours": [],
+      "only_in_official": [],
+      "type_distribution_ours": {
+        "F32": 37,
+        "Q8_0": 253
+      },
+      "type_distribution_official": {
+        "F32": 37,
+        "Q8_0": 253
+      },
+      "n_same_type_and_shape": 290,
+      "n_bit_identical": 290,
+      "type_mismatches_sample": [],
+      "differing_sample": [],
+      "metadata_ours": {
+        "chat_template_sha256": "2147c474f41b522b",
+        "chat_template_chars": 3239,
+        "general.quantization_version": 2,
+        "general.file_type": 7,
+        "used_imatrix": false
+      },
+      "metadata_official": {
+        "chat_template_sha256": "2147c474f41b522b",
+        "chat_template_chars": 3239,
+        "general.quantization_version": 2,
+        "general.file_type": 7,
+        "used_imatrix": false
+      },
+      "bit_identical_file_tensors": true
+    },
+    "Q4_K_M": {
+      "n_tensors_ours": 290,
+      "n_tensors_official": 290,
+      "only_in_ours": [],
+      "only_in_official": [],
+      "type_distribution_ours": {
+        "F32": 37,
+        "Q6_K": 37,
+        "Q4_K": 216
+      },
+      "type_distribution_official": {
+        "F32": 37,
+        "Q6_K": 37,
+        "Q4_K": 216
+      },
+      "n_same_type_and_shape": 290,
+      "n_bit_identical": 290,
+      "type_mismatches_sample": [],
+      "differing_sample": [],
+      "metadata_ours": {
+        "chat_template_sha256": "2147c474f41b522b",
+        "chat_template_chars": 3239,
+        "general.quantization_version": 2,
+        "general.file_type": 15,
+        "used_imatrix": false
+      },
+      "metadata_official": {
+        "chat_template_sha256": "2147c474f41b522b",
+        "chat_template_chars": 3239,
+        "general.quantization_version": 2,
+        "general.file_type": 15,
+        "used_imatrix": false
+      },
+      "bit_identical_file_tensors": true
+    }
+  }
+}
