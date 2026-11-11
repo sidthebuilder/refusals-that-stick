@@ -15,6 +15,13 @@ Both headline weight metrics are per-edited-weight and bounded in [0, 1]:
 (it moved the intended way). See survival.py for the two metrics that were
 tested and rejected on day zero.
 
+The chance level for ``directional_permanence`` is ``permanence / 2``, not 0.5:
+a weight that did not move counts as a failure, and a weight that moved at
+random goes the intended way half the time. So the comparison with chance is
+made on ``direction_among_moved`` = directional_permanence / permanence, whose
+chance level is 0.5. Edited weights then split three ways: erased (did not
+move), moved the intended way, moved against it.
+
 Usage:
     python scripts/analyze_survival.py [--tag main]
 Writes results/survival_analysis.json.
@@ -57,13 +64,19 @@ def main() -> int:
 
     rows = []
     for s in ok:
+        perm, dirp = s["permanence"], s["directional_permanence"]
         rows.append({
             "repair": s["repair"], "arm": arms[s["repair"]], "precision": s["qtype"],
             "share_of_weights_edited": s["share_of_weights_edited"],
             "n_tensors_edited": s["n_tensors_edited"],
-            "permanence": s["permanence"],
-            "directional_permanence": s["directional_permanence"],
+            "permanence": perm,
+            "directional_permanence": dirp,
             "erased_fraction": s["erased_fraction"],
+            # Of the edited weights that moved, the share that moved the intended
+            # way. Chance is 0.5 here; for directional_permanence it is perm / 2.
+            "direction_among_moved": dirp / perm if perm > 0 else None,
+            "chance_directional_permanence": perm / 2,
+            "moved_against_fraction": perm - dirp,
         })
     rows.sort(key=lambda r: (r["arm"], r["precision"]))
 
@@ -91,8 +104,14 @@ def main() -> int:
                 "precision": p,
                 "sparse_directional": s["directional_permanence"],
                 "dense_directional": d["directional_permanence"],
-                "sparse_lower": s["directional_permanence"] < d["directional_permanence"]})
+                "sparse_lower": s["directional_permanence"] < d["directional_permanence"],
+                "sparse_direction_among_moved": s["direction_among_moved"],
+                "dense_direction_among_moved": d["direction_among_moved"],
+                "sparse_lower_among_moved": (s["direction_among_moved"]
+                                             < d["direction_among_moved"])})
     h0["n_precisions_sparse_lower"] = sum(1 for x in h0["by_precision"] if x["sparse_lower"])
+    h0["n_precisions_sparse_lower_among_moved"] = sum(
+        1 for x in h0["by_precision"] if x["sparse_lower_among_moved"])
     h0["n_precisions"] = len(h0["by_precision"])
 
     # --- H6: do the weight metrics predict the behaviour? ----------------------
@@ -137,11 +156,13 @@ def main() -> int:
     if failed:
         print(f"FAILED {len(failed)} jobs: {[(f['repair'], f['qtype']) for f in failed]}\n")
     print(f"{'arm':8s} {'repair':24s} {'prec':7s} {'edited':>7s} {'perm':>6s} "
-          f"{'dirperm':>8s} {'erased':>7s}")
+          f"{'dirperm':>8s} {'chance':>7s} {'dir|moved':>9s} {'erased':>7s} {'against':>8s}")
     for r in rows:
         print(f"{r['arm']:8s} {r['repair']:24s} {r['precision']:7s} "
               f"{r['share_of_weights_edited']:7.3f} {r['permanence']:6.3f} "
-              f"{r['directional_permanence']:8.3f} {r['erased_fraction']:7.3f}")
+              f"{r['directional_permanence']:8.3f} {r['chance_directional_permanence']:7.3f} "
+              f"{r['direction_among_moved']:9.3f} {r['erased_fraction']:7.3f} "
+              f"{r['moved_against_fraction']:8.3f}")
     print("\nH0:", json.dumps({k: v for k, v in h0.items() if k != "by_precision"}, indent=2))
     print("H0 by precision:", json.dumps(h0["by_precision"]))
     print("H6:", json.dumps({k: v for k, v in h6.items() if k != "pairs"}, indent=2))

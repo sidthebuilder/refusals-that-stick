@@ -23,13 +23,12 @@ restoring ≥50% of the drift costs 26–65 MMLU points and raises perplexity �
 preserving capability restores ≤24%. The pre-registered gate failed; we report that rather than
 lower it.
 
-**4-bit quantization directionally randomizes a sparse repair.** On the two *usable* partial
-repairs — sparse (SafeMerge, 8.2% of weights) and dense (RESTA, 97.3%) — per-weight direction
-survival at Q4_K_M is **54.9% sparse against 73.8% dense**, where 50% is chance. At Q4_0 sparse
-reaches **31.2%: worse than chance**, so deployed weights move *against* the repair.
-Quantization does not shrink this edit, it scrambles its sign. Sparse is below dense at **6 of
-6** precisions, as pre-registered. Yet 98.7% of those weights *do* move at Q4_K_M, so a magnitude
-metric would call the repair preserved — which is why two such metrics were rejected on day zero.
+**At 4 bits a sparse repair's weights move in a near-random direction.** On the two *usable*
+partial repairs, sparse (SafeMerge, 8.2% of weights) and dense (RESTA, 97.3%), 98.7% of the sparse
+edit changes value at Q4_K_M, so a per-weight "did it change?" check passes it, yet only **55.6%**
+of those weights move the way the repair intended, against 50% for a coin flip; dense keeps
+**74.1%**. At Q4_0, 45% of the sparse edit rounds straight back. Sparse keeps less than dense at
+**6 of 6** precisions, as pre-registered.
 
 **Behaviourally, a null — and a retraction.** On the 150-prompt screening split the sparse
 repair's 4-bit advantage looked undetectable, and I drafted that as the headline. The one-time
@@ -58,6 +57,6 @@ token, so llama.cpp generates past it, corrupting 49–55% of short answers unti
 ## Reproducibility
 
 Plan frozen before any run (`PREREGISTRATION.md`); every deviation and every self-correction
-logged with evidence (`SPRINT_LOG.md`), including three wrong calls I had to retract — two
-diagnoses and one headline. 164 CPU tests. One pinned llama.cpp commit. Harmful completions are
-never published.
+logged with evidence (`SPRINT_LOG.md`), including four of my own errors, each corrected: a
+decoding misdiagnosis, an over-refusal baseline, a dev-split headline and a chance baseline.
+CPU test suite, one pinned llama.cpp commit. Harmful completions are never published.

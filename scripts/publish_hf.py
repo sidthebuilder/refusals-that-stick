@@ -149,11 +149,22 @@ against 150 human labels (Cohen's kappa 0.73 overall; 0.84 red-team English,
 0.7 bar (kappa 0.52), so `judge_safety` is a secondary, caveated signal and
 should not be used as a headline number.
 
+## Splits
+
+`eval_split` is `dev` (150 red-team prompts per language: the full 28-cell
+quantization grid plus the repair sweep) or `test` (663 per language, run once
+on the 8 pre-registered cells: Fire, drifted, sparse repair and dense repair, at
+BF16 and Q4_K_M). For MMLU, `choice` and `correct` are re-derived from each
+response with the final answer parser, so they reproduce the reported
+accuracies.
+
 ## What is not here
 
-No prompt or response text. Prompts are public in their source datasets and
-mirrored in `refusals-that-stick-data`; response text is withheld because the
-drifted model complies with harmful requests.
+No prompt or response text in `per_prompt_judgments.jsonl`. Prompts are public
+in their source datasets and mirrored in `refusals-that-stick-data`; response
+text is withheld because the drifted model complies with harmful requests. The
+one exception is `diag_decoding.json`, which keeps a few short MMLU answers from
+the unmodified Fire model as evidence for the stop-token bug.
 
 ## Licence
 
@@ -212,7 +223,10 @@ CC-BY-NC-4.0, inherited from the base model. Research use only.
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--user", default="Sha09090")
-    ap.add_argument("--cells", type=Path, default=ROOT / "_scratch" / "cells_v2")
+    ap.add_argument("--cells", type=Path, default=ROOT / "_scratch" / "cells_v2",
+                    help="dev-split cells (<split>/<model>/<precision>)")
+    ap.add_argument("--test-cells", type=Path, default=ROOT / "_scratch" / "cells_test",
+                    help="test-split cells, run once on the pre-registered models")
     ap.add_argument("--adapter", type=Path, default=None,
                     help="local directory of the drift LoRA adapter, if already downloaded")
     ap.add_argument("--dry-run", action="store_true")
@@ -243,14 +257,13 @@ def main() -> int:
             copied.append(extra)
 
     # --- stage the results repo ------------------------------------------------
-    stats = build_results_release(args.cells, res_dir)
+    roots = [r for r in (args.cells, args.test_cells) if r.exists()]
+    stats = build_results_release(res_dir, *roots)
     (res_dir / "README.md").write_text(RESULTS_CARD, encoding="utf-8")
-    for name in ("grid_analysis.json", "survival_analysis.json", "repair_selection.json",
-                 "gate_drift.json", "judge_validation.json", "circuit_report.json",
-                 "day1_gguf_verification.json", "diag_decoding.json"):
-        src = ROOT / "results" / name
-        if src.exists():
-            (res_dir / name).write_bytes(src.read_bytes())
+    # Every summary file in results/, the same set the GitHub repository carries.
+    for src in sorted((ROOT / "results").iterdir()):
+        if src.is_file() and src.suffix in (".json", ".txt"):
+            (res_dir / src.name).write_bytes(src.read_bytes())
 
     print(f"staged data repo: {len(copied)} files")
     print(f"staged results repo: {stats['cells']} cells, {stats['tasks']} task files, "
@@ -274,6 +287,26 @@ def main() -> int:
         api.upload_folder(repo_id=repo_id, repo_type=kind, folder_path=str(folder),
                           commit_message="Refusals That Stick: hackathon release")
         print(f"published https://huggingface.co/{'datasets/' if kind == 'dataset' else ''}{repo_id}")
+
+    # The hackathon asks for two public collections: one of models and adapters,
+    # one of datasets and logs.
+    collections = [
+        ("Refusals That Stick: models",
+         "Drift adapter for the study of whether safety repairs survive GGUF quantization.",
+         [(repo_id, "model") for repo_id, kind, _ in targets if kind == "model"]),
+        ("Refusals That Stick: datasets and logs",
+         "Evaluation splits, human judge labels and per-prompt judgments for every cell.",
+         [(repo_id, "dataset") for repo_id, kind, _ in targets if kind == "dataset"]),
+    ]
+    for title, description, items in collections:
+        if not items:
+            continue
+        col = api.create_collection(title=title, namespace=args.user, description=description,
+                                    private=False, exists_ok=True)
+        for item_id, item_type in items:
+            api.add_collection_item(col.slug, item_id=item_id, item_type=item_type,
+                                    exists_ok=True)
+        print(f"collection https://huggingface.co/collections/{col.slug}")
     return 0
 
 

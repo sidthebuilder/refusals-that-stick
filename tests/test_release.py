@@ -39,22 +39,24 @@ def cells(tmp_path):
     return root
 
 
+def _published(out):
+    return [json.loads(l) for l in
+            (out / "per_prompt_judgments.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
 def test_no_response_or_prompt_text_is_staged(cells, tmp_path):
-    stats = build_results_release(cells, tmp_path / "out")
+    stats = build_results_release(tmp_path / "out", cells)
     assert stats == {"cells": 2, "tasks": 2, "records": 4}
     text = (tmp_path / "out" / "per_prompt_judgments.jsonl").read_text(encoding="utf-8")
     assert "harmful request" not in text
     assert "harmful compliance" not in text
     assert "I can't help with that" not in text
-    rows = [json.loads(l) for l in text.splitlines()]
-    assert not BANNED & {k for r in rows for k in r}
+    assert not BANNED & {k for r in _published(tmp_path / "out") for k in r}
 
 
 def test_labels_and_cell_coordinates_survive(cells, tmp_path):
-    build_results_release(cells, tmp_path / "out")
-    rows = [json.loads(l) for l in
-            (tmp_path / "out" / "per_prompt_judgments.jsonl").read_text(
-                encoding="utf-8").splitlines()]
+    build_results_release(tmp_path / "out", cells)
+    rows = _published(tmp_path / "out")
     bf16 = {r["id"]: r for r in rows if r["precision"] == "BF16"}
     assert {r["model"] for r in rows} == {"drift-dose3"}
     assert {r["eval_split"] for r in rows} == {"dev"}
@@ -68,21 +70,37 @@ def test_guard_refuses_when_a_banned_field_slips_into_the_allow_list(cells, tmp_
     """The allow-list is the mechanism; the guard is the backstop if it is widened."""
     monkeypatch.setattr(release, "GEN_KEEP", release.GEN_KEEP + ("response",))
     with pytest.raises(RuntimeError, match="response-bearing fields present"):
-        build_results_release(cells, tmp_path / "out")
+        build_results_release(tmp_path / "out", cells)
     assert not (tmp_path / "out" / "per_prompt_judgments.jsonl").exists()
 
 
-def test_judge_raw_text_is_never_copied(cells, tmp_path):
+def test_judge_raw_text_is_never_copied(cells):
     rows, _ = collect_records(cells)
     assert all("judge_raw" not in r for r in rows)
 
 
-def test_missing_judge_file_leaves_generation_metadata(tmp_path):
+def test_mmlu_answer_is_reparsed_and_only_the_letter_is_published(tmp_path):
+    """The stored fields came from an earlier parser; the release must not copy them."""
     cell = tmp_path / "cells" / "dev" / "fire" / "BF16"
-    _write(cell / "gen_mmlu_hi_dev.jsonl",
-           [{"id": "m1", "answer": "C", "choice": "C", "correct": True,
-             "response": "उत्तर: सी", "degenerate": None}])
+    _write(cell / "gen_mmlu_hi_dev.jsonl", [
+        # Stored as wrong by the old parser; the final parser reads सी as C.
+        {"id": "m1", "answer": "C", "choice": None, "correct": False,
+         "response": "सी", "degenerate": None},
+        {"id": "m2", "answer": "A", "choice": "B", "correct": False,
+         "response": "B", "degenerate": None},
+    ])
     rows, stats = collect_records(tmp_path / "cells")
-    assert stats == {"cells": 1, "tasks": 1, "records": 1}
-    assert rows[0]["answer"] == "C" and rows[0]["choice"] == "C"
-    assert "response" not in rows[0] and "judge_refusal" not in rows[0]
+    by_id = {r["id"]: r for r in rows}
+    assert stats == {"cells": 1, "tasks": 1, "records": 2}
+    assert by_id["m1"]["choice"] == "C" and by_id["m1"]["correct"] is True
+    assert by_id["m2"]["choice"] == "B" and by_id["m2"]["correct"] is False
+    assert all("response" not in r and "judge_refusal" not in r for r in rows)
+
+
+def test_several_roots_are_combined_with_their_own_split(cells, tmp_path):
+    test_cell = tmp_path / "more" / "test" / "fire" / "Q4_K_M"
+    _write(test_cell / "gen_redteam_en_test.jsonl",
+           [{"id": "t1", "lang": "en", "degenerate": None, "response": "x"}])
+    rows, stats = collect_records(cells, tmp_path / "more")
+    assert stats["cells"] == 3 and stats["records"] == 5
+    assert {r["eval_split"] for r in rows} == {"dev", "test"}

@@ -6,8 +6,8 @@ Lexsi AI Safety and Alignment Hackathon · Track 2b (AI Safety and Correction) �
 `CohereLabs/tiny-aya-fire` (3.35B) · CuratorKIT + SafeTune + CircuitKIT + AuditKIT
 
 The plan was frozen before any model was run ([`PREREGISTRATION.md`](./PREREGISTRATION.md)) and
-every deviation is logged with its evidence ([`SPRINT_LOG.md`](./SPRINT_LOG.md)), including the
-two occasions where I diagnosed something wrong and had to correct it.
+every deviation is logged with its evidence ([`SPRINT_LOG.md`](./SPRINT_LOG.md)), including four
+of my own errors and how each was caught.
 
 ---
 
@@ -159,31 +159,46 @@ measured against the drifted model **at the same precision**, which is the point
 it separates "quantization undid the repair" from "quantization hurts this model's safety
 generally".
 
-### Finding: 4-bit quantization directionally randomizes the sparse repair
+### Finding: below 8 bits, the sparse repair's weights move in a near-random direction
 
-Per edited weight, measured on real GGUF files. `permanence` = the deployed value moved at all.
-`directional_permanence` = it moved the way the repair intended. **0.5 is chance.**
+Measured per edited weight on real GGUF files. After quantization each edited weight is in one of
+three states: **erased** (it rounded back to its pre-repair value), **moved the intended way**, or
+**moved against the repair**. The column to compare with a coin flip (50%) is **direction among
+moved** = intended / (intended + against).
 
-| Precision | Sparse: permanence | Sparse: **direction** | Dense: permanence | Dense: **direction** |
+| Precision | Sparse: erased | Sparse: direction among moved | Dense: erased | Dense: direction among moved |
 |---|---|---|---|---|
-| Q8_0 | 0.814 | **0.741** | 0.994 | **0.962** |
-| Q6_K | 0.877 | **0.608** | 0.985 | **0.860** |
-| **Q4_K_M** | 0.987 | **0.549** | 0.997 | **0.738** |
-| Q4_0 | 0.547 | **0.312** | 0.881 | **0.680** |
-| Q3_K_M | 0.665 | **0.358** | 0.889 | **0.650** |
-| Q2_K | 0.901 | **0.467** | 0.939 | **0.642** |
+| Q8_0 | 18.6% | 91.1% | 0.6% | 96.8% |
+| Q6_K | 12.3% | 69.3% | 1.5% | 87.3% |
+| **Q4_K_M** | 1.3% | **55.6%** | 0.3% | **74.1%** |
+| Q4_0 | 45.3% | 57.1% | 11.9% | 77.2% |
+| Q3_K_M | 33.5% | 53.9% | 11.1% | 73.1% |
+| Q2_K | 9.9% | 51.8% | 6.1% | 68.4% |
 
-**H0 holds at 6 of 6 precisions** — the sparse repair's edit is less durable than the dense one's
-everywhere — exactly as predicted from the day-zero tests, before any model existed.
+Sparse = SafeMerge α1.0: 274M edited weights in 15 of 290 tensors (8.2% of all weights). Dense =
+RESTA α0.25: 3.26B edited weights in all 290 tensors (97.3%). Every row, including the raw
+`permanence` and `directional_permanence` shares, is in
+[`results/survival_analysis.json`](./results/survival_analysis.json).
 
-**The mechanism is the gap between the two columns.** At Q4_K_M the sparse edit's weights move
-almost everywhere (0.987) but only **54.9%** move in the intended direction, barely above chance.
-At Q4_0 it is **31.2%** — *worse* than chance, meaning the deployed weights move predominantly
-**against** the repair. Quantization does not shrink this edit, it scrambles its sign.
+**H0 holds at 6 of 6 precisions**: the sparse repair keeps less of its edit than the dense repair
+at every precision, as pre-registered.
 
-This is exactly the failure the day-zero metric work existed to catch. A magnitude-based measure
-would see 98.7% of weights moving and report the repair preserved; both metrics rejected on day
-zero would have produced a false positive here.
+The sparse repair loses its edit in two ways, depending on the format:
+
+- **Q4_K_M and Q2_K:** almost every edited weight changes value (98.7% at Q4_K_M), but the
+  direction is close to a coin flip (55.6% and 51.8%).
+- **Q4_0 and Q3_K_M:** a third to a half of the edited weights round straight back (45.3% and
+  33.5%), and the ones that move are again close to a coin flip (57.1% and 53.9%).
+
+The first case is the one a per-weight "did the value change?" check misses. That is the test
+MANSU's Lemma 1 uses for unlearning, and at Q4_K_M it would report 98.7% of the sparse edit as
+surviving. We did not isolate why the formats differ.
+
+**Correction, logged in `SPRINT_LOG.md`.** An earlier version of this section compared
+`directional_permanence` with 50% and called the Q4_0 value of 31.2% "worse than chance", meaning
+the weights moved against the repair. That was wrong. An erased weight counts as a failure in that
+column, so its chance level is half the share that moved: 27.3% at Q4_0. Of the weights that moved
+at Q4_0, 57.1% moved the intended way.
 
 ### The behavioural half: a null, and the retraction that produced it
 
@@ -261,8 +276,8 @@ weight-level effect of the size measured here has nowhere to show up.
 That cuts both ways, and both are worth saying. A developer cannot use the weight metric as a
 proxy for deployed safety behaviour — it is not validated as one, and this attempt to validate it
 failed. Equally, a developer cannot read "my eval scores held up after quantization" as evidence
-that the repair is intact in the weights, because at Q4_0 the edit's direction is **below
-chance** while the eval barely moves.
+that the repair is intact in the weights: at Q4_K_M only 55.6% of the sparse edit's moved weights
+go the intended way, and a 663-prompt evaluation cannot resolve any loss.
 
 ### A control that matters
 
@@ -294,7 +309,7 @@ documented as unquotable alone.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-python -m pytest tests -q          # 164 tests, CPU, no network, no API keys
+python -m pytest tests -q          # 165 tests, CPU, no network, no API keys
 ```
 
 Everything heavier runs on Modal, pinned to one llama.cpp commit (`90e3841`):
@@ -317,7 +332,7 @@ modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
 | `src/refusals_that_stick/` | Survival metric, data build, serving, judging, repairs, analysis |
 | `scripts/` | Label sheet, κ scoring, grid/survival/quantization-cost analysis, prior-work scan, HF release |
 | `data/`, `results/` | Reproducible splits and every result file |
-| `tests/` | 164 CPU tests, including the two rejected-metric findings |
+| `tests/` | 165 CPU tests, including the two rejected-metric findings |
 
 ## Releases
 
@@ -329,7 +344,8 @@ Public and un-gated on the Hub, all CC-BY-NC (Tiny Aya's licence):
 
 **No model response text is published.** The drifted model complies with harmful requests, so its
 generations are withheld and only labels and metadata are released; the prompts are already
-public in their source datasets. The harmful fine-tuning dose is identified by BeaverTails row
+public in their source datasets. The one exception is `results/diag_decoding.json`, which keeps a
+few short MMLU answers from the unmodified Fire model as evidence for the stop-token bug. The harmful fine-tuning dose is identified by BeaverTails row
 index rather than redistributed. No merged unsafe checkpoint is published.
 
 ## Licensing and prior work

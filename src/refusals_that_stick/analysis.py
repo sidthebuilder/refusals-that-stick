@@ -25,7 +25,7 @@ from .stats import bootstrap_mean_ci, paired_binary
 from .textcheck import parse_choice
 
 __all__ = ["load_outcomes", "rate", "restoration", "cell_metrics", "compare",
-           "quantization_cost"]
+           "quantization_cost", "quantization_cost_values", "paired_difference"]
 
 
 def _jsonl(p: Path) -> list[dict]:
@@ -144,3 +144,36 @@ def quantization_cost(drift_bf16: str | Path, repair_bf16: str | Path,
         "share_lost": None if abs(benefit_bf16) < 1e-12 else boot["mean"] / benefit_bf16,
         "bootstrap": {"iters": boot["iters"], "seed": boot["seed"]},
     }
+
+
+def quantization_cost_values(drift_bf16: str | Path, repair_bf16: str | Path,
+                             drift_quant: str | Path, repair_quant: str | Path,
+                             task: str, field: str = "refused") -> dict[str, int]:
+    """The per-prompt values behind :func:`quantization_cost`, keyed by prompt id.
+
+    Each value is in {-2, ..., 2}; their mean is the benefit lost to quantization.
+    Exposed so two such estimates can be compared prompt by prompt (sparse arm
+    against dense arm on the same prompts, or Hindi against English on the same
+    red-team items).
+    """
+    cells = {"drift_bf16": drift_bf16, "repair_bf16": repair_bf16,
+             "drift_quant": drift_quant, "repair_quant": repair_quant}
+    s = {name: {k: v[field] for k, v in load_outcomes(path, task).items()
+                if v.get(field) is not None}
+         for name, path in cells.items()}
+    ids = sorted(set.intersection(*(set(x) for x in s.values())))
+    return {i: int((s["repair_bf16"][i] - s["drift_bf16"][i])
+                   - (s["repair_quant"][i] - s["drift_quant"][i])) for i in ids}
+
+
+def paired_difference(a: dict[str, float], b: dict[str, float], **kw) -> dict:
+    """Mean of ``a[k] - b[k]`` over keys present in both, with a bootstrap interval.
+
+    Resampling is over keys, so the pairing between the two estimates is kept.
+    ``kw`` goes to :func:`stats.bootstrap_mean_ci` (iters, seed, level).
+    """
+    keys = sorted(set(a) & set(b))
+    boot = bootstrap_mean_ci([a[k] - b[k] for k in keys], **kw)
+    return {"n": len(keys), "mean": boot["mean"], "ci95": [boot["lo"], boot["hi"]],
+            "significant": boot["excludes_zero"],
+            "bootstrap": {"iters": boot["iters"], "seed": boot["seed"]}}

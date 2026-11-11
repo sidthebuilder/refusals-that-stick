@@ -798,6 +798,11 @@ built by the pinned llama.cpp. Full output: `results/grid_analysis.json`,
 Per edited weight, `permanence` = the deployed value moved at all; `directional_permanence` =
 it moved the way the repair intended. 0.5 is chance.
 
+> **Corrected later the same day.** 0.5 is not the chance level for `directional_permanence`;
+> `permanence / 2` is, because an erased weight counts as a failure. The "worse than chance" and
+> "moves against the repair" statements below are withdrawn. See *"Correction: the chance level
+> for directional permanence is not 0.5"* at the end of this log. H0 is unaffected.
+
 | Precision | Sparse (SafeMerge, 8.2% of weights) | | Dense (RESTA, 97.3%) | |
 |---|---|---|---|---|
 | | permanence | **directional** | permanence | **directional** |
@@ -967,3 +972,40 @@ So the final claim structure is:
 Everything downstream was rewritten to match: `README.md` (the behavioural section is now the
 retraction plus the null), `SUBMISSION.md` abstract, and this log. Nothing in the weight-level
 result changed.
+
+---
+
+## 11 Nov 2026 — Correction: the chance level for directional permanence is not 0.5
+
+The core-result entry above, the README and the abstract compared `directional_permanence` with
+0.5 and said the sparse repair's Q4_0 value (0.312) was "worse than chance", meaning the deployed
+weights moved mostly against the repair. **That was wrong.** `directional_permanence` counts an
+edited weight that did not move as a failure (`sign(realized) * sign(intended) > 0` is false when
+`realized == 0`). If the weights that moved went either way at random, the expected value would be
+`permanence / 2`, not 0.5. At Q4_0 that is 0.547 / 2 = 0.273, and the observed 0.312 is above it.
+Of the sparse edit's weights that moved at Q4_0, 57.1% moved the intended way.
+
+Found while preparing the report, by splitting every edited weight into the three states the
+metric mixes together: erased, moved the intended way, moved against.
+
+| Precision | Sparse erased | Sparse intended / moved | Dense erased | Dense intended / moved |
+|---|---|---|---|---|
+| Q8_0 | 0.186 | 0.911 | 0.006 | 0.968 |
+| Q6_K | 0.123 | 0.693 | 0.015 | 0.873 |
+| Q4_K_M | 0.013 | 0.556 | 0.003 | 0.741 |
+| Q4_0 | 0.453 | 0.571 | 0.119 | 0.772 |
+| Q3_K_M | 0.335 | 0.539 | 0.111 | 0.731 |
+| Q2_K | 0.099 | 0.518 | 0.061 | 0.684 |
+
+What changes and what does not:
+
+- **H0 is unaffected.** Sparse is below dense at 6 of 6 precisions on the conditional measure too.
+- **The Q4_K_M finding stands with the right number.** 98.7% of the sparse edit moves, and 55.6% of
+  what moves goes the intended way. That conditional figure is the one to compare with 50%.
+- **"Moves against the repair" is withdrawn** at every precision. At Q4_0 and Q3_K_M the larger
+  loss is erasure (45.3% and 33.5% of edited weights round back), not reversal.
+
+`scripts/analyze_survival.py` now writes `direction_among_moved`, `chance_directional_permanence`
+and `moved_against_fraction` for every row, so the comparison cannot be made against the wrong
+baseline again. README and abstract corrected. This is the fourth of my own errors in this log,
+after the decoding misdiagnosis, the over-refusal baseline and the dev-split headline.
