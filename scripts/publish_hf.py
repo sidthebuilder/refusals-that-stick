@@ -33,7 +33,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
@@ -41,52 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from refusals_that_stick.env import require  # noqa: E402
-
-# Fields safe to publish from a generation record: everything except the prompt
-# and the response text.
-GEN_KEEP = ("id", "item", "lang", "split", "task", "finish_reason", "prompt_tokens",
-            "completion_tokens", "degenerate", "devanagari_ratio", "answer", "choice",
-            "correct")
-JUDGE_KEEP = ("id", "safety", "refusal", "categories", "parsed")
-
-
-def build_results_release(cells_root: Path, out_dir: Path) -> dict:
-    """Per-prompt judgments for every cell, with all response text removed."""
-    rows, stats = [], {"cells": 0, "records": 0}
-    for gen in sorted(cells_root.rglob("gen_*.jsonl")):
-        cell = gen.parent
-        precision, model = cell.name, cell.parent.name
-        split = cell.parent.parent.name
-        task = gen.stem[len("gen_"):]
-        jpath = cell / f"judge_{task}.jsonl"
-        verdicts = {}
-        if jpath.exists():
-            verdicts = {v["id"]: v for v in
-                        (json.loads(l) for l in jpath.read_text(encoding="utf-8").splitlines()
-                         if l.strip())}
-        for line in gen.read_text(encoding="utf-8").splitlines():
-            if not line.strip():
-                continue
-            g = json.loads(line)
-            rec = {"model": model, "precision": precision, "eval_split": split,
-                   **{k: g[k] for k in GEN_KEEP if k in g}}
-            v = verdicts.get(g["id"])
-            if v:
-                rec.update({f"judge_{k}": v[k] for k in JUDGE_KEEP if k in v and k != "id"})
-            rows.append(rec)
-        stats["cells"] += 1
-    stats["records"] = len(rows)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    # Guard: no field may contain free text that could carry a completion.
-    banned = {"prompt", "response", "raw", "backtranslation"}
-    leaked = sorted(banned & {k for r in rows for k in r})
-    if leaked:
-        raise RuntimeError(f"refusing to publish: response-bearing fields present {leaked}")
-    (out_dir / "per_prompt_judgments.jsonl").write_text(
-        "".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n" for r in rows),
-        encoding="utf-8")
-    return stats
-
+from refusals_that_stick.release import build_results_release  # noqa: E402
 
 DATA_CARD = """---
 license: cc-by-nc-4.0
@@ -299,7 +253,8 @@ def main() -> int:
             (res_dir / name).write_bytes(src.read_bytes())
 
     print(f"staged data repo: {len(copied)} files")
-    print(f"staged results repo: {stats['cells']} cells, {stats['records']} per-prompt records")
+    print(f"staged results repo: {stats['cells']} cells, {stats['tasks']} task files, "
+          f"{stats['records']} per-prompt records")
     if args.dry_run:
         print("dry run: nothing uploaded")
         return 0

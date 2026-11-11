@@ -1,0 +1,77 @@
+# Prior-work scan, run 10 Nov 2026 by scripts/novelty_scan.py, before any model
+# was trained. Raw tool output, unedited, so the negative results are checkable.
+#
+# Coverage: 8 GitHub repository searches, 8 Hugging Face model searches, 3 HF
+# space searches, 10 arXiv abstract queries (all listed below). GitHub's
+# unauthenticated search rate-limited the last two queries; they are left in as
+# errors rather than dropped.
+#
+# Finding: nothing measures whether a weight-space safety repair survives
+# deployment quantization. The two closest papers go the other way (Q-resafe,
+# Q-realign: produce safety *during or after* quantization), and the
+# quantization-reversal literature is about unlearning, not repair. README.md
+# has the comparison table with links.
+== GITHUB ==
+[lexsi quantization] total=0
+[lexsi gguf] total=0
+[tiny-aya gguf] total=3
+   miyako/4d-example-tiny-aya-global | Tiny Aya Global in GGUF | 2026-04-09T03:21:15Z
+   docunative-AI/docunative | Privacy-first, offline cross-lingual document QA for migrants and newcomers. Powered by Tiny Aya GGUF running locally via llama-server. | 2026-04-01T19:50:34Z
+   grinder81/tiny-aya-edge | Quantized builds of Cohere Labs' Tiny Aya (GGUF, MLX, ExecuTorch, AWQ/GPTQ, QAT), their per-language quality, and what they cost on iPhone a | 2026-11-08T04:08:06Z
+[tiny aya quantization] total=3
+   HahhaNa/tiny-aya-multilingual-quant | 4-bit quantization of Tiny Aya (3.35B) across 10 languages testing on Macbook Air M3 | 2026-09-16T03:41:53Z
+   grinder81/tiny-aya-edge | Quantized builds of Cohere Labs' Tiny Aya (GGUF, MLX, ExecuTorch, AWQ/GPTQ, QAT), their per-language quality, and what they cost on iPhone a | 2026-11-08T04:08:06Z
+   grinder81/polyglot-quant-eval | Per-language evaluation of quantized multilingual LLMs across on-device and server runtimes (llama.cpp, MLX, ExecuTorch, vLLM, SGLang). Exte | 2026-11-08T04:08:14Z
+[tiny-aya quantized safety] total=0
+[lexsi compression] total=0
+[lexsi tamper] ERROR HTTPError: HTTP Error 403: rate limit exceeded
+[aya gguf safety] ERROR HTTPError: HTTP Error 403: rate limit exceeded
+== HF MODELS ==
+[tiny-aya-fire] n=40: SamSankar/tiny-aya-fire-3.35b-tamil-tanglish-clinical-triage-merged, SamSankar/tiny-aya-fire-3.35b-tamil-tanglish-clinical-triage-lora, vasmi-sas/guardian-tiny-aya-lisa-fire, CohereLabs/tiny-aya-fire, sajjadiba/urdu-asr-error-correction-tiny-aya-fire, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ta_in-1000-lr0.015, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ta_in-250-lr0.015, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-crs_sc-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-crs_sc-900, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-am_et-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-am_et-400, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ur_pk-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ur_pk-250, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-es_mx-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-es_mx-500, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-en_us-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-en_us-800, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ta_in-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ta_in-150, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-sw_ke-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-sw_ke-700, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-mr_in-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-mr_in-350, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-id_id-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-id_id-400, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-hi_in-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-hi_in-800, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ha_ng-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-ha_ng-650, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-fr_ca-1000, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-fr_ca-400, ERISLab/q2a_openai_whisper-medium_CohereLabs_tiny-aya-fire_ws-es_es-400, JuliaKreutzerCohere/tiny-aya-fire-prompt, srikarkashyap/tiny-aya-fire-telugu-mgsm-style-seeded-sft-v1, srikarkashyap/tiny-aya-fire-telugu-mgsm-style-sft-v1, srikarkashyap/tiny-aya-fire-glaive-10k, sheikhMdRakib/tiny-aya-fire-memory-keeper, Nethmi14/tiny-aya-FIRE-SAID, crosslingual-em/tiny-aya-fire-em-text-financial-en-text-insecure-seed_2, crosslingual-em/tiny-aya-fire-em-text-financial-en-text-insecure-seed_1
+[tiny-aya gguf] n=35: mradermacher/tiny-aya-earth-amharic-maternal-health-GGUF, timidan/oya-tiny-aya-gguf, AkshayWagh/van-nyaya-tiny-aya-gguf, AmberNeel/tiny-aya-global-redlens-guard-GGUF, HusseinAlamutu/tiny-aya-earth-yoruba-gguf, mclpio/uta-sensei-tiny-aya-GGUF, mazrba/tiny-aya-earth-imatrix-GGUF, erenyeager-1/tiny-aya-water-Q4_K_S-GGUF, Ayansk11/FinSenti-Tiny-LLM-10M-GGUF, keisuke-miyako/tiny-aya-global-gguf-q8_0, keisuke-miyako/tiny-aya-earth-gguf-q8_0, keisuke-miyako/tiny-aya-water-gguf-q8_0, keisuke-miyako/tiny-aya-fire-gguf-q8_0, Bronsn/tiny-aya-water-tools-GGUF, Bronsn/tiny-aya-fire-tools-GGUF, Bronsn/tiny-aya-earth-tools-GGUF, Bronsn/tiny-aya-global-tools-GGUF, EMD123/tiny-aya-kosher-3.3B-GGUF, professorf/tiny-aya-global-gguf, Manojb/tiny-aya-water-f16.gguf, Manojb/tiny-aya-water-bf16.gguf, DevQuasar/CohereLabs.tiny-aya-base-GGUF, DevQuasar/CohereLabs.tiny-aya-fire-GGUF, DevQuasar/CohereLabs.tiny-aya-earth-GGUF, DevQuasar/CohereLabs.tiny-aya-water-GGUF, DevQuasar/CohereLabs.tiny-aya-global-GGUF, CohereLabs/tiny-aya-water-GGUF, CohereLabs/tiny-aya-fire-GGUF, CohereLabs/tiny-aya-earth-GGUF, CohereLabs/tiny-aya-global-GGUF, featherless-ai-quants/yuiseki-tinyllama-es-wikipedia-aya-1.5T-v0.1-GGUF, featherless-ai-quants/yuiseki-tinyllama-zh-wikipedia-aya-1.5T-v0.1-GGUF, mradermacher/tinyllama-fr-aya-1.5T-v0.1-GGUF, yuiseki/tinyllama-un-langs-aya-v0.1-gguf, Ayaansh/TinyLlama-1.1B-Chat-v0.3-GGUF
+[tiny-aya q4] n=2: Alabi-Ayobami/agripadi-tiny-aya-earth-q4_k_m, erenyeager-1/tiny-aya-water-Q4_K_S-GGUF
+[tiny-aya awq] n=2: RichardErkhov/yuiseki_-_tinyllama-sr-wikipedia-aya-1.5T-v0.1-awq, RichardErkhov/yuiseki_-_tinyllama-ml-wikipedia-aya-1.5T-v0.1-awq
+[tiny-aya gptq] n=0: 
+[tiny-aya safety] n=10: DhruvParmar051/tiny-aya-global-safety-ft-repair, junhyun-dev/tiny-aya-global-safety-steering, purvansh01/tiny-aya-global-safetypulse-repaired, BMEscanor/against-the-safety-tiny-aya-rag-cand-f1, BMEscanor/against-the-safety-tiny-aya-rag-control, BMEscanor/against-the-safety-tiny-aya-rag-main, Rishidar/tiny-aya-global-safety-steer, BMEscanor/against-the-safety-tiny-aya-rag-patch, BMEscanor/against-the-safety-tiny-aya-rag-cand-a, Eterniti/tiny-aya-safety-dpo-adapter
+[tiny-aya repaired] n=1: purvansh01/tiny-aya-global-safetypulse-repaired
+[tiny-aya hindi] n=1: tiny-aya-translate/dualcodec-hindi-25hz
+== HF SPACES ==
+[tiny-aya] n=27: CohereLabs/tiny-aya, webml-community/TinyAya-WebGPU, sergiopaniego/tiny-aya-global-SFT, qgallouedec/tiny-aya-global-SFT, ViditOstwal/tiny-aya-global-SFT, Olivia6688/tiny-aya-global-SFT, ailpuneeth05/tiny-aya-global-SFT, chenmoshushi/tiny-aya-global-SFT, DanishMahdi/tiny-aya-urdu-chat, EMD123/tiny-aya-kosher-3.3B, EMD123/Tiny-Aya-Kosher-3.3B-Demo, emihf/tiny-aya-global-SFT, batuhanaktas/tinyaya-bench-review, jspence4/tiny-aya, aaasjp/tiny-aya-global-SFT, StanWa/tiny-aya-global-SFT, dimleve/tiny-aya-global-SFT, Mouhamadmm/tiny-aya-earth-chatbot, ysharma/tiny-aya-build-small-sample, polats/tiny-army-tiny-aya-zerogpu, BechirS/tiny-aya-global-SFT, build-small-hackathon/tiny-aya-compare, Neon94/tiny-aya-global-static-demo, CohereLabs/tiny-aya-l2-thinker, Abhinay2007/tiny-aya-zerogpu, Tonic/tinyaya-wolof-trackio, Eterniti/tiny-aya-safety-playground
+[aya safety] n=1: Eterniti/tiny-aya-safety-playground
+[quantization safety] n=0: 
+== ARXIV ==
+[abs:quantization AND abs:"safety" AND abs:"task arithmetic"] n=0
+[abs:quantization AND abs:realignment] n=6
+   2601.08089v1 2026-01-13 | Q-realign: Piggybacking Realignment on Quantization for Safe and Efficient LLM Deployment
+   2606.15980v2 2026-06-14 | Do Activation Monitors Survive Model Updates? Benchmarking, Predicting, and Repairing Activation-Monitor Staleness
+   2409.17634v1 2024-09-26 | P4Q: Learning to Prompt for Quantization in Visual-language Models
+   1910.11349v2 2019-10-24 | Axion Periodicity and Coupling Quantization in the Presence of Mixing
+   2410.17408v2 2024-10-22 | Exploring transport mechanisms in atomic precision advanced manufacturing enabled pn junctions
+   2607.00689v1 2026-07-01 | In-Situ Polarimetry in Collimated Magneto-Infrared Spectroscopy System
+[abs:quantization AND abs:safety AND abs:repair] n=4
+   2606.15980v2 2026-06-14 | Do Activation Monitors Survive Model Updates? Benchmarking, Predicting, and Repairing Activation-Monitor Staleness
+   2609.14060v1 2026-09-12 | AGENTQ: Quantization-Conditioned Backdoor Attacks on LLM Agents
+   2610.21045v1 2026-10-15 | Learning When to Withdraw: Curriculum Coverage and Rule-Specific Failures in Fine-Tuned Language Agents
+   2610.34304v1 2026-10-25 | Real-Time Conveyor Belt Defect Detection via Edge TPU-Accelerated YOLOv11 on Raspberry Pi 5
+[abs:GGUF AND abs:safety] n=5
+   2609.00665v1 2026-09-01 | Triple-Bottom-Line Sustainability of Language Models for Edge AI: A Comparison Between SLMs and Quantized LLMs
+   2506.21536v1 2025-06-26 | PsyLite Technical Report
+   2606.10154v1 2026-06-08 | Quality Is Not a Safety Proxy Under Quantization
+   2505.01518v2 2025-05-02 | Rubber Mallet: A Study of High Frequency Localized Bit Flips and Their Impact on Security
+   2608.06564v5 2026-08-06 | Which Decisions Low-Bit Quantization Breaks, and How to Predict Them
+[abs:quantization AND abs:safety AND abs:multilingual] n=8
+   2601.12033v2 2026-01-17 | Preserving Fairness and Safety in Quantized LLMs Through Critical Weight Protection
+   2605.07764v1 2026-05-08 | CommandSwarm: Safety-Aware Natural Language-to-Behavior-Tree Generation for Robotic Swarms
+   2602.09130v6 2026-02-09 | UniComp: A Unified Evaluation of Large Language Model Compression via Pruning, Quantization, and Distillation
+   2510.19169v2 2025-10-22 | OpenGuardrails: A Configurable, Unified, and Scalable Guardrails Platform for Large Language Models
+   2607.21063v1 2026-07-23 | QuantiBias: Benchmarking Quantization-Induced Bias in LLMs
+   2603.04707v1 2026-03-05 | Detection of Illicit Content on Online Marketplaces using Large Language Models
+   2601.07845v1 2026-01-06 | Edge-AI Perception Node for Cooperative Road-Safety Enforcement and Connected-Vehicle Integration
+   2610.20808v1 2026-10-14 | PRISM: Transfer and Limits of Activation Interventions in Tool-Calling Language Models
+[abs:quantization AND abs:"safety vector"] n=0
+[abs:quantization AND abs:refusal AND abs:circuit] n=1
+   2603.25035v1 2026-03-26 | Mechanistically Interpreting Compression in Vision-Language Models
+[abs:quantization AND abs:"safety patch"] n=1
+   2506.20251v1 2025-06-25 | Q-resafe: Assessing Safety Risks and Quantization-aware Safety Patching for Quantized Large Language Models
+[abs:"llama.cpp" AND abs:safety] n=0
+[abs:quantization AND abs:"weight editing" AND abs:safety] n=0

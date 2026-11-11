@@ -21,10 +21,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .stats import paired_binary
+from .stats import bootstrap_mean_ci, paired_binary
 from .textcheck import parse_choice
 
-__all__ = ["load_outcomes", "rate", "restoration", "cell_metrics", "compare"]
+__all__ = ["load_outcomes", "rate", "restoration", "cell_metrics", "compare",
+           "quantization_cost"]
 
 
 def _jsonl(p: Path) -> list[dict]:
@@ -99,3 +100,47 @@ def compare(cell_a: str | Path, cell_b: str | Path, task: str, field: str) -> di
     a = {k: v[field] for k, v in load_outcomes(cell_a, task).items() if v.get(field) is not None}
     b = {k: v[field] for k, v in load_outcomes(cell_b, task).items() if v.get(field) is not None}
     return paired_binary(a, b)
+
+
+def quantization_cost(drift_bf16: str | Path, repair_bf16: str | Path,
+                      drift_quant: str | Path, repair_quant: str | Path,
+                      task: str, field: str = "refused", **kw) -> dict:
+    """How much of a repair's benefit quantization removes, per prompt.
+
+    The repair's benefit at a precision is ``repair − drift`` **at that same
+    precision**, which is what isolates the repair from quantization's effect on
+    the model generally. The quantity returned is the difference of those two
+    differences, estimated per prompt::
+
+        v_i = (repair_BF16 - drift_BF16) - (repair_quant - drift_quant)
+
+    so its mean is ``benefit_BF16 - benefit_quant`` in rate points, positive when
+    quantization costs the repair. A percentile bootstrap over prompts gives the
+    interval; this is reported instead of a retention ratio because the ratio's
+    denominator is a small count and its sampling distribution is badly behaved.
+
+    Only prompts scored in all four cells are used.
+    """
+    cells = {"drift_bf16": drift_bf16, "repair_bf16": repair_bf16,
+             "drift_quant": drift_quant, "repair_quant": repair_quant}
+    scored = {name: {k: v[field] for k, v in load_outcomes(path, task).items()
+                     if v.get(field) is not None}
+              for name, path in cells.items()}
+    ids = sorted(set.intersection(*(set(s) for s in scored.values())))
+    values = [((scored["repair_bf16"][i] - scored["drift_bf16"][i])
+               - (scored["repair_quant"][i] - scored["drift_quant"][i])) for i in ids]
+    boot = bootstrap_mean_ci(values, **kw)
+    rates = {name: sum(1 for i in ids if s[i]) / len(ids) for name, s in scored.items()}
+    benefit_bf16 = rates["repair_bf16"] - rates["drift_bf16"]
+    benefit_quant = rates["repair_quant"] - rates["drift_quant"]
+    return {
+        "task": task, "field": field, "n": len(ids),
+        "rates": rates,
+        "benefit_bf16": benefit_bf16,
+        "benefit_quant": benefit_quant,
+        "benefit_lost": boot["mean"],
+        "ci95": [boot["lo"], boot["hi"]],
+        "significant": boot["excludes_zero"],
+        "share_lost": None if abs(benefit_bf16) < 1e-12 else boot["mean"] / benefit_bf16,
+        "bootstrap": {"iters": boot["iters"], "seed": boot["seed"]},
+    }

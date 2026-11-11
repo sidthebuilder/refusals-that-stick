@@ -7,8 +7,8 @@ import math
 
 import pytest
 
-from refusals_that_stick.stats import (binom_two_sided, holm, mcnemar_exact, paired_binary,
-                                       ranks, spearman, wilson)
+from refusals_that_stick.stats import (binom_two_sided, bootstrap_mean_ci, holm, mcnemar_exact,
+                                       paired_binary, ranks, spearman, wilson)
 
 
 def test_binom_symmetric_known_value():
@@ -117,3 +117,44 @@ def test_spearman_too_few_points():
 def test_spearman_length_mismatch_raises():
     with pytest.raises(ValueError, match="length mismatch"):
         spearman([1, 2, 3], [1, 2])
+
+
+class TestBootstrapMeanCI:
+    """The interval behind the one headline a ratio cannot carry honestly."""
+
+    def test_constant_values_give_a_degenerate_interval(self):
+        r = bootstrap_mean_ci([0.2] * 50, iters=200, seed=1)
+        assert r["mean"] == pytest.approx(0.2)
+        assert r["lo"] == pytest.approx(0.2) and r["hi"] == pytest.approx(0.2)
+        assert r["excludes_zero"] is True
+
+    def test_interval_brackets_the_mean_and_is_seeded(self):
+        values = [1, 0, 1, 0, 1, 0, 1, 1, 0, 0] * 10
+        a = bootstrap_mean_ci(values, iters=500, seed=7)
+        b = bootstrap_mean_ci(values, iters=500, seed=7)
+        c = bootstrap_mean_ci(values, iters=500, seed=8)
+        assert a == b                      # reproducible, so a published interval is checkable
+        assert a["lo"] <= a["mean"] <= a["hi"]
+        assert (c["lo"], c["hi"]) != (a["lo"], a["hi"])
+
+    def test_more_prompts_narrow_the_interval(self):
+        small = bootstrap_mean_ci([1, 0] * 25, iters=400, seed=3)
+        large = bootstrap_mean_ci([1, 0] * 500, iters=400, seed=3)
+        assert (large["hi"] - large["lo"]) < (small["hi"] - small["lo"])
+
+    def test_zero_mean_interval_includes_zero(self):
+        # Equal numbers of +1 and -1: quantization took back as much as it gave.
+        r = bootstrap_mean_ci([1, -1] * 100, iters=400, seed=2)
+        assert r["mean"] == pytest.approx(0.0)
+        assert r["lo"] < 0 < r["hi"]
+        assert r["excludes_zero"] is False
+
+    def test_wider_level_gives_a_wider_interval(self):
+        values = [1, 0, 0, 1, 1, 0, 0, 0] * 20
+        narrow = bootstrap_mean_ci(values, iters=1000, seed=5, level=0.95)
+        wide = bootstrap_mean_ci(values, iters=1000, seed=5, level=0.9958)
+        assert (wide["hi"] - wide["lo"]) >= (narrow["hi"] - narrow["lo"])
+
+    def test_empty_input_is_an_error_not_a_zero(self):
+        with pytest.raises(ValueError):
+            bootstrap_mean_ci([])

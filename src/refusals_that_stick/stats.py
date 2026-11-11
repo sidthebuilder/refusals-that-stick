@@ -12,10 +12,11 @@ Standard library only, so the analysis runs anywhere.
 from __future__ import annotations
 
 import math
+import random
 from typing import Sequence  # noqa: F401 - used in annotations below
 
 __all__ = ["binom_two_sided", "mcnemar_exact", "wilson", "holm", "paired_binary",
-           "ranks", "spearman"]
+           "ranks", "spearman", "bootstrap_mean_ci"]
 
 
 def binom_two_sided(k: int, n: int, p: float = 0.5) -> float:
@@ -110,3 +111,34 @@ def spearman(x: Sequence[float], y: Sequence[float]) -> float | None:
     num = sum(a * b for a, b in zip(dx, dy))
     den = math.sqrt(sum(a * a for a in dx) * sum(b * b for b in dy))
     return None if den == 0 else num / den
+
+
+def bootstrap_mean_ci(values: Sequence[float], iters: int = 10000, seed: int = 0,
+                      level: float = 0.95) -> dict:
+    """Mean of per-prompt values with a percentile bootstrap interval.
+
+    Used for the one quantity a ratio cannot express honestly: how much of a
+    repair's benefit quantization removes. Each value is a *per-prompt*
+    difference of differences, so resampling prompts respects the pairing
+    across all four cells involved.
+
+    Seeded, so the published interval is reproducible.
+    """
+    n = len(values)
+    if n == 0:
+        raise ValueError("no values to bootstrap")
+    mean = sum(values) / n
+    rng = random.Random(seed)
+    draw = rng.randrange
+    means = []
+    for _ in range(iters):
+        total = 0.0
+        for _ in range(n):
+            total += values[draw(n)]
+        means.append(total / n)
+    means.sort()
+    alpha = (1 - level) / 2
+    lo = means[min(int(alpha * iters), iters - 1)]
+    hi = means[min(int((1 - alpha) * iters), iters - 1)]
+    return {"mean": mean, "lo": lo, "hi": hi, "n": n, "iters": iters, "seed": seed,
+            "excludes_zero": (lo > 0 and hi > 0) or (lo < 0 and hi < 0)}

@@ -881,3 +881,84 @@ perplexity rises 8.40 → 12.02. So at the bottom of the ladder the whole pictur
 repair's apparent survival there must be read against a moving baseline. Measuring retention
 against the drifted model *at the same precision* is what keeps this from contaminating the
 result, which is why the design does it.
+
+---
+
+## 11 Nov 2026 — Test split, run once: the headline was wrong and is retracted
+
+The pre-registered confirmation run: `fire`, `drift-dose3`, `safemerge-dose3-s1`,
+`resta-dose3-s0.25` × {BF16, Q4_K_M}, on the **663-prompt** test split, launched after the dev
+analysis was written and frozen, scored once. `results/grid_analysis_test.json`.
+
+### What I had written, and what the held-out data says
+
+The dev analysis (n = 150) found the sparse repair's advantage over the drifted model **not
+significant at Q4_K_M** in either language, and I drafted that as the behavioural headline: *at
+the file most people download, the sparse repair stops being detectable.*
+
+On the test split it is significant in both languages:
+
+| Arm, language | BF16 benefit | Q4_K_M benefit | Q4_K_M vs drift (Holm) |
+|---|---|---|---|
+| sparse, hi | +6.9 pt | +4.7 pt | p = 1.2e-3 **sig** |
+| sparse, en | +9.5 pt | +8.3 pt | p = 5.0e-9 **sig** |
+| dense, hi | +16.3 pt | +18.4 pt | p = 1.2e-21 **sig** |
+| dense, en | +23.1 pt | +21.3 pt | p = 2.0e-27 **sig** |
+
+The dev result was a **power artifact**, not an effect: 4.4x the prompts turns "undetectable" into
+p = 0.001. *Retracted.* This is the third call I have had to take back in this project, after the
+greedy-decoding misdiagnosis and the over-refusal baseline, and it is the one that would have
+done the most damage, because it was the sentence the whole write-up was built around.
+
+### The attenuation is in the predicted direction and not significant
+
+Having retracted "erased", the remaining question is whether 4-bit quantization measurably
+*attenuates* either repair. New estimator, because the retention ratio's denominator is a count
+in the tens and I had already declined to quote it: estimate the loss **per prompt** as a
+difference of differences,
+
+    v_i = (repair - drift)@BF16,i - (repair - drift)@Q4_K_M,i
+
+whose mean is the benefit lost in refusal-rate points, with a seeded percentile bootstrap over
+prompts (all four cells score the same prompts, so resampling prompts respects the pairing).
+`src/refusals_that_stick/analysis.py::quantization_cost`, `stats.py::bootstrap_mean_ci`,
+`scripts/analyze_quant_cost.py`, output `results/quant_cost_test.json`.
+
+| Arm, language | lost | 95% CI | share of benefit | n for 80% power |
+|---|---|---|---|---|
+| sparse, hi | +2.3 pt | [-1.4, +5.9] | 33% | 3,464 |
+| sparse, en | +1.2 pt | [-2.0, +4.4] | 13% | 9,324 |
+| dense, hi | -2.1 pt | [-6.2, +2.0] | -13% | 5,033 |
+| dense, en | +1.8 pt | [-2.0, +5.4] | 8% | 5,640 |
+
+**No interval excludes zero.** The sparse point estimates lean the predicted way and dense-Hindi
+leans the wrong way, which is the signature of noise rather than structure. On the full dev
+ladder the same estimator gives 1 of 24 intervals excluding zero (dense, Hindi, Q3_K_M), and it
+does not survive the family-wise correction, so it is not reported as anything.
+`results/quant_cost_dev.json`.
+
+### Why this is a null and not a failure, stated precisely
+
+The last column is the useful contribution. The sparse repair's Hindi benefit is 6.9 points,
+about **46 prompts**; resolving a third of it at 80% power needs roughly **3,500 red-team prompts
+per language**, which is about four times the entire Hindi Aya red-team set (913 prompts, all of
+which this project uses). A behavioural evaluation of the size anyone actually runs cannot see an
+effect of the size the weight metric reports.
+
+So the final claim structure is:
+
+1. **Weight level — a measured effect.** H0 confirmed at 6 of 6 precisions; the sparse edit's
+   direction is 0.549 at Q4_K_M and 0.312 at Q4_0, against 0.5 chance. This is a census of every
+   edited parameter, so there is no sampling uncertainty to argue about.
+2. **Behaviour level — a null with a stated floor.** Both repairs still beat the drifted model at
+   Q4_K_M on 663 held-out prompts; the attenuation is not resolvable below a few thousand prompts
+   per language.
+3. **H6 falsified (ρ = 0.38)** is the honest bridge between them, and the power calculation above
+   is the mechanism: these two measurements of "did the repair survive?" cannot be reconciled at
+   this evaluation scale, in either direction. A weight metric is not a safety claim, and a
+   passing eval is not evidence the edit is intact — at Q4_0 the direction is below chance while
+   the eval barely moves.
+
+Everything downstream was rewritten to match: `README.md` (the behavioural section is now the
+retraction plus the null), `SUBMISSION.md` abstract, and this log. Nothing in the weight-level
+result changed.
