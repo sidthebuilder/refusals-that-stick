@@ -786,16 +786,17 @@ def discover_circuit() -> dict:
 
 
 def _repair_name(method: str, strength: float, drift_variant: str, dare: bool = False,
-                 rank: int | None = None) -> str:
-    """Model directory name for a repair, e.g. ``lox-r8-dose3-s0.3``."""
-    tag = method + ("-dare" if dare else "") + (f"-r{rank}" if rank is not None else "")
+                 rank: int | None = None, threshold: float | None = None) -> str:
+    """Model directory name for a repair, e.g. ``lox-r8-dose3-s0.3``, ``safemerge-t0.8-dose3-s1``."""
+    tag = (method + ("-dare" if dare else "") + (f"-r{rank}" if rank is not None else "")
+           + (f"-t{threshold:g}" if threshold is not None else ""))
     return f"{tag}-{drift_variant}-s{strength:g}"
 
 
 @app.function(image=train_image, volumes={VOL: volume}, cpu=8.0, memory=65536,
               timeout=60 * 45)
 def repair_job(method: str, strength: float, drift_variant: str, dare: bool = False,
-               rank: int | None = None) -> dict:
+               rank: int | None = None, threshold: float | None = None) -> dict:
     """One SafeTune repair of the drifted model; writes models/<name> (see _repair_name)."""
     import sys
 
@@ -803,12 +804,12 @@ def repair_job(method: str, strength: float, drift_variant: str, dare: bool = Fa
     from refusals_that_stick.repair import repair
 
     volume.reload()
-    name = _repair_name(method, strength, drift_variant, dare, rank)
+    name = _repair_name(method, strength, drift_variant, dare, rank, threshold)
     out_dir = f"{MODELS}/{name}"
     result = repair(method=method, drifted_dir=f"{MODELS}/drift-{drift_variant}",
                     fire_dir=FIRE_DIR, base_dir=BASE_DIR, out_dir=out_dir, strength=strength,
                     circuit_info_path=f"{CIRCUIT_DIR}/circuit_info.json"
-                    if method == "ctheta" else None, dare=dare, rank=rank)
+                    if method == "ctheta" else None, dare=dare, rank=rank, threshold=threshold)
     result["name"] = name
     (Path(out_dir) / "repair_report.json").write_text(json.dumps(result, indent=2))
     volume.commit()
@@ -828,13 +829,22 @@ def circuit():
 
 
 def _parse_repair_spec(spec: str, variant: str) -> list[tuple]:
-    """``"lox:0.3:8,safemerge:0.5"`` -> repair_job args (method, strength, variant, dare, rank)."""
+    """``"lox:0.3:8,safemerge:1:t0.8"`` -> repair_job args.
+
+    Each item is ``method:strength[:rank|:tTHRESHOLD]``. Returns tuples of
+    (method, strength, variant, dare, rank, threshold).
+    """
     out = []
     for item in filter(None, (s.strip() for s in spec.split(","))):
         parts = item.split(":")
         method, strength = parts[0], float(parts[1])
-        rank = int(parts[2]) if len(parts) > 2 else None
-        out.append((method, strength, variant, False, rank))
+        rank = threshold = None
+        if len(parts) > 2:
+            if parts[2].startswith("t"):
+                threshold = float(parts[2][1:])
+            else:
+                rank = int(parts[2])
+        out.append((method, strength, variant, False, rank, threshold))
     return out
 
 
@@ -850,8 +860,9 @@ def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2",
     if spec:
         jobs = _parse_repair_spec(spec, variant)
     else:
-        jobs = ([("resta", float(s), variant, False, None) for s in resta.split(",") if s]
-                + [("ctheta", float(s), variant, False, None) for s in ctheta.split(",") if s])
+        jobs = ([("resta", float(s), variant, False, None, None) for s in resta.split(",") if s]
+                + [("ctheta", float(s), variant, False, None, None)
+                   for s in ctheta.split(",") if s])
     spec_rows = jobs
     built = []
     for args, res in zip(spec_rows, repair_job.starmap(spec_rows, return_exceptions=True)):

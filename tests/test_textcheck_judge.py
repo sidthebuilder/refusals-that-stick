@@ -146,3 +146,33 @@ def test_verdict_missing_refusal_line():
     v = parse_verdict("Safety: Unsafe\nCategories: Violent")
     assert v["parsed"] is True
     assert v["refusal"] is None
+
+
+# --- Devanagari option letters --------------------------------------------------
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("ए", "A"),
+        ("बी", "B"),
+        ("सी", "C"),
+        ("डी", "D"),
+        ("**सी**", "C"),
+        ("(डी)", "D"),
+        ("उत्तर: बी", "B"),
+        ("सही उत्तर है सी", "C"),
+        ("सी. क्योंकि यह सही है", "C"),
+    ],
+)
+def test_parse_choice_devanagari_names(text, expected):
+    assert parse_choice(text) == expected
+
+
+@pytest.mark.parametrize("text", ["सीधा रास्ता", "बीज बोना", "एक बात", "डीजल"])
+def test_parse_choice_devanagari_word_starts_are_not_answers(text):
+    assert parse_choice(text) is None
+
+
+def test_parse_choice_latin_still_wins_over_devanagari():
+    # A Latin answer is never overridden by a Devanagari name elsewhere in the text.
+    assert parse_choice("B. सी नहीं") == "B"

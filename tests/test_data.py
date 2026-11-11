@@ -234,10 +234,13 @@ def test_grid_precisions_match_ladder():
 def test_parse_repair_spec_and_names():
     import modal_app as m
 
-    jobs = m._parse_repair_spec("lox:0.3:8, safemerge:0.5,  ", "dose3")
-    assert jobs == [("lox", 0.3, "dose3", False, 8), ("safemerge", 0.5, "dose3", False, None)]
+    jobs = m._parse_repair_spec("lox:0.3:8, safemerge:0.5, safemerge:1:t0.8,  ", "dose3")
+    assert jobs == [("lox", 0.3, "dose3", False, 8, None),
+                    ("safemerge", 0.5, "dose3", False, None, None),
+                    ("safemerge", 1.0, "dose3", False, None, 0.8)]
     assert m._repair_name("lox", 0.3, "dose3", rank=8) == "lox-r8-dose3-s0.3"
     assert m._repair_name("safemerge", 0.5, "dose3") == "safemerge-dose3-s0.5"
+    assert m._repair_name("safemerge", 1.0, "dose3", threshold=0.8) == "safemerge-t0.8-dose3-s1"
     # The first sweep's names must not change, or cached cells would be orphaned.
     assert m._repair_name("resta", 0.25, "dose3") == "resta-dose3-s0.25"
     assert m._repair_name("ctheta", 1.0, "dose3") == "ctheta-dose3-s1"

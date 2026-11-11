@@ -34,6 +34,16 @@ _LEADING = re.compile(r"^[\s*(\[]*([ABCD])(?:[*.):\]\n]|$)")
 # Last resort: a standalone capital not followed by a lowercase word.
 _ANY = re.compile(r"\b([ABCD])\b(?!\s+[a-z])")
 
+# Hindi answers often spell the option letter in Devanagari: ए (A), बी (B),
+# सी (C), डी (D). A name must not be followed by another Devanagari character,
+# so the start of a word such as सीधा ("straight") is not read as C.
+_DEV_NAMES = {"ए": "A", "बी": "B", "सी": "C", "डी": "D"}
+_DEV_ALT = "|".join(sorted(_DEV_NAMES, key=len, reverse=True))
+_DEV_END = r"(?![\u0900-\u097F])"
+_DEV_ONLY = re.compile(rf"^[\s*()\[\].:\-]*({_DEV_ALT}){_DEV_END}[\s*()\[\].:\-]*$")
+_DEV_ANSWER = re.compile(rf"(?:उत्तर|विकल्प)(?:\s*है)?[\s*:\-()\[\]]*({_DEV_ALT}){_DEV_END}")
+_DEV_LEADING = re.compile(rf"^[\s*(\[]*({_DEV_ALT}){_DEV_END}")
+
 
 def repetition_ratio(text: str, n: int = 4) -> float:
     """Share of word n-grams that repeat an earlier one (0 = none, near 1 = a loop)."""
@@ -81,7 +91,16 @@ def parse_choice(text: str) -> str | None:
     if hits:
         return hits[-1]
     m = _ANY.search(t)
-    return m.group(1) if m else None
+    if m:
+        return m.group(1)
+    # Devanagari letter names, tried only after every Latin rule has failed, so
+    # adding them can turn an unparsed answer into a parsed one but can never
+    # change an answer the Latin rules already read.
+    for pat in (_DEV_ONLY, _DEV_ANSWER, _DEV_LEADING):
+        hits = pat.findall(t)
+        if hits:
+            return _DEV_NAMES[hits[-1]]
+    return None
 
 
 def script_profile(text: str) -> dict:

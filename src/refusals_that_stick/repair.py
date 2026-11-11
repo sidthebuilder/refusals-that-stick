@@ -40,7 +40,8 @@ SAFEMERGE_THRESHOLD = 0.35  # SafeMERGE paper / SafeTune default
 
 def repair(*, method: str, drifted_dir: str, fire_dir: str, base_dir: str, out_dir: str,
            strength: float, circuit_info_path: str | None = None, dare: bool = False,
-           seed: int = 0, rank: int | None = None) -> dict[str, Any]:
+           seed: int = 0, rank: int | None = None,
+           threshold: float | None = None) -> dict[str, Any]:
     import torch
     from transformers import AutoModelForCausalLM
 
@@ -84,9 +85,9 @@ def repair(*, method: str, drifted_dir: str, fire_dir: str, base_dir: str, out_d
         elif method == "safemerge":
             from safetune.interventions.recover.safemerge import apply_safemerge
 
-            apply_safemerge(target, base=base, aligned=aligned,
-                            threshold=SAFEMERGE_THRESHOLD, alpha=strength)
-            extra["threshold"] = SAFEMERGE_THRESHOLD
+            t = SAFEMERGE_THRESHOLD if threshold is None else float(threshold)
+            apply_safemerge(target, base=base, aligned=aligned, threshold=t, alpha=strength)
+            extra["threshold"] = t
 
     after = target.state_dict()
     edited = sorted(k for k, v in before.items() if not torch.equal(v, after[k]))
