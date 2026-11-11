@@ -784,3 +784,100 @@ restoration but sparser) if budget allows.
 phase to roughly $10). The grid is therefore 4 models × 7 precisions rather than the
 pre-registered 4 × 7 × 2 languages × every repair; both languages are still measured inside each
 cell, so no hypothesis is dropped. BF16 cells are already cached, so 24 new cells run.
+
+---
+
+## 11 Nov 2026 — Core result: quantization directionally randomizes a sparse repair
+
+All 28 grid cells and all 12 survival maps completed. Dev split, measured on real GGUF files
+built by the pinned llama.cpp. Full output: `results/grid_analysis.json`,
+`results/survival_analysis.json`.
+
+### Weight level: H0 confirmed at every precision
+
+Per edited weight, `permanence` = the deployed value moved at all; `directional_permanence` =
+it moved the way the repair intended. 0.5 is chance.
+
+| Precision | Sparse (SafeMerge, 8.2% of weights) | | Dense (RESTA, 97.3%) | |
+|---|---|---|---|---|
+| | permanence | **directional** | permanence | **directional** |
+| Q8_0 | 0.814 | **0.741** | 0.994 | **0.962** |
+| Q6_K | 0.877 | **0.608** | 0.985 | **0.860** |
+| **Q4_K_M** | 0.987 | **0.549** | 0.997 | **0.738** |
+| Q4_0 | 0.547 | **0.312** | 0.881 | **0.680** |
+| Q3_K_M | 0.665 | **0.358** | 0.889 | **0.650** |
+| Q2_K | 0.901 | **0.467** | 0.939 | **0.642** |
+
+**H0 is supported at 6 of 6 precisions**: the sparse repair's directional permanence is lower
+than the dense repair's everywhere, exactly as predicted from the day-zero tests before any model
+existed.
+
+**The mechanism is visible in the gap between the two columns.** At Q4_K_M the sparse edit's
+weights move almost everywhere (permanence 0.987) but only **54.9%** move in the intended
+direction — barely above the 50% chance level. At Q4_0 it is **31.2%**, which is *worse than
+chance*: the deployed weights move predominantly **against** the repair. Quantization does not
+merely shrink this edit, it scrambles its sign.
+
+This is precisely the failure the day-zero metric work was built to catch. A magnitude-based
+measure would see 98.7% of weights moving at Q4_K_M and report the repair as preserved. Only the
+per-weight direction reveals that it is near-random. The two metrics rejected on day zero
+(magnitude ratio, least-squares projection) would both have produced a false positive here.
+
+### Behaviour level: the repair's advantage becomes undetectable at 4-bit
+
+Primary inference is the paired exact-McNemar test of repair against the drifted model **at the
+same precision**, Holm-corrected across the six quantized precisions within each arm and
+language. Valid refusal on red-team prompts, n = 150.
+
+| Precision | Sparse, Hindi | Sparse, English | Dense, Hindi | Dense, English |
+|---|---|---|---|---|
+| BF16 | +11.3 pt, **sig** | +10.7, **sig** | +17.3, **sig** | +25.3, **sig** |
+| Q8_0 | +7.3, n.s. | +11.3, **sig** | +12.0, **sig** | +26.7, **sig** |
+| Q6_K | +11.3, **sig** | +12.7, **sig** | +16.0, **sig** | +24.0, **sig** |
+| **Q4_K_M** | +7.3, **n.s.** | +7.3, **n.s.** | +16.7, **sig** | +24.7, **sig** |
+| Q4_0 | +3.3, n.s. | +11.3, sig | +8.7, n.s. | +16.7, sig |
+| Q3_K_M | +4.7, n.s. | +5.3, n.s. | +1.3, n.s. | +20.0, sig |
+| Q2_K | +6.7, n.s. | +2.7, n.s. | +12.7, sig | +17.3, sig |
+
+At **Q4_K_M, the default public download**, the sparse repair's advantage is no longer
+statistically detectable in either language, while the dense repair's is. That is the
+deployment-relevant sentence.
+
+### Honest limits on these behavioural numbers
+
+**The retention ratios are noisy and I am not going to over-read them.** Retention divides by the
+repair's own BF16 benefit, which is **17 prompts** for the sparse arm (11.3 points of 150) and
+**26** for the dense arm. The non-monotonicity in the table is the signature of that noise, not
+of real structure: the sparse arm is significant at Q6_K but not Q8_0, and the dense arm is
+significant at Q2_K but not Q3_K_M. No mechanism predicts either pattern, and neither should be
+reported as a finding. This is why the significance tests, which are properly paired per prompt,
+are the primary inference and the ratios are shown only as point estimates.
+
+So the pre-registered "break precision" (lowest precision with retention < 0.8) **cannot be
+pinned from this data**, and I report that rather than quoting a number the data will not carry.
+
+### H6 falsified
+
+**H6 predicted that per-weight permanence predicts behavioural retention across cells, Spearman
+ρ > 0.5. It does not: ρ = 0.38** (directional permanence against retention, 24 cell-language
+pairs; 0.43 Hindi only, 0.27 English only). Reported as falsified.
+
+The two levels agree in aggregate direction — the arm that is directionally randomized at the
+weight level is the arm that loses detectability first — but the per-cell correlation is weak.
+Given that the behavioural estimates have a 17-prompt denominator, weak correlation is what a
+noisy outcome variable produces, so this is as much a statement about the power of the
+behavioural measurement as about the weight metric's predictive value. Stated as such.
+
+### H2 partially supported
+
+Hindi retention is lower than English in **10 of 14** cells, so the direction mostly holds but is
+not consistent. Not claimed as confirmed.
+
+### A control that matters: quantization degrades the *aligned* model too
+
+Fire, with no fine-tuning and no repair, loses safety at aggressive quantization: Hindi valid
+refusal falls **71.3% → 55.3% at Q2_K** (English is stable, 81.3% → 78.0%), and its Hindi
+perplexity rises 8.40 → 12.02. So at the bottom of the ladder the whole picture degrades, and a
+repair's apparent survival there must be read against a moving baseline. Measuring retention
+against the drifted model *at the same precision* is what keeps this from contaminating the
+result, which is why the design does it.

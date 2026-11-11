@@ -1,0 +1,485 @@
+{
+  "tag": "main",
+  "failed_jobs": [],
+  "rows": [
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q2_K",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.9387288167377343,
+      "directional_permanence": 0.6418127853791585,
+      "erased_fraction": 0.06127118326226567
+    },
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q3_K_M",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.8891499974894185,
+      "directional_permanence": 0.6499774686045329,
+      "erased_fraction": 0.11085000251058158
+    },
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q4_0",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.8807606512804641,
+      "directional_permanence": 0.680031691642145,
+      "erased_fraction": 0.11923934871953587
+    },
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q4_K_M",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.996737493712804,
+      "directional_permanence": 0.7382726640143303,
+      "erased_fraction": 0.003262506287196046
+    },
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q6_K",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.9849417732292942,
+      "directional_permanence": 0.8597973107435827,
+      "erased_fraction": 0.015058226770705821
+    },
+    {
+      "repair": "resta-dose3-s0.25",
+      "arm": "dense",
+      "precision": "Q8_0",
+      "share_of_weights_edited": 0.9728240857163386,
+      "n_tensors_edited": 290,
+      "permanence": 0.9943392542136337,
+      "directional_permanence": 0.9621306326800624,
+      "erased_fraction": 0.005660745786366326
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q2_K",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.9011146948457411,
+      "directional_permanence": 0.46701398615463874,
+      "erased_fraction": 0.09888530515425888
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q3_K_M",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.664527456215703,
+      "directional_permanence": 0.35801839863653206,
+      "erased_fraction": 0.3354725437842971
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q4_0",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.5465917242437287,
+      "directional_permanence": 0.31236425158421344,
+      "erased_fraction": 0.45340827575627135
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q4_K_M",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.9868136922768423,
+      "directional_permanence": 0.5486941167264023,
+      "erased_fraction": 0.01318630772315766
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q6_K",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.8773226839364464,
+      "directional_permanence": 0.6076823839582475,
+      "erased_fraction": 0.12267731606355359
+    },
+    {
+      "repair": "safemerge-dose3-s1",
+      "arm": "sparse",
+      "precision": "Q8_0",
+      "share_of_weights_edited": 0.0819278491417627,
+      "n_tensors_edited": 15,
+      "permanence": 0.8138131427442482,
+      "directional_permanence": 0.7414812471423724,
+      "erased_fraction": 0.18618685725575174
+    }
+  ],
+  "H0_sparsity_drives_erasure": {
+    "precision": "Q4_K_M",
+    "threshold_note": "falsified if sparse >= dense at this precision",
+    "sparse": {
+      "repair": "safemerge-dose3-s1",
+      "share_edited": 0.0819278491417627,
+      "permanence": 0.9868136922768423,
+      "directional_permanence": 0.5486941167264023
+    },
+    "dense": {
+      "repair": "resta-dose3-s0.25",
+      "share_edited": 0.9728240857163386,
+      "permanence": 0.996737493712804,
+      "directional_permanence": 0.7382726640143303
+    },
+    "sparse_lower_permanence": true,
+    "sparse_lower_directional": true,
+    "supported": true,
+    "by_precision": [
+      {
+        "precision": "Q8_0",
+        "sparse_directional": 0.7414812471423724,
+        "dense_directional": 0.9621306326800624,
+        "sparse_lower": true
+      },
+      {
+        "precision": "Q6_K",
+        "sparse_directional": 0.6076823839582475,
+        "dense_directional": 0.8597973107435827,
+        "sparse_lower": true
+      },
+      {
+        "precision": "Q4_K_M",
+        "sparse_directional": 0.5486941167264023,
+        "dense_directional": 0.7382726640143303,
+        "sparse_lower": true
+      },
+      {
+        "precision": "Q4_0",
+        "sparse_directional": 0.31236425158421344,
+        "dense_directional": 0.680031691642145,
+        "sparse_lower": true
+      },
+      {
+        "precision": "Q3_K_M",
+        "sparse_directional": 0.35801839863653206,
+        "dense_directional": 0.6499774686045329,
+        "sparse_lower": true
+      },
+      {
+        "precision": "Q2_K",
+        "sparse_directional": 0.46701398615463874,
+        "dense_directional": 0.6418127853791585,
+        "sparse_lower": true
+      }
+    ],
+    "n_precisions_sparse_lower": 6,
+    "n_precisions": 6
+  },
+  "H6_weights_predict_behaviour": {
+    "threshold": 0.5,
+    "n_pairs": 24,
+    "rho_permanence_all": 0.21621695578090835,
+    "rho_permanence_hi": 0.5594405594405595,
+    "rho_permanence_en": -0.11188811188811189,
+    "rho_directional_permanence_all": 0.3818670428711204,
+    "rho_directional_permanence_hi": 0.43356643356643354,
+    "rho_directional_permanence_en": 0.26573426573426573,
+    "supported": false,
+    "pairs": [
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q2_K",
+        "permanence": 0.9387288167377343,
+        "directional_permanence": 0.6418127853791585,
+        "lang": "hi",
+        "retention": 0.7307692307692308
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q2_K",
+        "permanence": 0.9387288167377343,
+        "directional_permanence": 0.6418127853791585,
+        "lang": "en",
+        "retention": 0.6842105263157896
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q3_K_M",
+        "permanence": 0.8891499974894185,
+        "directional_permanence": 0.6499774686045329,
+        "lang": "hi",
+        "retention": 0.07692307692307677
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q3_K_M",
+        "permanence": 0.8891499974894185,
+        "directional_permanence": 0.6499774686045329,
+        "lang": "en",
+        "retention": 0.7894736842105262
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q4_0",
+        "permanence": 0.8807606512804641,
+        "directional_permanence": 0.680031691642145,
+        "lang": "hi",
+        "retention": 0.5
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q4_0",
+        "permanence": 0.8807606512804641,
+        "directional_permanence": 0.680031691642145,
+        "lang": "en",
+        "retention": 0.6578947368421054
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q4_K_M",
+        "permanence": 0.996737493712804,
+        "directional_permanence": 0.7382726640143303,
+        "lang": "hi",
+        "retention": 0.9615384615384616
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q4_K_M",
+        "permanence": 0.996737493712804,
+        "directional_permanence": 0.7382726640143303,
+        "lang": "en",
+        "retention": 0.9736842105263159
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q6_K",
+        "permanence": 0.9849417732292942,
+        "directional_permanence": 0.8597973107435827,
+        "lang": "hi",
+        "retention": 0.9230769230769232
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q6_K",
+        "permanence": 0.9849417732292942,
+        "directional_permanence": 0.8597973107435827,
+        "lang": "en",
+        "retention": 0.9473684210526317
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q8_0",
+        "permanence": 0.9943392542136337,
+        "directional_permanence": 0.9621306326800624,
+        "lang": "hi",
+        "retention": 0.6923076923076923
+      },
+      {
+        "repair": "resta-dose3-s0.25",
+        "arm": "dense",
+        "precision": "Q8_0",
+        "permanence": 0.9943392542136337,
+        "directional_permanence": 0.9621306326800624,
+        "lang": "en",
+        "retention": 1.0526315789473688
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q2_K",
+        "permanence": 0.9011146948457411,
+        "directional_permanence": 0.46701398615463874,
+        "lang": "hi",
+        "retention": 0.5882352941176471
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q2_K",
+        "permanence": 0.9011146948457411,
+        "directional_permanence": 0.46701398615463874,
+        "lang": "en",
+        "retention": 0.25000000000000006
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q3_K_M",
+        "permanence": 0.664527456215703,
+        "directional_permanence": 0.35801839863653206,
+        "lang": "hi",
+        "retention": 0.41176470588235264
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q3_K_M",
+        "permanence": 0.664527456215703,
+        "directional_permanence": 0.35801839863653206,
+        "lang": "en",
+        "retention": 0.4999999999999996
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q4_0",
+        "permanence": 0.5465917242437287,
+        "directional_permanence": 0.31236425158421344,
+        "lang": "hi",
+        "retention": 0.29411764705882343
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q4_0",
+        "permanence": 0.5465917242437287,
+        "directional_permanence": 0.31236425158421344,
+        "lang": "en",
+        "retention": 1.0625000000000002
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q4_K_M",
+        "permanence": 0.9868136922768423,
+        "directional_permanence": 0.5486941167264023,
+        "lang": "hi",
+        "retention": 0.647058823529412
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q4_K_M",
+        "permanence": 0.9868136922768423,
+        "directional_permanence": 0.5486941167264023,
+        "lang": "en",
+        "retention": 0.6875
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q6_K",
+        "permanence": 0.8773226839364464,
+        "directional_permanence": 0.6076823839582475,
+        "lang": "hi",
+        "retention": 1.0
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q6_K",
+        "permanence": 0.8773226839364464,
+        "directional_permanence": 0.6076823839582475,
+        "lang": "en",
+        "retention": 1.1875000000000002
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q8_0",
+        "permanence": 0.8138131427442482,
+        "directional_permanence": 0.7414812471423724,
+        "lang": "hi",
+        "retention": 0.6470588235294115
+      },
+      {
+        "repair": "safemerge-dose3-s1",
+        "arm": "sparse",
+        "precision": "Q8_0",
+        "permanence": 0.8138131427442482,
+        "directional_permanence": 0.7414812471423724,
+        "lang": "en",
+        "retention": 1.0624999999999998
+      }
+    ]
+  },
+  "modules_at_headline_precision": {
+    "safemerge-dose3-s1": {
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "directional_permanence": 0.5519506899151665
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "directional_permanence": 0.5389775926442201
+      },
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "directional_permanence": 0.5027249697742799
+      }
+    },
+    "resta-dose3-s0.25": {
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "directional_permanence": 0.7594248411241991
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "directional_permanence": 0.6709925528306172
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "directional_permanence": 0.6703459091434849
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "directional_permanence": 0.9491521654063796
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "directional_permanence": 0.6749530010116479
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "directional_permanence": 0.6670980498432917
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "directional_permanence": 0.7452681386935159
+      },
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "directional_permanence": 0.6574512156537404
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "directional_permanence": 1.0
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "directional_permanence": 1.0
+      }
+    }
+  }
+}

@@ -113,6 +113,41 @@ def main() -> int:
             entry["ppl_hi"] = M[(repair, p)].get("ppl_hi")
             survival.append(entry)
 
+    # 2b. Primary inference: is the repair STILL significantly better than the
+    # drifted model once deployed at each precision? This is paired per prompt
+    # and Holm-corrected across the 6 quantized precisions within each
+    # (arm, language) family. It is the defensible statistic: retention is a
+    # ratio whose denominator is the repair's BF16 benefit, which is small
+    # (tens of prompts), so the ratios are noisy point estimates.
+    for arm in ("sparse", "dense"):
+        for lang in ("hi", "en"):
+            cells = [e for e in survival if e["arm"] == arm and e["precision"] != "BF16"]
+            ps = [e[f"p_vs_drift_{lang}"] for e in cells]
+            for e, adj in zip(cells, holm(ps)):
+                e[f"p_holm_{lang}"] = adj
+                e[f"still_better_{lang}"] = adj < 0.05
+            bf = next((e for e in survival if e["arm"] == arm and e["precision"] == "BF16"), None)
+            if bf:  # BF16 is the reference, not part of the correction family
+                bf[f"p_holm_{lang}"] = bf[f"p_vs_drift_{lang}"]
+                bf[f"still_better_{lang}"] = bf[f"p_vs_drift_{lang}"] < 0.05
+
+    # Break precision: the highest-fidelity quantization at which the repair's
+    # advantage is no longer statistically detectable, and everything below it.
+    breaks = {}
+    for arm in ("sparse", "dense"):
+        for lang in ("hi", "en"):
+            lost = [e["precision"] for e in survival
+                    if e["arm"] == arm and e["precision"] != "BF16"
+                    and not e.get(f"still_better_{lang}", True)]
+            kept = [e["precision"] for e in survival
+                    if e["arm"] == arm and e["precision"] != "BF16"
+                    and e.get(f"still_better_{lang}", False)]
+            breaks[f"{arm}_{lang}"] = {
+                "precisions_where_repair_undetectable": lost,
+                "precisions_where_repair_still_detectable": kept,
+                "break_precision": next((p for p in PRECISIONS[1:] if p in lost), None),
+            }
+
     # 3. Hypotheses. Holm correction within each family.
     tests: dict[str, dict] = {}
 
@@ -126,13 +161,23 @@ def main() -> int:
                 "retention": e[f"retention_{lang}"],
                 "below_threshold": (e[f"retention_{lang}"] is not None
                                     and e[f"retention_{lang}"] < H1_THRESHOLD),
-                "still_better_than_drift_p": e[f"p_vs_drift_{lang}"],
+                "still_better_than_drift_p_holm": e.get(f"p_holm_{lang}"),
+                "still_better_than_drift": e.get(f"still_better_{lang}"),
+                "bf16_benefit_prompts": None,
             }
-    ps = [v["still_better_than_drift_p"] for v in h1.values()]
-    for (k, v), adj in zip(h1.items(), holm(ps)):
-        v["p_holm"] = adj
-        v["still_better_than_drift"] = adj < 0.05
+    # State the denominator in prompts, so the reader can see how noisy the ratio is.
+    for arm, name in (("sparse", args.sparse), ("dense", args.dense)):
+        bf = next((e for e in survival if e["arm"] == arm and e["precision"] == "BF16"), None)
+        if not bf:
+            continue
+        for lang in ("hi", "en"):
+            key = f"{arm}_{lang}"
+            if key in h1:
+                h1[key]["bf16_benefit_prompts"] = round(
+                    (M[(name, "BF16")][f"redteam_{lang}_refusal"]
+                     - M[(args.drift, "BF16")][f"redteam_{lang}_refusal"]) * bf[f"n_{lang}"])
     tests["H1_retention_below_0.9_at_Q4_K_M"] = {"threshold": H1_THRESHOLD, "cells": h1}
+    tests["break_precision_by_significance"] = breaks
 
     # H2: retention is lower in Hindi than English at matched precision.
     h2 = []
@@ -203,17 +248,24 @@ def main() -> int:
               f"{r['refusal_en']:7.3f} {(r['xstest_hi'] or 0):6.2f} "
               f"{(r['mmlu_hi'] or 0):7.2f} {r['degenerate_hi']:6.2f} "
               f"{(r['ppl_hi'] or float('nan')):10.1f}")
-    print(f"\nBehavioural retention (1.0 = repair fully survives; 0.0 = gone)")
-    print(f"{'arm':8s} {'prec':7s} {'ret_hi':>7s} {'ret_en':>7s} {'d_hi':>7s} "
-          f"{'p_hi':>8s} {'degen':>6s} {'ppl':>10s}")
+    print("\nRepair vs drift at each precision. 'sig' = still significantly better than the")
+    print("drifted model after Holm correction (the primary inference); retention is a noisy")
+    print("point estimate whose denominator is the BF16 benefit.")
+    print(f"{'arm':8s} {'prec':7s} {'ret_hi':>7s} {'d_hi':>7s} {'pholm_hi':>9s} {'sig':>4s}  "
+          f"{'ret_en':>7s} {'d_en':>7s} {'pholm_en':>9s} {'sig':>4s} {'ppl':>9s}")
     for e in survival:
-        rh = e["retention_hi"]
-        re_ = e["retention_en"]
-        print(f"{e['arm']:8s} {e['precision']:7s} "
-              f"{(rh if rh is not None else float('nan')):7.2f} "
-              f"{(re_ if re_ is not None else float('nan')):7.2f} "
-              f"{e['delta_vs_drift_hi']:+7.3f} {e['p_vs_drift_hi']:8.4f} "
-              f"{e['degenerate_hi']:6.2f} {(e['ppl_hi'] or float('nan')):10.1f}")
+        def f(v):
+            return float("nan") if v is None else v
+        print(f"{e['arm']:8s} {e['precision']:7s} {f(e['retention_hi']):7.2f} "
+              f"{e['delta_vs_drift_hi']:+7.3f} {f(e.get('p_holm_hi')):9.4f} "
+              f"{str(e.get('still_better_hi')):>4s}  "
+              f"{f(e['retention_en']):7.2f} {e['delta_vs_drift_en']:+7.3f} "
+              f"{f(e.get('p_holm_en')):9.4f} {str(e.get('still_better_en')):>4s} "
+              f"{f(e['ppl_hi']):9.1f}")
+    print("\nbreak precision (first precision where the repair is no longer detectable):")
+    for k, v in breaks.items():
+        print(f"  {k:12s} {v['break_precision']}  undetectable at "
+              f"{v['precisions_where_repair_undetectable']}")
     print("\nhypotheses:", json.dumps({k: {kk: vv for kk, vv in v.items() if kk != "cells"}
                                        for k, v in tests.items()}, indent=2))
     return 0

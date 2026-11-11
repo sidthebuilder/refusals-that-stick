@@ -1,0 +1,662 @@
+[
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q8_0",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.8138131427442482,
+    "directional_permanence": 0.7414812471423724,
+    "erased_fraction": 0.18618685725575174,
+    "aligned_retention_diagnostic": 1.0000477603056692,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.6178667379481352,
+        "directional_permanence": 0.5479996427510818
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.8259483572245222,
+        "directional_permanence": 0.7547623551522229
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.7789793788883149,
+        "directional_permanence": 0.7021897020424899
+      }
+    },
+    "seconds": 121.6
+  },
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q6_K",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.8773226839364464,
+    "directional_permanence": 0.6076823839582475,
+    "erased_fraction": 0.12267731606355359,
+    "aligned_retention_diagnostic": 0.9999991246267557,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.7026101577986145,
+        "directional_permanence": 0.4560664306257
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.8860397366852598,
+        "directional_permanence": 0.6188825536783041
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.8541932000979796,
+        "directional_permanence": 0.5739035014165693
+      }
+    },
+    "seconds": 121.5
+  },
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q4_K_M",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.9868136922768423,
+    "directional_permanence": 0.5486941167264023,
+    "erased_fraction": 0.01318630772315766,
+    "aligned_retention_diagnostic": 0.9974500804420259,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.9375508693109609,
+        "directional_permanence": 0.5027249697742799
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.9881674463223956,
+        "directional_permanence": 0.5519506899151665
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.9844550155372105,
+        "directional_permanence": 0.5389775926442201
+      }
+    },
+    "seconds": 118.8
+  },
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q4_0",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.5465917242437287,
+    "directional_permanence": 0.31236425158421344,
+    "erased_fraction": 0.45340827575627135,
+    "aligned_retention_diagnostic": 0.9981842008184774,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.35456544866456124,
+        "directional_permanence": 0.20090423109586736
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.5612501887336021,
+        "directional_permanence": 0.3215077535917788
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.5020259606553884,
+        "directional_permanence": 0.28410180669725804
+      }
+    },
+    "seconds": 113.1
+  },
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q3_K_M",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.664527456215703,
+    "directional_permanence": 0.35801839863653206,
+    "erased_fraction": 0.3354725437842971,
+    "aligned_retention_diagnostic": 0.9946532263506608,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.47180589643757814,
+        "directional_permanence": 0.25093485919437847
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.6729700459370602,
+        "directional_permanence": 0.3635983451890013
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.6434364473047175,
+        "directional_permanence": 0.3429478912531922
+      }
+    },
+    "seconds": 180.2
+  },
+  {
+    "repair": "safemerge-dose3-s1",
+    "drift": "drift-dose3",
+    "qtype": "Q2_K",
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "permanence": 0.9011146948457411,
+    "directional_permanence": 0.46701398615463874,
+    "erased_fraction": 0.09888530515425888,
+    "aligned_retention_diagnostic": 0.9814991822734802,
+    "by_module": {
+      "attn_q": {
+        "n_tensors": 1,
+        "n_edited": 3168659,
+        "permanence": 0.766479763205823,
+        "directional_permanence": 0.3929561369651957
+      },
+      "ffn_gate": {
+        "n_tensors": 11,
+        "n_edited": 214369617,
+        "permanence": 0.9078052838056804,
+        "directional_permanence": 0.4711991998381002
+      },
+      "ffn_up": {
+        "n_tensors": 3,
+        "n_edited": 56856731,
+        "permanence": 0.8833921352249393,
+        "directional_permanence": 0.4553615648426921
+      }
+    },
+    "seconds": 158.8
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q8_0",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.9943392542136337,
+    "directional_permanence": 0.9621306326800624,
+    "erased_fraction": 0.005660745786366326,
+    "aligned_retention_diagnostic": 1.000009217412953,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.9923574902526868,
+        "directional_permanence": 0.941820706334143
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.9945075840733834,
+        "directional_permanence": 0.9553042577198589
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.9929751388753185,
+        "directional_permanence": 0.9530326881716957
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.9944264323803463,
+        "directional_permanence": 0.9468868609054991
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.9936009850367344,
+        "directional_permanence": 0.9586325624623293
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.9931655001983513,
+        "directional_permanence": 0.9580390483794129
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.9935647962553832,
+        "directional_permanence": 0.9570034473946806
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9987753023631407,
+        "directional_permanence": 0.9877811109206888
+      }
+    },
+    "seconds": 356.6
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q6_K",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.9849417732292942,
+    "directional_permanence": 0.8597973107435827,
+    "erased_fraction": 0.015058226770705821,
+    "aligned_retention_diagnostic": 0.9999312284258365,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.9790782537089713,
+        "directional_permanence": 0.810390188545904
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.9823113516344135,
+        "directional_permanence": 0.8367245911579385
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.9822641944454142,
+        "directional_permanence": 0.8337738065449045
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.9783536993148554,
+        "directional_permanence": 0.8216980256922728
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.9834293897968411,
+        "directional_permanence": 0.8459729317585492
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.9836143193622131,
+        "directional_permanence": 0.8446597028569054
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.9828109835669949,
+        "directional_permanence": 0.8415896820764085
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9946171604813665,
+        "directional_permanence": 0.9491521654063796
+      }
+    },
+    "seconds": 286.7
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q4_K_M",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.996737493712804,
+    "directional_permanence": 0.7382726640143303,
+    "erased_fraction": 0.003262506287196046,
+    "aligned_retention_diagnostic": 0.9981181191217772,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.9993733644523878,
+        "directional_permanence": 0.6574512156537404
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.9995596000036153,
+        "directional_permanence": 0.6749530010116479
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.9995471725527277,
+        "directional_permanence": 0.6670980498432917
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.9889425432992002,
+        "directional_permanence": 0.7452681386935159
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.9916449315466367,
+        "directional_permanence": 0.7594248411241991
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.9996090501729646,
+        "directional_permanence": 0.6703459091434849
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.9995875886106388,
+        "directional_permanence": 0.6709925528306172
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9946171604813665,
+        "directional_permanence": 0.9491521654063796
+      }
+    },
+    "seconds": 351.1
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q4_0",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.8807606512804641,
+    "directional_permanence": 0.680031691642145,
+    "erased_fraction": 0.11923934871953587,
+    "aligned_retention_diagnostic": 0.997995702186621,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.8475407245829125,
+        "directional_permanence": 0.6337795498340294
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.8679160793977849,
+        "directional_permanence": 0.6576891694891861
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.8550691443259726,
+        "directional_permanence": 0.6259166878246639
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.8526642818878999,
+        "directional_permanence": 0.6527025359872024
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.859012567438637,
+        "directional_permanence": 0.6245034674429221
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.8571209786789665,
+        "directional_permanence": 0.6206114216241025
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.859258561737218,
+        "directional_permanence": 0.6308420515307852
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9946171604813665,
+        "directional_permanence": 0.9491521654063796
+      }
+    },
+    "seconds": 370.0
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q3_K_M",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.8891499974894185,
+    "directional_permanence": 0.6499774686045329,
+    "erased_fraction": 0.11085000251058158,
+    "aligned_retention_diagnostic": 0.9964671867004771,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.7794632803376869,
+        "directional_permanence": 0.5506791087232447
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.9995596000036153,
+        "directional_permanence": 0.6749530010116479
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.7936254990548941,
+        "directional_permanence": 0.5455269165241493
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.9994916576689837,
+        "directional_permanence": 0.6708051955078211
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.9996090430423129,
+        "directional_permanence": 0.675982431832158
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.79820655803931,
+        "directional_permanence": 0.5424081600564685
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.7954610924344375,
+        "directional_permanence": 0.547807190327095
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9946171604813665,
+        "directional_permanence": 0.9491521654063796
+      }
+    },
+    "seconds": 397.0
+  },
+  {
+    "repair": "resta-dose3-s0.25",
+    "drift": "drift-dose3",
+    "qtype": "Q2_K",
+    "n_tensors": 290,
+    "n_tensors_edited": 290,
+    "n_weights_edited": 3258209200,
+    "share_of_weights_edited": 0.9728240857163386,
+    "permanence": 0.9387288167377343,
+    "directional_permanence": 0.6418127853791585,
+    "erased_fraction": 0.06127118326226567,
+    "aligned_retention_diagnostic": 0.9895788432096129,
+    "by_module": {
+      "attn_k": {
+        "n_tensors": 36,
+        "n_edited": 36416702,
+        "permanence": 0.9948030988638126,
+        "directional_permanence": 0.6171425133445637
+      },
+      "attn_norm": {
+        "n_tensors": 36,
+        "n_edited": 71999,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "attn_output": {
+        "n_tensors": 36,
+        "n_edited": 146376023,
+        "permanence": 0.7992824548867542,
+        "directional_permanence": 0.5666433976007123
+      },
+      "attn_q": {
+        "n_tensors": 36,
+        "n_edited": 146130718,
+        "permanence": 0.9955276685905287,
+        "directional_permanence": 0.6029912068179942
+      },
+      "attn_v": {
+        "n_tensors": 36,
+        "n_edited": 36597385,
+        "permanence": 0.9994826679556477,
+        "directional_permanence": 0.6669609864202046
+      },
+      "ffn_down": {
+        "n_tensors": 36,
+        "n_edited": 787419162,
+        "permanence": 0.7967588589112846,
+        "directional_permanence": 0.5432092380296938
+      },
+      "ffn_gate": {
+        "n_tensors": 36,
+        "n_edited": 786768477,
+        "permanence": 0.9957893063882883,
+        "directional_permanence": 0.5949324199983167
+      },
+      "ffn_up": {
+        "n_tensors": 36,
+        "n_edited": 786976326,
+        "permanence": 0.9959556051499318,
+        "directional_permanence": 0.6009198680774547
+      },
+      "output_norm": {
+        "n_tensors": 1,
+        "n_edited": 2048,
+        "permanence": 1.0,
+        "directional_permanence": 1.0
+      },
+      "token_embd": {
+        "n_tensors": 1,
+        "n_edited": 531450360,
+        "permanence": 0.9946171604813665,
+        "directional_permanence": 0.9491521654063796
+      }
+    },
+    "seconds": 478.6
+  }
+]

@@ -44,8 +44,16 @@ def _write(path, tensors: dict[str, np.ndarray], qtype: GGMLQuantizationType | N
     w.close()
 
 
-@pytest.fixture()
-def pair(tmp_path):
+@pytest.fixture(params=[None, GGMLQuantizationType.BF16], ids=["f32_ref", "bf16_ref"])
+def pair(request, tmp_path):
+    """Two checkpoints and their Q8_0 versions.
+
+    The full-precision pair is written both as F32 and as **BF16**, because the
+    real pipeline's reference files are BF16 and that read path goes through
+    ``gguf.quants.dequantize`` rather than a plain astype. A silent failure there
+    would corrupt every survival number.
+    """
+    ref_qt = request.param
     rng = np.random.default_rng(0)
     before = {
         "blk.0.attn_q.weight": rng.normal(0, 0.02, (ROWS, COLS)).astype(np.float32),
@@ -54,8 +62,14 @@ def pair(tmp_path):
     after = {k: v.copy() for k, v in before.items()}
     # Edit only the attention tensor, by a large amount (several Q8_0 bins).
     after["blk.0.attn_q.weight"] += 0.01
+    if ref_qt is GGMLQuantizationType.BF16:
+        # Round the references to what BF16 can represent, so the test compares
+        # against the values the files actually hold.
+        for d in (before, after):
+            for k, v in d.items():
+                d[k] = dequantize(quantize(v, ref_qt), ref_qt).reshape(v.shape)
     paths = {}
-    for tag, tensors, qt in (("db", before, None), ("rb", after, None),
+    for tag, tensors, qt in (("db", before, ref_qt), ("rb", after, ref_qt),
                              ("dq", before, GGMLQuantizationType.Q8_0),
                              ("rq", after, GGMLQuantizationType.Q8_0)):
         paths[tag] = tmp_path / f"{tag}.gguf"
