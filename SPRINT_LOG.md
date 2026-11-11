@@ -845,6 +845,11 @@ deployment-relevant sentence.
 
 ### Honest limits on these behavioural numbers
 
+> **Superseded later the same day.** The dev-split detectability claim in this section and the
+> one below it did not replicate on the 663-prompt test split. See *"Test split, run once: the
+> headline was wrong and is retracted"* at the end of this log. The weight-level results are
+> unaffected. Left in place as written, because the point of this log is what I believed when.
+
 **The retention ratios are noisy and I am not going to over-read them.** Retention divides by the
 repair's own BF16 benefit, which is **17 prompts** for the sparse arm (11.3 points of 150) and
 **26** for the dense arm. The non-monotonicity in the table is the signature of that noise, not
