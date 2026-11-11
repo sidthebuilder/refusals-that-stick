@@ -12,9 +12,10 @@ Standard library only, so the analysis runs anywhere.
 from __future__ import annotations
 
 import math
-from typing import Sequence
+from typing import Sequence  # noqa: F401 - used in annotations below
 
-__all__ = ["binom_two_sided", "mcnemar_exact", "wilson", "holm", "paired_binary"]
+__all__ = ["binom_two_sided", "mcnemar_exact", "wilson", "holm", "paired_binary",
+           "ranks", "spearman"]
 
 
 def binom_two_sided(k: int, n: int, p: float = 0.5) -> float:
@@ -78,3 +79,34 @@ def paired_binary(a: dict[str, bool], b: dict[str, bool]) -> dict:
         "discordant_b_only": b_only,
         "p_mcnemar": mcnemar_exact(a_only, b_only),
     }
+
+
+def ranks(values: Sequence[float]) -> list[float]:
+    """Ranks from 1, with tied values sharing their average rank."""
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    out = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        shared = (i + j) / 2 + 1
+        for k in range(i, j + 1):
+            out[order[k]] = shared
+        i = j + 1
+    return out
+
+
+def spearman(x: Sequence[float], y: Sequence[float]) -> float | None:
+    """Spearman rank correlation. ``None`` when either side has no variation."""
+    if len(x) != len(y):
+        raise ValueError(f"length mismatch: {len(x)} vs {len(y)}")
+    if len(x) < 3:
+        return None
+    rx, ry = ranks(x), ranks(y)
+    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
+    dx = [a - mx for a in rx]
+    dy = [b - my for b in ry]
+    num = sum(a * b for a, b in zip(dx, dy))
+    den = math.sqrt(sum(a * a for a in dx) * sum(b * b for b in dy))
+    return None if den == 0 else num / den

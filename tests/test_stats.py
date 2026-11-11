@@ -8,7 +8,7 @@ import math
 import pytest
 
 from refusals_that_stick.stats import (binom_two_sided, holm, mcnemar_exact, paired_binary,
-                                       wilson)
+                                       ranks, spearman, wilson)
 
 
 def test_binom_symmetric_known_value():
@@ -73,3 +73,47 @@ def test_paired_binary_counts():
     assert (r["discordant_a_only"], r["discordant_b_only"]) == (0, 2)
     assert r["p_mcnemar"] == pytest.approx(0.5)
     assert math.isfinite(r["ci_a"][0])
+
+
+# --- ranks and Spearman ---------------------------------------------------------
+
+def test_ranks_no_ties():
+    assert ranks([10.0, 30.0, 20.0]) == [1.0, 3.0, 2.0]
+
+
+def test_ranks_ties_share_average():
+    # Two values tied for ranks 2 and 3 both get 2.5.
+    assert ranks([1.0, 5.0, 5.0, 9.0]) == [1.0, 2.5, 2.5, 4.0]
+
+
+def test_ranks_all_tied():
+    assert ranks([7.0, 7.0, 7.0]) == [2.0, 2.0, 2.0]
+
+
+def test_spearman_perfect_monotone():
+    assert spearman([1, 2, 3, 4], [10, 20, 30, 40]) == pytest.approx(1.0)
+    assert spearman([1, 2, 3, 4], [40, 30, 20, 10]) == pytest.approx(-1.0)
+
+
+def test_spearman_is_rank_based_not_linear():
+    # A strictly increasing but wildly non-linear map still gives exactly 1.
+    assert spearman([1, 2, 3, 4, 5], [1, 4, 9, 1000, 1e6]) == pytest.approx(1.0)
+
+
+def test_spearman_known_value():
+    # x=[1,2,3,4,5], y=[2,1,4,3,5] -> one swapped pair at each end.
+    # d = [-1, 1, -1, 1, 0], sum d^2 = 4, rho = 1 - 6*4/(5*24) = 0.8
+    assert spearman([1, 2, 3, 4, 5], [2, 1, 4, 3, 5]) == pytest.approx(0.8)
+
+
+def test_spearman_no_variation_is_none():
+    assert spearman([1, 1, 1, 1], [1, 2, 3, 4]) is None
+
+
+def test_spearman_too_few_points():
+    assert spearman([1, 2], [2, 1]) is None
+
+
+def test_spearman_length_mismatch_raises():
+    with pytest.raises(ValueError, match="length mismatch"):
+        spearman([1, 2, 3], [1, 2])

@@ -881,6 +881,62 @@ def repairs(variant: str, resta: str = "0.1,0.25,0.5", ctheta: str = "0.5,1,2",
         json.dumps({"repairs": built, "ladders": ladders_out}, indent=2, default=str))
 
 
+@app.function(image=quant_image, volumes={VOL: volume}, cpu=4.0, memory=49152,
+              timeout=60 * 40)
+def survival_job(repair: str, drift: str, precision: str) -> dict:
+    """Per-tensor survival of one repair's edit at one precision, from the real GGUF files.
+
+    Memory is sized for RESTA, which edits the tied 262,144 x 2,048 embedding. One
+    tensor is held at a time, but that one needs roughly 31 GB: float32 copies of
+    the two BF16 and two quantized versions, plus float64 intended, realized and
+    residual arrays, plus the boolean mask of edited positions.
+    """
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.survival_map import survival_map
+
+    volume.reload()
+    g = Path(GGUF_ROOT)
+    res = survival_map(str(g / drift / "BF16.gguf"), str(g / repair / "BF16.gguf"),
+                       str(g / drift / f"{precision}.gguf"),
+                       str(g / repair / f"{precision}.gguf"), qtype_label=precision)
+    res.update(repair=repair, drift=drift)
+    out = Path(VOL) / "survival" / repair / f"{precision}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(res, default=str))
+    volume.commit()
+    return res
+
+
+@app.local_entrypoint()
+def survival(repairs: str, drift: str = "drift-dose3",
+             precisions: str = "Q8_0,Q6_K,Q4_K_M,Q4_0,Q3_K_M,Q2_K", tag: str = "run"):
+    """Weight-level survival of each repair's edit at every quantization (CPU).
+
+    The per-tensor rows stay on the volume; only the pooled summary and the
+    per-module breakdown come back, so the local file stays readable.
+    """
+    root = Path(__file__).parent
+    spec = [(r, drift, p) for r in repairs.split(",") for p in precisions.split(",")]
+    keep = ("qtype", "n_tensors", "n_tensors_edited", "n_weights_edited",
+            "share_of_weights_edited", "permanence", "directional_permanence",
+            "erased_fraction", "aligned_retention_diagnostic", "by_module", "seconds")
+    results = []
+    for (r, d, p), res in zip(spec, survival_job.starmap(spec, return_exceptions=True)):
+        if isinstance(res, dict):
+            row = {"repair": r, "drift": d, **{k: res.get(k) for k in keep}}
+        else:
+            row = {"repair": r, "drift": d, "qtype": p, "error": repr(res)}
+        results.append(row)
+        print(f"{r:24s} {p:7s} perm={row.get('permanence')} "
+              f"dir_perm={row.get('directional_permanence')} "
+              f"edited={row.get('share_of_weights_edited')} {row.get('error', '')}")
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"survival_{tag}.json").write_text(
+        json.dumps(results, indent=2, default=str))
+
+
 @app.local_entrypoint()
 def grid(models: str, split: str = "dev", tag: str = "grid"):
     """Full ladder for each model (cached rungs are reused), then every (model, precision) cell."""
