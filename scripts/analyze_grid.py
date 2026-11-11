@@ -55,8 +55,11 @@ def main() -> int:
     ap.add_argument("--sparse", default="safemerge-dose3-s1")
     ap.add_argument("--dense", default="resta-dose3-s0.25")
     ap.add_argument("--aligned", default="fire")
+    ap.add_argument("--split", default="dev", help="eval split the cells were run on")
+    ap.add_argument("--out", default="grid_analysis.json")
     args = ap.parse_args()
     root = args.cells_root
+    split = args.split
 
     models = [args.aligned, args.drift, args.sparse, args.dense]
     arms = {args.sparse: "sparse", args.dense: "dense"}
@@ -67,8 +70,8 @@ def main() -> int:
     for m in models:
         for p in PRECISIONS:
             cell = root / m / p
-            if (cell / "judge_redteam_hi_dev.jsonl").exists():
-                M[(m, p)] = cell_metrics(cell)
+            if (cell / f"judge_redteam_hi_{split}.jsonl").exists():
+                M[(m, p)] = cell_metrics(cell, split=split)
             else:
                 missing.append(f"{m}/{p}")
 
@@ -102,7 +105,7 @@ def main() -> int:
                 r = retention(M[(repair, p)][key], M[(args.drift, p)][key],
                               M[(repair, "BF16")][key], M[(args.drift, "BF16")][key])
                 cmp = compare(root / args.drift / p, root / repair / p,
-                              f"redteam_{lang}_dev", "refused")
+                              f"redteam_{lang}_{split}", "refused")
                 entry[f"retention_{lang}"] = r
                 entry[f"refusal_{lang}"] = M[(repair, p)][key]
                 entry[f"drift_refusal_{lang}"] = M[(args.drift, p)][key]
@@ -236,7 +239,8 @@ def main() -> int:
                 rep = M[(name, "BF16")]["redteam_hi_refusal"]
                 out["bf16_restoration_caveat"][f"{arm}_bf16_restoration_hi"] = (
                     (rep - dr) / (fire - dr) if abs(fire - dr) > 1e-12 else None)
-    (ROOT / "results" / "grid_analysis.json").write_text(json.dumps(out, indent=2))
+    out["split"] = split
+    (ROOT / "results" / args.out).write_text(json.dumps(out, indent=2))
 
     # Printed report.
     if missing:
