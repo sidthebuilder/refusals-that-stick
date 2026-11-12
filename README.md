@@ -200,8 +200,9 @@ computed.
 | Whole model at Q8_0 | 290 | 91.1% | 18.6% | +66.9% |
 
 - **Checked on a real file.** The protected Q4_K_M file built with `--tensor-type` measures
-  directional survival 0.741, identical to the computed value, and none of the other 275 tensors
-  changed type. ([`results/protection_check.json`](./results/protection_check.json))
+  exactly the computed values: 18.6% of edited weights erased, and directional survival 0.741
+  over all edited weights, which is 91.1% intended among the 81.4% that moved. None of the other
+  275 tensors changed type. ([`results/protection_check.json`](./results/protection_check.json))
 - **Edit-aware protection is the practical fix.** It gives Q8_0-level survival for 7.5% more file
   size, against 66.9% for the whole model at Q8_0. A developer knows which tensors their repair
   edited, so it needs no circuit discovery. The dense repair edits every tensor, so the same
