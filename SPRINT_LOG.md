@@ -1009,3 +1009,37 @@ What changes and what does not:
 and `moved_against_fraction` for every row, so the comparison cannot be made against the wrong
 baseline again. README and abstract corrected. This is the fourth of my own errors in this log,
 after the decoding misdiagnosis, the over-refusal baseline and the dev-split headline.
+
+---
+
+## 12 Nov 2026 — Fix 1 (mixed precision), rule fixed before any number is computed
+
+Pre-registered fix 1 keeps chosen tensors at Q8_0 inside a lower-precision file
+(`llama-quantize --tensor-type`), against a random control matched on total bytes. It was
+pre-registered for C-ΔΘ, which restored nothing at usable strengths, so it is applied here to the
+sparse arm (SafeMerge α1.0) and, for completeness, the dense arm (RESTA α0.25). Deviation logged
+now, before any result.
+
+**Why most of this can be computed rather than run.** Q8_0 quantizes each tensor independently of
+every other tensor, so a tensor kept at Q8_0 inside a Q4_K_M file is bit-identical to the same
+tensor in the full Q8_0 file, and an unprotected tensor is identical to its Q4_K_M version. The
+per-tensor survival maps already measured at every precision therefore give the exact weight-level
+result of any protection set. This holds if `--tensor-type` leaves the types of the other tensors
+unchanged; one protected file is built and measured on Modal to check that assumption.
+
+**Arms, all at a Q4_K_M base and repeated at a Q4_0 base:**
+
+1. **Edit-aware:** the 15 tensors the sparse repair edits (320M parameters).
+2. **Circuit-aware (fix 1 as pre-registered):** CircuitKIT's refusal circuit, the 28 tensors of
+   layers 0, 14, 16 and 20 (about 312M parameters, close to arm 1 in size).
+3. **Random control:** tensors drawn at random from the 253 quantized tensors until their total
+   parameter count matches arm 1, which matches total bytes at Q8_0. Seeds 0, 1 and 2 as
+   pre-registered, plus 10,000 seeds for the full distribution.
+
+**Prediction stated in advance.** Arm 1 equals the Q8_0 row by construction (sparse: 0.741
+directional, 0.911 intended among moved), so it is not evidence on its own. The tests are:
+(a) does the circuit arm beat random at equal bytes (H4 as registered); (b) how far is each arm
+from arm 1; (c) the file-size cost of arm 1 against the whole model at Q8_0.
+
+**Success rule for H4:** the circuit arm's directional permanence exceeds that of all three
+pre-registered random seeds at both bases. Otherwise H4 is not supported.
