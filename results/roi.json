@@ -1,0 +1,133 @@
+{
+  "requests": 10000,
+  "token_mix_from": "fire Q4_K_M, test split",
+  "mean_prompt_tokens": 416.87421383647796,
+  "mean_completion_tokens": 115.85085354896675,
+  "self_hosted": [
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 248123,
+      "generate_seconds": 526.1,
+      "requests_per_second": 4.231134765253754,
+      "completion_tokens_per_second": 471.62706709750995,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 111.46585804132974,
+      "model": "fire",
+      "precision": "BF16",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 1.2801924228811024,
+      "cost_per_mtok_output": 1.1485063187746938
+    },
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 257884,
+      "generate_seconds": 417.6,
+      "requests_per_second": 5.330459770114942,
+      "completion_tokens_per_second": 617.5383141762452,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 115.85085354896675,
+      "model": "fire",
+      "precision": "Q4_K_M",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 1.0161725067385445,
+      "cost_per_mtok_output": 0.8771385584216159
+    },
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 184859,
+      "generate_seconds": 457.0,
+      "requests_per_second": 4.8708971553610505,
+      "completion_tokens_per_second": 404.5054704595186,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 83.04537286612758,
+      "model": "safemerge-dose3-s1",
+      "precision": "BF16",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 1.1120470200658878,
+      "cost_per_mtok_output": 1.33908366196218
+    },
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 187025,
+      "generate_seconds": 275.5,
+      "requests_per_second": 8.079854809437387,
+      "completion_tokens_per_second": 678.8566243194192,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 84.01841868823001,
+      "model": "safemerge-dose3-s1",
+      "precision": "Q4_K_M",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 0.6703915843066784,
+      "cost_per_mtok_output": 0.7979102615514859
+    },
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 153358,
+      "generate_seconds": 352.7,
+      "requests_per_second": 6.31131273036575,
+      "completion_tokens_per_second": 434.8114544939042,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 68.89398023360287,
+      "model": "resta-dose3-s0.25",
+      "precision": "BF16",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 0.8582472297094937,
+      "cost_per_mtok_output": 1.245750683585684
+    },
+    {
+      "requests": 2226,
+      "prompt_tokens": 927962,
+      "completion_tokens": 156993,
+      "generate_seconds": 254.0,
+      "requests_per_second": 8.763779527559056,
+      "completion_tokens_per_second": 618.0826771653543,
+      "mean_prompt_tokens": 416.87421383647796,
+      "mean_completion_tokens": 70.52695417789758,
+      "model": "resta-dose3-s0.25",
+      "precision": "Q4_K_M",
+      "gpu": "Modal L40S",
+      "cost_per_10k": 0.618074273734651,
+      "cost_per_mtok_output": 0.8763660375515681
+    }
+  ],
+  "apis": {
+    "gpt-6-luna": {
+      "input_per_mtok": 0.1,
+      "output_per_mtok": 0.5,
+      "cost_per_10k": 0.9961284815813117,
+      "cost_per_10k_output_only": 0.5792542677448337
+    },
+    "gpt-4o-mini": {
+      "input_per_mtok": 0.15,
+      "output_per_mtok": 0.6,
+      "cost_per_10k": 1.3204164420485174,
+      "cost_per_10k_output_only": 0.6951051212938004
+    },
+    "gpt-5-mini": {
+      "input_per_mtok": 0.25,
+      "output_per_mtok": 2.0,
+      "cost_per_10k": 3.3592026055705295,
+      "cost_per_10k_output_only": 2.3170170709793347
+    },
+    "gpt-6.1-sol": {
+      "input_per_mtok": 2.0,
+      "output_per_mtok": 10.0,
+      "cost_per_10k": 19.92256963162623,
+      "cost_per_10k_output_only": 11.585085354896673
+    }
+  },
+  "gpu_prices": {
+    "Modal L40S": {
+      "usd_per_hour": 1.95,
+      "source": "https://modal.com/blog/introducing-l40s ; https://computeprices.com/providers/modal/gpus/l40s"
+    }
+  },
+  "api_source": "https://developers.openai.com/api/docs/pricing",
+  "prices_checked": "2026-11-12",
+  "licence_note": "Tiny Aya is CC-BY-NC: self-hosting is for research and non-commercial use"
+}

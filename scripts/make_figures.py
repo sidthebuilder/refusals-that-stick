@@ -290,12 +290,70 @@ def fig_power(qc: dict) -> Path:
     return save(fig, "power_curve.png")
 
 
+# --------------------------------------------------------------------------------------
+def fig_protection(pa: dict) -> Path:
+    fig = plt.figure(figsize=(12, 6.2))
+    header(fig, "Keeping the repaired tensors at 8 bits restores their survival",
+           "Sparse repair: of the edited weights that move, the share that move the intended "
+           "way (coin flip: 50%), when chosen tensors stay at Q8_0 inside a 4-bit file.")
+    arms = [("none", "No protection"), ("random", "Random tensors,\nsame bytes"),
+            ("circuit", "CircuitKIT\nrefusal circuit"), ("edit_aware", "The 15 tensors\nthe repair edited"),
+            ("full_q8_0", "Whole model\nat Q8_0")]
+    for i, base in enumerate(("Q4_K_M", "Q4_0")):
+        block = pa["results"][base]["arms"]["sparse"]
+        res = pa["results"][base]
+        ax = fig.add_axes([0.07 + i * 0.47, 0.25, 0.42, 0.53])
+        full_size = res["q8_payload_bytes"] / res["base_payload_bytes"] - 1
+        ticks = []
+        for x, (key, label) in enumerate(arms):
+            top = None
+            if key == "random":
+                d = block["random_distribution"]["direction_among_moved"]
+                val = d["mean"]
+                size = block["random_distribution"]["size_increase"]["mean"]
+                ax.bar(x, val, color="#9ca3af", width=0.62)
+                ax.plot([x, x], [d["p05"], d["p95"]], color=INK, linewidth=1.6)
+                for yy in (d["p05"], d["p95"]):
+                    ax.plot([x - 0.1, x + 0.1], [yy, yy], color=INK, linewidth=1.6)
+                top = d["p95"]
+            elif key == "full_q8_0":
+                val, size = block["full_q8_0"]["direction_among_moved"], full_size
+                ax.bar(x, val, color="#e5e7eb", width=0.62, edgecolor=MUTED, linewidth=1)
+            else:
+                val, size = block[key]["direction_among_moved"], block[key]["size_increase"]
+                colour = {"none": ERASED, "circuit": "#2563eb", "edit_aware": SPARSE}[key]
+                ax.bar(x, val, color=colour, width=0.62)
+            ax.text(x, max(val, top or 0) + 0.03, f"{val:.1%}", ha="center", fontsize=11,
+                    fontweight="bold", color=INK)
+            ticks.append(f"{label}\n" + ("size +0%" if key == "none" else f"size +{size:.1%}"))
+        ax.axhline(0.5, color=MUTED, linewidth=1, linestyle=":")
+        ax.text(4.45, 0.505, "coin flip", fontsize=8.5, color=MUTED, ha="right", va="bottom")
+        ax.set_xticks(range(len(arms)))
+        ax.set_xticklabels(ticks, fontsize=9, linespacing=1.35)
+        ax.set_ylim(0, 1)
+        ax.set_yticks([0, 0.25, 0.5, 0.75, 1])
+        ax.set_yticklabels(["0%", "25%", "50%", "75%", "100%"])
+        ax.set_title(f"{base} file", loc="left", fontsize=12, fontweight="bold", color=INK)
+        ax.grid(axis="y", color=GRID)
+        ax.set_axisbelow(True)
+    fig.text(0.07, 0.065, "Size: file-size increase over the plain 4-bit file. Random bar: mean "
+                          "of 10,000 random tensor sets matched on bytes, whisker 5–95%.",
+             fontsize=9, color=MUTED)
+    footer(fig, "Source: results/protection_analysis.json, computed exactly from the per-tensor "
+                "survival maps (Q8_0 quantizes each tensor independently); checked against one "
+                "protected file built with llama-quantize --tensor-type.")
+    return save(fig, "protection.png")
+
+
 def main() -> int:
     surv = load("survival_analysis.json")["rows"]
     qc = load("quant_cost_test.json")
     sel = load("repair_selection.json")
-    for p in (fig_overview(surv, qc), fig_frontier(sel), fig_survival(surv),
-              fig_behaviour(qc), fig_power(qc)):
+    figs = [fig_overview(surv, qc), fig_frontier(sel), fig_survival(surv), fig_behaviour(qc),
+            fig_power(qc)]
+    if (RES / "protection_analysis.json").exists():
+        figs.append(fig_protection(load("protection_analysis.json")))
+    for p in figs:
         print(f"wrote {p.relative_to(ROOT)}")
     return 0
 

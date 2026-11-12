@@ -59,4 +59,6 @@ token, so llama.cpp generates past it, corrupting 49–55% of short answers unti
 Plan frozen before any run (`PREREGISTRATION.md`); every deviation and every self-correction
 logged with evidence (`SPRINT_LOG.md`), including four of my own errors, each corrected: a
 decoding misdiagnosis, an over-refusal baseline, a dev-split headline and a chance baseline.
-CPU test suite, one pinned llama.cpp commit. Harmful completions are never published.
+174 CPU tests, one pinned llama.cpp commit. Harmful completions are never published.
+
+Website: https://sidthebuilder.github.io/refusals-that-stick/

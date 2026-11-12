@@ -1,0 +1,477 @@
+{
+  "assumption": "--tensor-type leaves every other tensor's type unchanged; checked by building one protected file",
+  "sparse_edited_tensors": [
+    "blk.0.attn_q.weight",
+    "blk.0.ffn_gate.weight",
+    "blk.0.ffn_up.weight",
+    "blk.1.ffn_gate.weight",
+    "blk.11.ffn_gate.weight",
+    "blk.15.ffn_gate.weight",
+    "blk.17.ffn_gate.weight",
+    "blk.2.ffn_gate.weight",
+    "blk.23.ffn_gate.weight",
+    "blk.27.ffn_gate.weight",
+    "blk.33.ffn_gate.weight",
+    "blk.34.ffn_gate.weight",
+    "blk.34.ffn_up.weight",
+    "blk.35.ffn_gate.weight",
+    "blk.35.ffn_up.weight"
+  ],
+  "circuit_tensors": [
+    "blk.0.attn_k.weight",
+    "blk.0.attn_output.weight",
+    "blk.0.attn_q.weight",
+    "blk.0.attn_v.weight",
+    "blk.0.ffn_down.weight",
+    "blk.0.ffn_gate.weight",
+    "blk.0.ffn_up.weight",
+    "blk.14.attn_k.weight",
+    "blk.14.attn_output.weight",
+    "blk.14.attn_q.weight",
+    "blk.14.attn_v.weight",
+    "blk.14.ffn_down.weight",
+    "blk.14.ffn_gate.weight",
+    "blk.14.ffn_up.weight",
+    "blk.16.attn_k.weight",
+    "blk.16.attn_output.weight",
+    "blk.16.attn_q.weight",
+    "blk.16.attn_v.weight",
+    "blk.16.ffn_down.weight",
+    "blk.16.ffn_gate.weight",
+    "blk.16.ffn_up.weight",
+    "blk.20.attn_k.weight",
+    "blk.20.attn_output.weight",
+    "blk.20.attn_q.weight",
+    "blk.20.attn_v.weight",
+    "blk.20.ffn_down.weight",
+    "blk.20.ffn_gate.weight",
+    "blk.20.ffn_up.weight"
+  ],
+  "circuit_layers": [
+    0,
+    14,
+    16,
+    20
+  ],
+  "results": {
+    "Q4_K_M": {
+      "base_payload_bytes": 2132099072.0,
+      "q8_payload_bytes": 3558776832.0,
+      "target_params": 319815680,
+      "arms": {
+        "sparse": {
+          "full_q8_0": {
+            "n_edited": 274395007,
+            "permanence": 0.8138131427442482,
+            "directional_permanence": 0.7414812471423724,
+            "erased_fraction": 0.18618685725575174,
+            "direction_among_moved": 0.9111197745492701
+          },
+          "none": {
+            "n_edited": 274395007,
+            "permanence": 0.9868136922768423,
+            "directional_permanence": 0.5486941167264023,
+            "erased_fraction": 0.01318630772315766,
+            "direction_among_moved": 0.5560260472880334,
+            "n_tensors_protected": 0,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 0,
+            "extra_bytes": 0.0,
+            "size_increase": 0.0
+          },
+          "edit_aware": {
+            "n_edited": 274395007,
+            "permanence": 0.8138131427442482,
+            "directional_permanence": 0.7414812471423724,
+            "erased_fraction": 0.18618685725575174,
+            "direction_among_moved": 0.9111197745492701,
+            "n_tensors_protected": 15,
+            "n_edited_tensors_protected": 15,
+            "params_protected": 319815680,
+            "extra_bytes": 159907840.0,
+            "size_increase": 0.07500019211114782
+          },
+          "circuit": {
+            "n_edited": 274395007,
+            "permanence": 0.9598623818982246,
+            "directional_permanence": 0.5778691337484869,
+            "erased_fraction": 0.04013761810177544,
+            "direction_among_moved": 0.6020333171154103,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 3,
+            "params_protected": 312475648,
+            "extra_bytes": 150155264.0,
+            "size_increase": 0.07042602568141824
+          },
+          "random_seed0": {
+            "n_edited": 274395007,
+            "permanence": 0.9868136922768423,
+            "directional_permanence": 0.5486941167264023,
+            "erased_fraction": 0.01318630772315766,
+            "direction_among_moved": 0.5560260472880334,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 318767104,
+            "size_increase": 0.0665761182789915
+          },
+          "random_seed1": {
+            "n_edited": 274395007,
+            "permanence": 0.9721506120554154,
+            "directional_permanence": 0.5591511510265929,
+            "erased_fraction": 0.027849387944584574,
+            "direction_among_moved": 0.5751692629646975,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 1,
+            "params_protected": 313524224,
+            "size_increase": 0.0731443984231517
+          },
+          "random_seed2": {
+            "n_edited": 274395007,
+            "permanence": 0.9868136922768423,
+            "directional_permanence": 0.5486941167264023,
+            "erased_fraction": 0.01318630772315766,
+            "direction_among_moved": 0.5560260472880334,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 313524224,
+            "size_increase": 0.062493756387695665
+          },
+          "random_distribution": {
+            "n": 10000,
+            "mean": 0.5701249621903641,
+            "p05": 0.5486941167264023,
+            "p95": 0.5971966610893907,
+            "direction_among_moved": {
+              "mean": 0.5896070105920459,
+              "p05": 0.5560260472880334,
+              "p95": 0.625899906413469
+            },
+            "n_tensors": {
+              "mean": 29.4129,
+              "p05": 22,
+              "p95": 38
+            },
+            "size_increase": {
+              "mean": 0.06872050229380774,
+              "p05": 0.06261286529934759,
+              "p95": 0.07387826300784582
+            },
+            "share_at_or_above_circuit": 0.2812
+          },
+          "H4_circuit_beats_registered_seeds": true
+        },
+        "dense": {
+          "full_q8_0": {
+            "n_edited": 3258209200,
+            "permanence": 0.9943392542136337,
+            "directional_permanence": 0.9621306326800624,
+            "erased_fraction": 0.005660745786366326,
+            "direction_among_moved": 0.967608015677664
+          },
+          "none": {
+            "n_edited": 3258209200,
+            "permanence": 0.996737493712804,
+            "directional_permanence": 0.7382726640143303,
+            "erased_fraction": 0.003262506287196046,
+            "direction_among_moved": 0.7406891670787829,
+            "n_tensors_protected": 0,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 0,
+            "extra_bytes": 0.0,
+            "size_increase": 0.0
+          },
+          "edit_aware": {
+            "n_edited": 3258209200,
+            "permanence": 0.9961330678214277,
+            "directional_permanence": 0.765588151307166,
+            "erased_fraction": 0.0038669321785722048,
+            "direction_among_moved": 0.768560121170889,
+            "n_tensors_protected": 15,
+            "n_edited_tensors_protected": 15,
+            "params_protected": 319815680,
+            "extra_bytes": 159907840.0,
+            "size_increase": 0.07500019211114782
+          },
+          "circuit": {
+            "n_edited": 3258209200,
+            "permanence": 0.9962906896831548,
+            "directional_permanence": 0.7637791931837894,
+            "erased_fraction": 0.0037093103168452167,
+            "direction_among_moved": 0.7666228351754347,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 28,
+            "params_protected": 312475648,
+            "extra_bytes": 150155264.0,
+            "size_increase": 0.07042602568141824
+          },
+          "random_seed0": {
+            "n_edited": 3258209200,
+            "permanence": 0.9964935876431753,
+            "directional_permanence": 0.7619407839128316,
+            "erased_fraction": 0.0035064123568247243,
+            "direction_among_moved": 0.7646218634631772,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 28,
+            "params_protected": 318767104,
+            "size_increase": 0.0665761182789915
+          },
+          "random_seed1": {
+            "n_edited": 3258209200,
+            "permanence": 0.9961880563101964,
+            "directional_permanence": 0.7648252021386472,
+            "erased_fraction": 0.003811943689803589,
+            "direction_among_moved": 0.7677518288780742,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 29,
+            "params_protected": 313524224,
+            "size_increase": 0.0731443984231517
+          },
+          "random_seed2": {
+            "n_edited": 3258209200,
+            "permanence": 0.9966268470422341,
+            "directional_permanence": 0.7603246169705739,
+            "erased_fraction": 0.0033731529577658795,
+            "direction_among_moved": 0.7628979885772167,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 29,
+            "params_protected": 313524224,
+            "size_increase": 0.062493756387695665
+          },
+          "random_distribution": {
+            "n": 10000,
+            "mean": 0.7628586117372075,
+            "p05": 0.7602648062009032,
+            "p95": 0.7650880499017682,
+            "direction_among_moved": {
+              "mean": 0.765624419786011,
+              "p05": 0.7628587633088888,
+              "p95": 0.7680250512261384
+            },
+            "n_tensors": {
+              "mean": 29.4129,
+              "p05": 22,
+              "p95": 38
+            },
+            "size_increase": {
+              "mean": 0.06872050229380774,
+              "p05": 0.06261286529934759,
+              "p95": 0.07387826300784582
+            },
+            "share_at_or_above_circuit": 0.3019
+          },
+          "H4_circuit_beats_registered_seeds": false
+        }
+      }
+    },
+    "Q4_0": {
+      "base_payload_bytes": 2022612992.0,
+      "q8_payload_bytes": 3558776832.0,
+      "target_params": 319815680,
+      "arms": {
+        "sparse": {
+          "full_q8_0": {
+            "n_edited": 274395007,
+            "permanence": 0.8138131427442482,
+            "directional_permanence": 0.7414812471423724,
+            "erased_fraction": 0.18618685725575174,
+            "direction_among_moved": 0.9111197745492701
+          },
+          "none": {
+            "n_edited": 274395007,
+            "permanence": 0.5465917242437287,
+            "directional_permanence": 0.31236425158421344,
+            "erased_fraction": 0.45340827575627135,
+            "direction_among_moved": 0.5714763647700751,
+            "n_tensors_protected": 0,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 0,
+            "extra_bytes": 0.0,
+            "size_increase": 0.0
+          },
+          "edit_aware": {
+            "n_edited": 274395007,
+            "permanence": 0.8138131427442482,
+            "directional_permanence": 0.7414812471423724,
+            "erased_fraction": 0.18618685725575174,
+            "direction_among_moved": 0.9111197745492701,
+            "n_tensors_protected": 15,
+            "n_edited_tensors_protected": 15,
+            "params_protected": 319815680,
+            "extra_bytes": 159907840.0,
+            "size_increase": 0.07906002810843213
+          },
+          "circuit": {
+            "n_edited": 274395007,
+            "permanence": 0.5877069075094359,
+            "directional_permanence": 0.37788622370960273,
+            "erased_fraction": 0.4122930924905642,
+            "direction_among_moved": 0.6429841454663107,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 3,
+            "params_protected": 312475648,
+            "extra_bytes": 156237824.0,
+            "size_increase": 0.07724553566004187
+          },
+          "random_seed0": {
+            "n_edited": 274395007,
+            "permanence": 0.5465917242437287,
+            "directional_permanence": 0.31236425158421344,
+            "erased_fraction": 0.45340827575627135,
+            "direction_among_moved": 0.5714763647700751,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 318767104,
+            "size_increase": 0.07880081490151923
+          },
+          "random_seed1": {
+            "n_edited": 274395007,
+            "permanence": 0.5652620749035714,
+            "directional_permanence": 0.3403807161840959,
+            "erased_fraction": 0.4347379250964286,
+            "direction_among_moved": 0.6021644318560763,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 1,
+            "params_protected": 313524224,
+            "size_increase": 0.07750474886695477
+          },
+          "random_seed2": {
+            "n_edited": 274395007,
+            "permanence": 0.5465917242437287,
+            "directional_permanence": 0.31236425158421344,
+            "erased_fraction": 0.45340827575627135,
+            "direction_among_moved": 0.5714763647700751,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 313524224,
+            "size_increase": 0.07750474886695477
+          },
+          "random_distribution": {
+            "n": 10000,
+            "mean": 0.36015399202325366,
+            "p05": 0.31236425158421344,
+            "p95": 0.4102959169370017,
+            "direction_among_moved": {
+              "mean": 0.6236131658033464,
+              "p05": 0.5714763647700751,
+              "p95": 0.6791652644684917
+            },
+            "n_tensors": {
+              "mean": 29.4129,
+              "p05": 22,
+              "p95": 38
+            },
+            "size_increase": {
+              "mean": 0.07847583930401639,
+              "p05": 0.07750474886695477,
+              "p95": 0.08035609414299659
+            },
+            "share_at_or_above_circuit": 0.1989
+          },
+          "H4_circuit_beats_registered_seeds": true
+        },
+        "dense": {
+          "full_q8_0": {
+            "n_edited": 3258209200,
+            "permanence": 0.9943392542136337,
+            "directional_permanence": 0.9621306326800624,
+            "erased_fraction": 0.005660745786366326,
+            "direction_among_moved": 0.967608015677664
+          },
+          "none": {
+            "n_edited": 3258209200,
+            "permanence": 0.8807606512804641,
+            "directional_permanence": 0.680031691642145,
+            "erased_fraction": 0.11923934871953587,
+            "direction_among_moved": 0.7720959044361303,
+            "n_tensors_protected": 0,
+            "n_edited_tensors_protected": 0,
+            "params_protected": 0,
+            "extra_bytes": 0.0,
+            "size_increase": 0.0
+          },
+          "edit_aware": {
+            "n_edited": 3258209200,
+            "permanence": 0.8936208690958211,
+            "directional_permanence": 0.7119954719297951,
+            "erased_fraction": 0.1063791309041789,
+            "direction_among_moved": 0.7967534069008513,
+            "n_tensors_protected": 15,
+            "n_edited_tensors_protected": 15,
+            "params_protected": 319815680,
+            "extra_bytes": 159907840.0,
+            "size_increase": 0.07906002810843213
+          },
+          "circuit": {
+            "n_edited": 3258209200,
+            "permanence": 0.8934074905319155,
+            "directional_permanence": 0.7107318247091071,
+            "erased_fraction": 0.10659250946808449,
+            "direction_among_moved": 0.7955292878571599,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 28,
+            "params_protected": 312475648,
+            "extra_bytes": 156237824.0,
+            "size_increase": 0.07724553566004187
+          },
+          "random_seed0": {
+            "n_edited": 3258209200,
+            "permanence": 0.8935064587013013,
+            "directional_permanence": 0.7111584520110004,
+            "erased_fraction": 0.10649354129869869,
+            "direction_among_moved": 0.7959186473533262,
+            "n_tensors_protected": 28,
+            "n_edited_tensors_protected": 28,
+            "params_protected": 318767104,
+            "size_increase": 0.07880081490151923
+          },
+          "random_seed1": {
+            "n_edited": 3258209200,
+            "permanence": 0.8932966643148635,
+            "directional_permanence": 0.7103586537660013,
+            "erased_fraction": 0.10670333568513649,
+            "direction_among_moved": 0.7952102388189581,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 29,
+            "params_protected": 313524224,
+            "size_increase": 0.07750474886695477
+          },
+          "random_seed2": {
+            "n_edited": 3258209200,
+            "permanence": 0.8933421862537249,
+            "directional_permanence": 0.710813365206875,
+            "erased_fraction": 0.1066578137462751,
+            "direction_among_moved": 0.7956787176789517,
+            "n_tensors_protected": 29,
+            "n_edited_tensors_protected": 29,
+            "params_protected": 313524224,
+            "size_increase": 0.07750474886695477
+          },
+          "random_distribution": {
+            "n": 10000,
+            "mean": 0.7111514175601443,
+            "p05": 0.7102601557935567,
+            "p95": 0.7121459880476674,
+            "direction_among_moved": {
+              "mean": 0.7959108768806795,
+              "p05": 0.7950978082547169,
+              "p95": 0.7967852118719131
+            },
+            "n_tensors": {
+              "mean": 29.4129,
+              "p05": 22,
+              "p95": 38
+            },
+            "size_increase": {
+              "mean": 0.07847583930401639,
+              "p05": 0.07750474886695477,
+              "p95": 0.08035609414299659
+            },
+            "share_at_or_above_circuit": 0.759
+          },
+          "H4_circuit_beats_registered_seeds": false
+        }
+      }
+    }
+  },
+  "H4_supported": true
+}

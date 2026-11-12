@@ -1043,3 +1043,39 @@ from arm 1; (c) the file-size cost of arm 1 against the whole model at Q8_0.
 
 **Success rule for H4:** the circuit arm's directional permanence exceeds that of all three
 pre-registered random seeds at both bases. Otherwise H4 is not supported.
+
+### Fix 1 results (12 Nov 2026)
+
+Computed by `scripts/analyze_protection.py` from the committed per-tensor maps
+(`results/survival_maps/`), then checked on one built file (`modal run modal_app.py::protect`).
+
+**The assumption holds.** The protected Q4_K_M files for the drifted and sparse-repaired models,
+built with `--tensor-type '^<name>$=q8_0'` for the 15 edited tensors, have those 15 tensors at Q8_0
+and every other tensor at exactly the type it has in the plain Q4_K_M file (0 of 275 changed). The
+measured survival of the edit, directional permanence 0.7414812, equals the computed value to
+every printed digit. (`results/protection_check.json`)
+
+**Sparse repair, intended among moved weights:**
+
+| Base | None | Random, same bytes (mean, 5–95%) | Circuit (28 tensors) | Edit-aware (15) | Whole model Q8_0 |
+|---|---|---|---|---|---|
+| Q4_K_M | 0.556 | 0.590 [0.556, 0.626] | 0.602 | **0.911** (+7.5% size) | 0.911 (+66.9%) |
+| Q4_0 | 0.571 | 0.624 [0.571, 0.679] | 0.643 | **0.911** (+7.9% size) | 0.911 (+75.9%) |
+
+- **H4, as registered (circuit beats random seeds 0, 1 and 2 at both bases): passes.** The rule
+  was met, but the support is weak. 28.1% (Q4_K_M) and 19.9% (Q4_0) of 10,000 random sets of the
+  same size reach the circuit's directional permanence, because only 3 of the circuit's 28 tensors
+  are among the 15 tensors SafeMerge edited. Reported as weak support, not as a confirmation.
+- **Edit-aware protection is the practical fix**, as predicted, and is not evidence on its own:
+  it equals the Q8_0 row by construction. What it adds is the cost: 7.5% more file size for
+  Q8_0-level survival, against 66.9% for the whole model at Q8_0.
+- **Dense repair:** the same budget barely helps (0.741 → 0.769 at Q4_K_M), because RESTA edits
+  every tensor and 15 of 290 protect only a small share of its edit.
+
+**Behaviour, no-harm check (dev split, 150 prompts per language, paired McNemar against the plain
+Q4_K_M file of the same repair):** Hindi valid refusal 27.3% vs 31.3% (−4.0 pt, p = 0.15), English
+36.0% vs 32.0% (+4.0 pt, p = 0.15). MMLU 0.56/0.58 vs 0.55/0.59, XSTest refusal 2%/4% vs 5%/2%,
+Hindi perplexity 8.72 vs 8.75. No detectable harm and no detectable gain; at this size neither
+was expected to be visible. (`results/protection_behaviour.json`)
+
+Cost of this step: one CPU build-and-measure job and one L40S evaluation cell, under $1.

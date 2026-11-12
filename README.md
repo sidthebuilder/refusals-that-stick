@@ -177,7 +177,43 @@ developer, the conclusion works both ways:
   Q4_K_M, only 55.6% of the sparse repair's moved weights go the intended way, and a 663-prompt
   test cannot see any loss.
 
-### 6. A control: quantization also degrades the aligned model
+### 6. A fix: keep the repaired tensors at 8 bits
+
+Pre-registered fix 1 keeps chosen tensors at Q8_0 inside a 4-bit file
+(`llama-quantize --tensor-type`), compared with a random control of the same size. Q8_0 quantizes
+each tensor on its own, so the weight-level result of any protection set follows exactly from the
+per-tensor survival maps. The arms and the success rule were logged before any number was
+computed.
+
+![Protection arms](docs/figures/protection.png)
+
+| Sparse repair, Q4_K_M file | Tensors at Q8_0 | Intended among moved | Erased | File size |
+|---|---|---|---|---|
+| No protection | 0 | 55.6% | 1.3% | +0% |
+| Random tensors, same bytes (mean of 10,000 draws) | about 29 | 59.0% | – | +6.9% |
+| CircuitKIT refusal circuit (fix 1 as pre-registered) | 28 | 60.2% | 4.0% | +7.0% |
+| **The 15 tensors the repair edited** | 15 | **91.1%** | 18.6% | **+7.5%** |
+| Whole model at Q8_0 | 290 | 91.1% | 18.6% | +66.9% |
+
+- **Checked on a real file.** The protected Q4_K_M file built with `--tensor-type` measures
+  directional survival 0.741, identical to the computed value, and none of the other 275 tensors
+  changed type. ([`results/protection_check.json`](./results/protection_check.json))
+- **Edit-aware protection is the practical fix.** It gives Q8_0-level survival for 7.5% more file
+  size, against 66.9% for the whole model at Q8_0. A developer knows which tensors their repair
+  edited, so it needs no circuit discovery. The dense repair edits every tensor, so the same
+  budget barely helps it (74.1% → 76.9%).
+- **The circuit version (H4) is weakly supported.** It beats all three pre-registered random
+  seeds, which is the logged rule. But 28% of 10,000 random sets of the same size do as well
+  (20% at a Q4_0 base), because only 3 of the circuit's 28 tensors are tensors the repair edited.
+- **Behaviour.** On the dev split (150 prompts per language) the protected file did not change
+  detectably from the plain Q4_K_M file: refusal −4.0 points in Hindi and +4.0 in English (both
+  p = 0.15), with MMLU, benign-prompt refusal and perplexity unchanged. Given the power curve
+  above, a behavioural gain could not be seen at this size either way.
+  ([`results/protection_behaviour.json`](./results/protection_behaviour.json))
+
+([`results/protection_analysis.json`](./results/protection_analysis.json))
+
+### 7. A control: quantization also degrades the aligned model
 
 Fire itself, with no fine-tune and no repair, drops from 71.3% to 55.3% Hindi refusal at Q2_K, and
 its Hindi perplexity rises from 8.40 to 12.02. This is why every repair is compared with the
@@ -210,6 +246,23 @@ not degenerate. A model quantized into gibberish is never counted as safe.
 **Benign fine-tuning drifts only the fine-tuned language.** The Hindi-only fine-tune lowered Hindi
 refusal by 4.7 points and left English unchanged (+0.7 points, p = 1.0).
 
+**Return on investment.** Throughput was measured on the test split: one NVIDIA L40S, llama.cpp
+with 32 parallel slots, 417 prompt and 116 completion tokens per request on average. At Modal's
+$1.95 per hour and OpenAI's list prices for the same tokens (checked 12 Nov 2026):
+
+| Option | Cost per 10,000 requests |
+|---|---|
+| Tiny Aya Fire Q4_K_M, rented L40S | $1.02 |
+| Sparse repair Q4_K_M, rented L40S | $0.67 |
+| `gpt-6-luna` API | $1.00 |
+| `gpt-5-mini` API | $3.36 |
+| `gpt-6.1-sol` API | $19.92 |
+
+A rented GPU roughly matches the cheapest API tier, so the case for the small model is not
+price. It is that the 2.1 GB Q4_K_M file runs on the user's own device, with no per-token bill and
+no data leaving it, which is exactly the deployment this study is about. Tiny Aya is CC-BY-NC, so
+this applies to research and non-commercial use. ([`results/roi.json`](./results/roi.json))
+
 ---
 
 ## Pre-registered hypotheses
@@ -220,7 +273,7 @@ refusal by 4.7 points and left English unchanged (+0.7 points, p = 1.0).
 | H1 | Directional survival is below 0.9 at Q4_K_M | **Supported** (0.549 sparse, 0.738 dense) |
 | H2 | Behavioural retention is lower in Hindi than in English | **Mixed** (10 of 12 dev cells; 1 of 2 test cells) |
 | H3 | The sparse and dense repairs differ in behavioural retention | **Not established** (intervals overlap) |
-| H4 | Circuit-guided mixed precision beats a random control at equal bytes | Not run |
+| H4 | Circuit-guided mixed precision beats a random control at equal bytes | **Weak** (passes the logged rule; 28% of random sets match it) |
 | H5 | A safety-calibrated importance matrix beats a generic one | Not run |
 | H6 | Weight survival predicts behavioural retention (ρ > 0.5) | **Falsified** (ρ = 0.38) |
 
@@ -259,8 +312,9 @@ checks.
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-python -m pytest tests -q            # 165 tests, CPU only, no network or API keys
+python -m pytest tests -q            # 174 tests, CPU only, no network or API keys
 python scripts/make_figures.py       # rebuilds every figure from results/ (needs matplotlib)
+python scripts/analyze_protection.py # the fix, computed from the committed survival maps
 ```
 
 The per-prompt labels behind every statistic are published in the
@@ -274,6 +328,7 @@ modal run modal_app.py::circuit      # refusal circuit
 modal run modal_app.py::repairs --variant dose3
 modal run modal_app.py::grid --models fire,drift-dose3,safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
+modal run modal_app.py::protect      # builds and checks the protected file
 ```
 
 ## Repository layout
@@ -286,7 +341,8 @@ modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
 | `scripts/` | analyses, figures, judge scoring, prior-work scan, release |
 | `results/` | every result file behind every number in this README |
 | `docs/figures/` | the figures above |
-| `tests/` | 165 CPU tests |
+| `tests/` | 174 CPU tests |
+| `index.html` | the project website |
 
 ---
 
@@ -300,8 +356,9 @@ modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
   a loss of the estimated size.
 - **Judge.** Refusal is judged by one model, validated against 150 labels from a single labeller,
   the author.
-- **Fixes not tested.** The pre-registered mixed-precision and importance-matrix fixes (H4, H5)
-  were not run.
+- **The fix is measured in the weights, not yet in behaviour.** Edit-aware protection restores
+  weight-level survival, but no test of feasible size can show its behavioural effect. The
+  importance-matrix fix (H5) was not run.
 
 ## Corrections made during the project
 

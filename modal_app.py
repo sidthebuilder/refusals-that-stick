@@ -937,6 +937,87 @@ def survival(repairs: str, drift: str = "drift-dose3",
         json.dumps(results, indent=2, default=str))
 
 
+@app.function(image=quant_image, volumes={VOL: volume}, cpu=4.0, memory=49152,
+              timeout=60 * 45)
+def protected_job(repair: str, drift: str, base: str, protect: list[str], label: str) -> dict:
+    """Fix 1 check: build drift and repair files at ``base`` with ``protect`` kept at Q8_0.
+
+    Both files get the same recipe, as in deployment. Then (a) every tensor's type is
+    compared with the plain ``base`` file, to test the assumption that --tensor-type
+    changes only the named tensors, and (b) the edit's survival is measured, to compare
+    with the value computed from the per-tensor maps.
+    """
+    import re
+    import sys
+
+    sys.path.insert(0, "/root")
+    from gguf.constants import GGMLQuantizationType
+    from gguf.gguf_reader import GGUFReader
+    from refusals_that_stick.ladder import quantize
+    from refusals_that_stick.survival_map import survival_map
+
+    def types_of(path: Path) -> dict[str, str]:
+        return {str(t.name): GGMLQuantizationType(t.tensor_type).name
+                for t in GGUFReader(str(path), "r").tensors}
+
+    volume.reload()
+    g = Path(GGUF_ROOT)
+    args: list[str] = []
+    for name in protect:
+        args += ["--tensor-type", "^" + re.escape(name) + "$=q8_0"]
+    built = {}
+    for model in (drift, repair):
+        out = g / model / f"{label}.gguf"
+        rep = quantize(g / model / "BF16.gguf", out, base, threads=4, extra_args=args)
+        mine, plain = types_of(out), types_of(g / model / f"{base}.gguf")
+        built[model] = {
+            "bytes": rep["bytes"], "base_bytes": (g / model / f"{base}.gguf").stat().st_size,
+            "seconds": rep["seconds"],
+            "protected_types": {n: mine.get(n) for n in protect},
+            "n_other_tensors_changed": sum(1 for n, t in mine.items()
+                                           if n not in protect and plain.get(n) != t),
+            "other_tensors_changed": sorted(n for n, t in mine.items()
+                                            if n not in protect and plain.get(n) != t)[:20],
+        }
+    res = survival_map(str(g / drift / "BF16.gguf"), str(g / repair / "BF16.gguf"),
+                       str(g / drift / f"{label}.gguf"), str(g / repair / f"{label}.gguf"),
+                       qtype_label=label)
+    res.update(repair=repair, drift=drift, base=base, protect=protect, built=built)
+    dest = Path(VOL) / "survival" / repair / f"{label}.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(res, default=str))
+    volume.commit()
+    return res
+
+
+@app.local_entrypoint()
+def protect(repair: str = "safemerge-dose3-s1", drift: str = "drift-dose3",
+            base: str = "Q4_K_M", label: str = "Q4_K_M-protect-edit", eval_split: str = "dev"):
+    """Build and measure the edit-aware protected file, then one no-harm behaviour cell."""
+    root = Path(__file__).parent
+    analysis = json.loads((root / "results" / "protection_analysis.json").read_text())
+    names = analysis["sparse_edited_tensors"]
+    res = protected_job.remote(repair, drift, base, names, label)
+    computed = analysis["results"][base]["arms"]["sparse"]["edit_aware"]
+    check = {
+        "label": label, "base": base, "repair": repair, "n_protected": len(names),
+        "measured": {k: res.get(k) for k in ("permanence", "directional_permanence",
+                                             "erased_fraction")},
+        "computed": {k: computed[k] for k in ("permanence", "directional_permanence",
+                                              "erased_fraction")},
+        "built": res["built"],
+    }
+    print(json.dumps(check, indent=2))
+    (root / "results" / "survival_maps" / repair).mkdir(parents=True, exist_ok=True)
+    (root / "results" / "survival_maps" / repair / f"{label}.json").write_text(
+        json.dumps({k: v for k, v in res.items() if k != "built"}, default=str))
+    cell = eval_cell.remote(repair, label, eval_split, f"{GGUF_ROOT}/{repair}/{label}.gguf")
+    check["cell"] = cell
+    print(json.dumps(cell.get("tasks", {}), indent=2))
+    (root / "results" / "protection_check.json").write_text(
+        json.dumps(check, indent=2, default=str))
+
+
 @app.local_entrypoint()
 def grid(models: str, split: str = "dev", tag: str = "grid"):
     """Full ladder for each model (cached rungs are reused), then every (model, precision) cell."""
