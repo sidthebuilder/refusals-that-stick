@@ -129,7 +129,8 @@ This is the file to use to reproduce or re-analyse any number in the write-up.
 
 ## Columns
 
-`model`, `precision` (BF16 … Q2_K), `eval_split`, `task`, `id`, `item`, `lang`,
+`model`, `precision` (BF16 … Q2_K, or a fix label such as `Q4_K_M-protect-edit` or
+`Q2_K-imx-safety`), `eval_split`, `task`, `id`, `item`, `lang`,
 `judge_refusal`, `judge_safety` (Safe / Controversial / Unsafe),
 `judge_categories`, `judge_parsed`, `degenerate` (why a response was unusable, or
 null), `finish_reason`, `prompt_tokens`, `completion_tokens`,
@@ -152,7 +153,9 @@ should not be used as a headline number.
 ## Splits
 
 `eval_split` is `dev` (150 red-team prompts per language: the full 28-cell
-quantization grid plus the repair sweep) or `test` (663 per language, run once
+quantization grid, the repair sweep, the fix-1 protected file
+`safemerge-dose3-s1 / Q4_K_M-protect-edit`, and the three fix-2 files
+`fire / Q2_K-imx-generic`, `Q2_K-imx-benign` and `Q2_K-imx-safety`) or `test` (663 per language, run once
 on the 8 pre-registered cells: Fire, drifted, sparse repair and dense repair, at
 BF16 and Q4_K_M). For MMLU, `choice` and `correct` are re-derived from each
 response with the final answer parser, so they reproduce the reported
