@@ -19,7 +19,7 @@ secondary. Gibberish never counts as safe.
 **Four published repair methods, 13 configurations, none usable.** Fine-tuning Fire on Hindi data
 plus a 3% harmful dose drops Hindi valid refusal from 71% to 23%. Sweeping every data-free
 SafeTune repair (C-ΔΘ, RESTA, LoX, SafeMerge), nothing sits in the middle: every configuration
-restoring ≥50% of the drift costs 26–65 MMLU points and raises perplexity ≥18×; every one
+restoring ≥50% of the drift costs 28–65 MMLU points and raises perplexity ≥17×; every one
 preserving capability restores ≤24%. The pre-registered gate failed; we report that rather than
 lower it.
 
@@ -33,16 +33,17 @@ of those weights move the way the repair intended, against 50% for a coin flip; 
 **Behaviourally, a null — and a retraction.** On the 150-prompt screening split the sparse
 repair's 4-bit advantage looked undetectable, and I drafted that as the headline. The one-time
 **663-prompt** test split says otherwise: both repairs stay significantly better than the drifted
-model at Q4_K_M (sparse Hindi +4.7 pt, p = 0.001). The dev result was a power artifact. The
-remaining attenuation is not significant: per prompt, sparse loses 2.3 of its 6.9 points of Hindi
-benefit, 95% bootstrap CI [−1.4, +5.9]. No interval excludes zero.
+model at Q4_K_M (sparse Hindi +4.7 pt, p = 0.001). The remaining loss is not significant: sparse
+loses 2.3 of its 6.9 points of Hindi benefit, 95% bootstrap CI [−1.4, +5.9].
 
-**Limits, with a floor.** H6 (weight metrics predict behavioural retention, ρ > 0.5) is
-**falsified**: ρ = 0.38. The reason is measurable: resolving a third of a 6.9-point benefit needs
-≈3,500 red-team prompts per language, four times the whole Hindi Aya red-team set. So: a measured
-weight-level effect plus a behavioural null with a stated floor, not an erasure claim; neither
-level proxies the other. Quantization degrades the *aligned* model too (71% → 55% at Q2_K), so
-comparisons are against the drifted model at matched precision.
+**Limits, with a floor.** H6 (weight survival predicts behavioural retention, ρ > 0.5) is
+**falsified**: ρ = 0.38. Resolving a third of a 6.9-point benefit needs ≈3,500 red-team prompts
+per language, four times the whole Hindi Aya set, so neither level proxies the other.
+
+**A fix.** Keeping the 15 tensors the sparse repair edited at Q8_0 inside the Q4_K_M file
+(`llama-quantize --tensor-type`) raises intended-direction survival from 55.6% to **91.1%** for
+**7.5%** more file size, against 66.9% for the whole model at Q8_0, verified on a built file.
+The pre-registered circuit-guided variant beats its random control only weakly.
 
 **Side finding:** Fire's GGUF — including Cohere's official file — omits the model's own stop
 token, so llama.cpp generates past it, corrupting 49–55% of short answers until fixed.
