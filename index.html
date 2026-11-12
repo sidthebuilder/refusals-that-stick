@@ -462,6 +462,14 @@
           <code>results/protection_check.json</code>, <code>results/protection_behaviour.json</code>.
         </p>
       </div>
+      <p class="section-desc" style="margin-top: 18px;">
+        <strong>Fix 2 does not work.</strong> An importance matrix calibrated on safety prompts
+        (same file size) was screened on Fire at Q2_K, where Fire loses 16 points of Hindi refusal.
+        It restored 2.7 of them (p = 0.61), against a bar of 8 points set before the run, so the
+        test split was not run. A generic and a benign-chat matrix did no better. All three cut
+        Hindi perplexity by 9–11%: the file scores better on the usual quality measure while its
+        refusal does not come back. Source: <code>results/h5_dev.json</code>.
+      </p>
     </section>
 
     <!-- Hypotheses -->
@@ -477,7 +485,7 @@
             <tr><td>H2</td><td>Behavioural retention is lower in Hindi than in English</td><td><span class="badge b-mixed">MIXED</span> 10 of 12 dev cells, 1 of 2 test cells</td></tr>
             <tr><td>H3</td><td>The sparse and dense repairs differ in behavioural retention</td><td><span class="badge b-na">NOT ESTABLISHED</span> intervals overlap</td></tr>
             <tr><td>H4</td><td>Circuit-guided precision beats a random control at equal bytes</td><td><span class="badge b-mixed">WEAK</span> passes the rule; 28% of random sets match it</td></tr>
-            <tr><td>H5</td><td>A safety-calibrated importance matrix beats a generic one</td><td><span class="badge b-na">NOT RUN</span></td></tr>
+            <tr><td>H5</td><td>A safety-calibrated importance matrix beats a generic one</td><td><span class="badge b-no">NOT SUPPORTED</span> fails its dev screen; +8.0 pt vs generic, Holm p = 0.14</td></tr>
             <tr><td>H6</td><td>Weight survival predicts behavioural retention (ρ &gt; 0.5)</td><td><span class="badge b-no">FALSIFIED</span> ρ = 0.38</td></tr>
           </tbody>
         </table>

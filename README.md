@@ -220,10 +220,35 @@ computed.
 
 ### 7. A control: quantization also degrades the aligned model
 
-Fire itself, with no fine-tune and no repair, drops from 71.3% to 55.3% Hindi refusal at Q2_K, and
-its Hindi perplexity rises from 8.40 to 12.02. This is why every repair is compared with the
-drifted model *at the same precision*: it separates "quantization undid the repair" from
-"quantization hurts this model generally".
+Fire itself, with no fine-tune and no repair, drops from 71.3% to 55.3% Hindi refusal at Q2_K
+(p = 3 × 10⁻⁶), and its Hindi perplexity rises from 8.40 to 12.02. This is why every repair is
+compared with the drifted model *at the same precision*: it separates "quantization undid the
+repair" from "quantization hurts this model generally".
+
+### 8. Fix 2: an importance matrix restores perplexity, not refusal
+
+Pre-registered fix 2 calibrates llama.cpp's importance matrix on safety prompts, at no cost in
+file size. It was applied where Fire breaks, at Q2_K, against two controls: a generic matrix
+(WikiText-2) and a benign-chat matrix (harmless prompts in the same chat format as the safety
+prompts). Each matrix saw the same amount of text. Dev split, 150 red-team prompts per language:
+
+| Fire at Q2_K | Hindi valid refusal | Hindi perplexity | MMLU (hi / en) |
+|---|---|---|---|
+| No importance matrix (as Cohere ships it) | 55.3% | 12.02 | 0.50 / 0.52 |
+| Generic matrix | 50.0% | 10.91 | 0.39 / 0.45 |
+| Benign-chat matrix | 52.7% | 10.69 | 0.49 / 0.45 |
+| Safety matrix (fix 2) | 58.0% | 10.72 | 0.48 / 0.50 |
+| BF16, for reference | 71.3% | 8.40 | 0.53 / 0.65 |
+
+- **Fix 2 does not pass its screen.** The safety matrix is 2.7 points above no matrix (p = 0.61),
+  against a bar of 8 points logged before the run, so the test split was not run. H5 is not
+  supported.
+- **Every matrix improves perplexity by 9–11%, and none restores refusal.** At this precision the
+  usual quality measure for a quantized file gets better while the safety behaviour does not.
+- The safety matrix is 8.0 points above the generic one (p = 0.029), but not after the Holm
+  correction (p = 0.14), so no difference is claimed.
+
+([`results/h5_dev.json`](./results/h5_dev.json))
 
 ---
 
@@ -279,7 +304,7 @@ this applies to research and non-commercial use. ([`results/roi.json`](./results
 | H2 | Behavioural retention is lower in Hindi than in English | **Mixed** (10 of 12 dev cells; 1 of 2 test cells) |
 | H3 | The sparse and dense repairs differ in behavioural retention | **Not established** (intervals overlap) |
 | H4 | Circuit-guided mixed precision beats a random control at equal bytes | **Weak** (passes the logged rule; 28% of random sets match it) |
-| H5 | A safety-calibrated importance matrix beats a generic one | Not run |
+| H5 | A safety-calibrated importance matrix beats a generic one | **Not supported** (fails its dev screen; +8.0 pt vs generic, Holm p = 0.14) |
 | H6 | Weight survival predicts behavioural retention (ρ > 0.5) | **Falsified** (ρ = 0.38) |
 
 ¹ Pre-registered with C-ΔΘ as the sparse repair. C-ΔΘ restored nothing at usable strengths, so
@@ -311,6 +336,54 @@ English translation from the same dataset. Splits: 100 prompts for calibration, 
 screening, 663 for the one-time test. XSTest was translated into Hindi with back-translation
 checks.
 
+### Models and datasets
+
+| Model | Role | Licence |
+|---|---|---|
+| [`CohereLabs/tiny-aya-fire`](https://huggingface.co/CohereLabs/tiny-aya-fire) | the model under study | CC-BY-NC-4.0 |
+| [`CohereLabs/tiny-aya-base`](https://huggingface.co/CohereLabs/tiny-aya-base) | the base of the safety vector (Fire − base) that the repairs use | CC-BY-NC-4.0 |
+| [`CohereLabs/tiny-aya-fire-GGUF`](https://huggingface.co/CohereLabs/tiny-aya-fire-GGUF) | Cohere's published files, the reference for the bit-identity check | CC-BY-NC-4.0 |
+| [`Qwen/Qwen3Guard-Gen-8B`](https://huggingface.co/Qwen/Qwen3Guard-Gen-8B) | refusal and safety judge, pinned revision, validated against hand labels | Apache-2.0 |
+| `gemma-4-31b-it`, `deepseek-v4-flash` | XSTest translated into Hindi, then back-translated by the second model for the check | hosted API; only the translated prompts are kept |
+
+| Dataset | Role | Licence |
+|---|---|---|
+| [`CohereLabs/aya_redteaming`](https://huggingface.co/datasets/CohereLabs/aya_redteaming) | Hindi red-team prompts and their English versions: calibration, dev and test splits | Apache-2.0 |
+| [`CohereLabs/aya_dataset`](https://huggingface.co/datasets/CohereLabs/aya_dataset) | Hindi instruction pairs for the drift fine-tune, harmless calibration prompts, Hindi perplexity text | Apache-2.0 |
+| [`PKU-Alignment/BeaverTails`](https://huggingface.co/datasets/PKU-Alignment/BeaverTails) | the 3% harmful dose (published as row indices only) | CC-BY-NC-4.0 |
+| [`Paul/XSTest`](https://huggingface.co/datasets/Paul/XSTest) | over-refusal prompts, English and translated Hindi | CC-BY-4.0 |
+| [`CohereLabs/Global-MMLU`](https://huggingface.co/datasets/CohereLabs/Global-MMLU) | capability check in Hindi and English | Apache-2.0 |
+| [`Salesforce/wikitext`](https://huggingface.co/datasets/Salesforce/wikitext) | generic calibration text for the importance matrix (fix 2) | CC-BY-SA-3.0 / GFDL |
+
+### Notes for the Lexsi toolkits
+
+Problems met while building, each with its evidence in `SPRINT_LOG.md`:
+
+- **SafeTune `apply_ctheta` edits whole layers.** It edits every pair in `layer_subset` ×
+  `target_modules`, so once a circuit holds both a head and an MLP of a layer, every projection in
+  that layer is edited. No circuit size met C-ΔΘ's 5% parameter budget; the smallest gave 9.3%.
+  Selecting individual (layer, module) pairs would let the edit follow the circuit.
+- **SafeTune `apply_qresafe` does not reach the deployment format.** Its selective mode
+  fake-quantizes with a symmetric per-tensor round trip and returns a bf16 model, and the CLI falls
+  back to a random-probe skeleton when no calibration inputs are passed. Neither produces a GGUF
+  file, so it could not be compared on the llama.cpp path. A warning when the skeleton is used
+  would help.
+- **CircuitKIT's refusal task needed rebuilding for Tiny Aya.** The shipped task pairs each prompt
+  with itself (`answer_contrastive`), which EAP rejects. The default answer tokens (" I" /
+  " Sure") suit GPT-2 and Llama; Fire's own first tokens are `I'm` / `The` in English and
+  `मैं` / `उत्तर` in Hindi. Choosing answer tokens from the model's own outputs would carry the
+  task to other models and languages.
+- **CircuitKIT EAP-IG ran out of memory on an A100-80GB** with default settings, because the hooks
+  EAP needs materialize per-head tensors. Batch size 1, `expandable_segments` and 128 contrastive
+  pairs fixed it (about 12 minutes). Its parity gate (next-token KL below 1e-4) is stated for
+  fp32; in bf16 the measured KL was 0.0012–0.0019 nats.
+- **CuratorKIT has no script gate and no decontamination step.** Both were written here as
+  CuratorKIT gates (`data.py`): a Devanagari-share gate and an 8-word overlap check against every
+  evaluation prompt. Both would be useful built in for multilingual safety data.
+- **SafeTune needs Python ≥ 3.12 and CircuitKIT pins transformer-lens**, so each toolkit ran in its
+  own image (`modal_app.py`). AuditKIT's `judge_calibration` gave the judge's κ against the hand
+  labels directly.
+
 ---
 
 ## Reproduce
@@ -334,6 +407,7 @@ modal run modal_app.py::repairs --variant dose3
 modal run modal_app.py::grid --models fire,drift-dose3,safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::protect      # builds and checks the protected file
+modal run modal_app.py::h5           # fix 2: three importance matrices, Fire at Q2_K, dev cells
 ```
 
 ## Repository layout
@@ -363,7 +437,25 @@ modal run modal_app.py::protect      # builds and checks the protected file
   the author.
 - **The fix is measured in the weights, not yet in behaviour.** Edit-aware protection restores
   weight-level survival, but no test of feasible size can show its behavioural effect. The
-  importance-matrix fix (H5) was not run.
+  importance-matrix fix (H5) was screened only on Fire at Q2_K, on the dev split.
+
+## With more credits
+
+What I would run next, in order, and the result each would settle:
+
+1. **A test large enough to see the loss.** About 3,500 red-team prompts per language would
+   resolve the sparse repair's estimated 2.3-point loss at Q4_K_M. That needs Hindi red-team
+   prompts beyond the 913 Aya ones, for example English red-team sets translated with the same
+   back-translation check used for XSTest, then the four test cells run once.
+2. **The protected file on that test.** Keeping the 15 edited tensors at Q8_0 raises weight-level
+   survival from 55.6% to 91.1%. Only a test of that size can show whether this reaches
+   behaviour.
+3. **A milder drift.** A 1% harmful dose, or the plain Hindi fine-tune, may leave room for a repair
+   that passes the pre-registered gate, so the survival question can be asked of a full repair
+   rather than a partial one.
+4. **Train-time hardening.** SafeTune's train-time methods were outside this study; the same
+   per-weight survival measurement applies to them.
+5. **Other models.** The same protocol on Tiny Aya Global and Earth, and on Aya Expanse 8B.
 
 ## Corrections made during the project
 

@@ -1,0 +1,31 @@
+Edit: 15 of 290 tensors changed, 274,395,007 weights (8.2% of the model).
+
+Survival of the edit, over the edited weights:
+  precision    erased   intended among moved   directional survival
+  Q8_0          18.6%                  91.1%                  74.1%
+  Q4_K_M         1.3%                  55.6%                  54.9%
+  Intended among moved is 50% for a coin flip.
+
+Keep the 15 edited tensors at Q8_0 inside the Q4_K_M file:
+  intended among moved 55.6% -> 91.1%, erased 1.3% -> 18.6%
+  file size +7.5% (the whole model at Q8_0: +66.9%)
+  computed exactly from the Q8_0 and Q4_K_M measurements
+  built and measured: intended among moved 91.1%, 0 other tensors re-typed (matches)
+  Build it with:
+  llama-quantize \
+    --tensor-type '^blk\.0\.attn_q\.weight$=q8_0' \
+    --tensor-type '^blk\.0\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.0\.ffn_up\.weight$=q8_0' \
+    --tensor-type '^blk\.1\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.11\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.15\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.17\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.2\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.23\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.27\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.33\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.34\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.34\.ffn_up\.weight$=q8_0' \
+    --tensor-type '^blk\.35\.ffn_gate\.weight$=q8_0' \
+    --tensor-type '^blk\.35\.ffn_up\.weight$=q8_0' \
+    AFTER.gguf AFTER-Q4_K_M-protected.gguf Q4_K_M

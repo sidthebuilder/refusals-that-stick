@@ -1018,6 +1018,203 @@ def protect(repair: str = "safemerge-dose3-s1", drift: str = "drift-dose3",
         json.dumps(check, indent=2, default=str))
 
 
+# --------------------------------------------------------------------------- #
+# Fix 2 (H5): importance matrices                                              #
+# --------------------------------------------------------------------------- #
+
+IMATRIX_ROOT = f"{VOL}/imatrix"
+IMATRIX_ARMS = ("generic", "benign", "safety")
+
+
+@app.function(image=gpu_eval_image, gpu="L40S", volumes={VOL: volume}, memory=32768,
+              timeout=60 * 40)
+def imatrix_job(model: str = "fire", ctx: int = 512) -> dict:
+    """Three importance matrices for one model, each over the same number of chunks.
+
+    ``safety`` (fix 2 as registered): the red-team calibration prompts. ``benign``: the
+    harmless calibration prompts, a control for language and chat format. Both are
+    rendered with the model's own chat template and followed by the model's own BF16
+    answer, so the matrix sees the activations of the model doing the task.
+    ``generic``: WikiText-2 test, the conventional llama.cpp calibration text.
+    """
+    import re
+    import subprocess
+    import sys
+    import time
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.serve import LlamaServer
+
+    volume.reload()
+    t0 = time.time()
+    out_dir = Path(IMATRIX_ROOT) / model
+    out_dir.mkdir(parents=True, exist_ok=True)
+    data = Path(VOL) / "data" / "eval"
+    bf16 = f"{GGUF_ROOT}/{model}/BF16.gguf"
+    exe = "/opt/llama.cpp/build/bin/llama-imatrix"
+
+    h = subprocess.run([exe, "--help"], capture_output=True, text=True)
+    help_text = (h.stdout or "") + (h.stderr or "")
+    parse_special = "--parse-special" in help_text
+    no_ppl = "--no-ppl" in help_text
+
+    def rows_of(name: str) -> list[dict]:
+        return [json.loads(l) for l in (data / f"{name}.jsonl").read_text(encoding="utf-8")
+                .splitlines() if l.strip()]
+
+    sets = {"safety": rows_of("redteam_hi_calib") + rows_of("redteam_en_calib"),
+            "benign": rows_of("calib_harmless")}
+    texts: dict[str, str] = {}
+    with LlamaServer(bf16, n_parallel=32, log_path=out_dir / "server.log",
+                     extra_args=SERVER_ARGS) as srv:
+        for arm, rows in sets.items():
+            def one(r: dict) -> str:
+                msgs = [{"role": "user", "content": r["prompt"]}]
+                answer = srv.chat(msgs, max_tokens=256)["response"]
+                if not parse_special:
+                    return r["prompt"] + "\n" + answer
+                # llama-imatrix starts every chunk with BOS itself; one mid-text
+                # BOS per sample would add activations the deployed model never sees.
+                return srv.apply_template(msgs).removeprefix("<BOS_TOKEN>") + answer
+            texts[arm] = "\n\n".join(srv.map(one, rows)) + "\n"
+    texts["generic"] = (Path(VOL) / "private" / "imatrix_generic.txt").read_text(encoding="utf-8")
+    for arm, text in texts.items():
+        (out_dir / f"calib_{arm}.txt").write_text(text, encoding="utf-8")
+
+    def run(arm: str, chunks: int | None) -> dict:
+        cmd = [exe, "-m", bf16, "-f", str(out_dir / f"calib_{arm}.txt"),
+               "-o", str(out_dir / f"{arm}.dat"), "-c", str(ctx), "-ngl", "999"]
+        if parse_special and arm != "generic":
+            cmd.append("--parse-special")
+        if no_ppl:
+            cmd.append("--no-ppl")
+        if chunks:
+            cmd += ["--chunks", str(chunks)]
+        t = time.time()
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+        log = (r.stdout or "") + (r.stderr or "")
+        (out_dir / f"{arm}.log").write_text(log[-20000:], encoding="utf-8")
+        if r.returncode != 0:
+            raise RuntimeError(f"llama-imatrix {arm} failed:\n{log[-3000:]}")
+        m = re.search(r"computing over (\d+) chunks", log)
+        return {"chunks": int(m.group(1)) if m else None, "seconds": round(time.time() - t, 1),
+                "chars": len(texts[arm]), "path": str(out_dir / f"{arm}.dat")}
+
+    # Same amount of calibration text for every arm: the smaller chat set sets the
+    # chunk count, and the other two are cut to it.
+    first = {arm: run(arm, None) for arm in ("safety", "benign")}
+    if any(v["chunks"] is None for v in first.values()):
+        raise RuntimeError("could not read the chunk count from llama-imatrix; see "
+                           f"{out_dir}/safety.log")
+    k = min(v["chunks"] for v in first.values())
+    res = {arm: (v if v["chunks"] == k else run(arm, k)) for arm, v in first.items()}
+    res["generic"] = run("generic", k)
+    volume.commit()
+    return {"model": model, "ctx": ctx, "chunks": k, "parse_special": parse_special,
+            "arms": res, "seconds": round(time.time() - t0, 1)}
+
+
+@app.function(image=quant_image, volumes={VOL: volume}, cpu=8.0, memory=32768,
+              timeout=60 * 30)
+def imatrix_quant_job(model: str, base: str, arms: list[str]) -> dict:
+    """One ``base`` file per importance matrix, from the same BF16 file as the plain one."""
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.ladder import quantize
+
+    volume.reload()
+    g = Path(GGUF_ROOT) / model
+    out = {}
+    for arm in arms:
+        imx = Path(IMATRIX_ROOT) / model / f"{arm}.dat"
+        rep = quantize(g / "BF16.gguf", g / f"{base}-imx-{arm}.gguf", base, threads=8,
+                       extra_args=["--imatrix", str(imx)])
+        rep["plain_bytes"] = (g / f"{base}.gguf").stat().st_size
+        out[arm] = rep
+    volume.commit()
+    return out
+
+
+@app.local_entrypoint()
+def h5(split: str = "dev", model: str = "fire", base: str = "Q2_K",
+       arms: str = "generic,benign,safety", build: bool = True):
+    """Fix 2: build the matrices and files (dev only), then one cell per file on ``split``."""
+    root = Path(__file__).parent
+    arm_list = arms.split(",")
+    report: dict = {"model": model, "base": base, "split": split, "arms": arm_list}
+    if build:
+        report["imatrix"] = imatrix_job.remote(model)
+        print(json.dumps(report["imatrix"], indent=2, default=str))
+        report["files"] = imatrix_quant_job.remote(model, base, arm_list)
+        print(json.dumps(report["files"], indent=2, default=str))
+    spec = [(model, f"{base}-imx-{a}", split, f"{GGUF_ROOT}/{model}/{base}-imx-{a}.gguf")
+            for a in arm_list]
+    if split != "dev":  # the plain file has no cell on this split yet
+        spec.insert(0, (model, base, split, f"{GGUF_ROOT}/{model}/{base}.gguf"))
+    cells_out = {}
+    for (m, p, s, _), res in zip(spec, eval_cell.starmap(spec, return_exceptions=True)):
+        res = res if isinstance(res, dict) else {"error": repr(res)}
+        cells_out[p] = res
+        t = res.get("tasks", {})
+        print(f"{p:18s} hi_ref={t.get(f'redteam_hi_{s}', {}).get('refusal_rate')} "
+              f"hi_unsafe={t.get(f'redteam_hi_{s}', {}).get('unsafe_rate')} "
+              f"ppl={res.get('perplexity', {}).get('ppl')} {res.get('error', '')}")
+    report["cells"] = cells_out
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"h5_cells_{split}.json").write_text(
+        json.dumps(report, indent=2, default=str))
+
+
+# --------------------------------------------------------------------------- #
+# The one-command check, run on two checkpoints from the volume               #
+# --------------------------------------------------------------------------- #
+
+@app.function(image=quant_image, volumes={VOL: volume}, cpu=8.0, memory=49152,
+              timeout=60 * 45)
+def check_job(before: str, after: str, precisions: list[str], verify: bool = False,
+              prebuilt: bool = True) -> dict:
+    """``refusals_that_stick.check`` on two BF16 files.
+
+    ``prebuilt`` passes the ladder's existing quantized files instead of building new
+    ones (same llama.cpp commit, same defaults, so the same bytes).
+    """
+    import sys
+
+    sys.path.insert(0, "/root")
+    from refusals_that_stick.check import check_repair, format_report
+
+    volume.reload()
+    g = Path(GGUF_ROOT)
+    quantized = ({p: (str(g / before / f"{p}.gguf"), str(g / after / f"{p}.gguf"))
+                  for p in precisions} if prebuilt else None)
+    rep = check_repair(g / before / "BF16.gguf", g / after / "BF16.gguf",
+                       precisions=precisions, quantized=quantized,
+                       llama_quantize="/opt/llama.cpp/build/bin/llama-quantize",
+                       workdir="/tmp/rts-check", verify=verify, threads=8)
+    text = format_report(rep)
+    # Kept on the volume too, so the result survives a lost local client.
+    dest = Path(VOL) / "check"
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / f"check_{after}.json").write_text(json.dumps(rep, indent=2, default=str))
+    (dest / f"check_{after}.txt").write_text(text + "\n", encoding="utf-8")
+    volume.commit()
+    return {"report": rep, "text": text}
+
+
+@app.local_entrypoint()
+def check(before: str = "drift-dose3", after: str = "safemerge-dose3-s1",
+          precisions: str = "Q8_0,Q4_K_M", verify: bool = False, prebuilt: bool = True):
+    """Run the check on Modal; save its report and the text it prints."""
+    root = Path(__file__).parent
+    res = check_job.remote(before, after, precisions.split(","), verify, prebuilt)
+    print(res["text"])
+    (root / "results").mkdir(exist_ok=True)
+    (root / "results" / f"check_{after}.json").write_text(
+        json.dumps(res["report"], indent=2, default=str))
+    (root / "results" / f"check_{after}.txt").write_text(res["text"] + "\n", encoding="utf-8")
+
+
 @app.local_entrypoint()
 def grid(models: str, split: str = "dev", tag: str = "grid"):
     """Full ladder for each model (cached rungs are reused), then every (model, precision) cell."""

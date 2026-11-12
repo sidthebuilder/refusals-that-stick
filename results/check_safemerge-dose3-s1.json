@@ -1,0 +1,384 @@
+{
+  "before": "/vol/gguf/drift-dose3/BF16.gguf",
+  "after": "/vol/gguf/safemerge-dose3-s1/BF16.gguf",
+  "precisions": {
+    "Q8_0": {
+      "erased": 0.18618685725575174,
+      "directional_survival": 0.7414812471423724,
+      "intended_among_moved": 0.9111197745492701,
+      "file": "/tmp/rts-check/after-Q8_0.gguf",
+      "tensors": [
+        {
+          "name": "blk.0.attn_q.weight",
+          "qtype": "Q8_0",
+          "n_edited": 3168659,
+          "erased_fraction": 0.3821332620518648,
+          "directional_permanence": 0.5479996427510818,
+          "permanence": 0.6178667379481352
+        },
+        {
+          "name": "blk.0.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19620281,
+          "erased_fraction": 0.1594479202413054,
+          "directional_permanence": 0.7679000112179841,
+          "permanence": 0.8405520797586946
+        },
+        {
+          "name": "blk.0.ffn_up.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19241823,
+          "erased_fraction": 0.19315280054285916,
+          "directional_permanence": 0.7297980549971799,
+          "permanence": 0.8068471994571408
+        },
+        {
+          "name": "blk.1.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19133287,
+          "erased_fraction": 0.21072181690474825,
+          "directional_permanence": 0.7138055787277952,
+          "permanence": 0.7892781830952518
+        },
+        {
+          "name": "blk.11.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19241427,
+          "erased_fraction": 0.19419781079646536,
+          "directional_permanence": 0.7303471306987782,
+          "permanence": 0.8058021892035346
+        },
+        {
+          "name": "blk.15.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19717980,
+          "erased_fraction": 0.15687611002749774,
+          "directional_permanence": 0.7711119496013283,
+          "permanence": 0.8431238899725022
+        },
+        {
+          "name": "blk.17.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19737161,
+          "erased_fraction": 0.15304647917702044,
+          "directional_permanence": 0.776763233577514,
+          "permanence": 0.8469535208229796
+        },
+        {
+          "name": "blk.2.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 18707128,
+          "erased_fraction": 0.24477471902688644,
+          "directional_permanence": 0.6801341178613842,
+          "permanence": 0.7552252809731136
+        },
+        {
+          "name": "blk.23.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19847505,
+          "erased_fraction": 0.14508710288774332,
+          "directional_permanence": 0.7850920808434108,
+          "permanence": 0.8549128971122567
+        },
+        {
+          "name": "blk.27.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19597232,
+          "erased_fraction": 0.163054608936609,
+          "directional_permanence": 0.7656840517068941,
+          "permanence": 0.8369453910633909
+        },
+        {
+          "name": "blk.33.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 20122487,
+          "erased_fraction": 0.12310073799525874,
+          "directional_permanence": 0.8161166658972124,
+          "permanence": 0.8768992620047412
+        },
+        {
+          "name": "blk.34.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19892622,
+          "erased_fraction": 0.1403679213328439,
+          "directional_permanence": 0.7953926335100521,
+          "permanence": 0.8596320786671561
+        },
+        {
+          "name": "blk.34.ffn_up.weight",
+          "qtype": "Q8_0",
+          "n_edited": 19135790,
+          "erased_fraction": 0.20547607389086106,
+          "directional_permanence": 0.7203839507018002,
+          "permanence": 0.7945239261091389
+        },
+        {
+          "name": "blk.35.ffn_gate.weight",
+          "qtype": "Q8_0",
+          "n_edited": 18752507,
+          "erased_fraction": 0.23341396433020928,
+          "directional_permanence": 0.6895056218349899,
+          "permanence": 0.7665860356697907
+        },
+        {
+          "name": "blk.35.ffn_up.weight",
+          "qtype": "Q8_0",
+          "n_edited": 18479118,
+          "erased_fraction": 0.2661355915363493,
+          "directional_permanence": 0.6546010475175276,
+          "permanence": 0.7338644084636508
+        }
+      ]
+    },
+    "Q4_K_M": {
+      "erased": 0.01318630772315766,
+      "directional_survival": 0.5486941167264023,
+      "intended_among_moved": 0.5560260472880334,
+      "file": "/tmp/rts-check/after-Q4_K_M.gguf",
+      "tensors": [
+        {
+          "name": "blk.0.attn_q.weight",
+          "qtype": "Q4_K",
+          "n_edited": 3168659,
+          "erased_fraction": 0.062449130689039116,
+          "directional_permanence": 0.5027249697742799,
+          "permanence": 0.9375508693109609
+        },
+        {
+          "name": "blk.0.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19620281,
+          "erased_fraction": 0.010071925065701148,
+          "directional_permanence": 0.551359279716738,
+          "permanence": 0.9899280749342988
+        },
+        {
+          "name": "blk.0.ffn_up.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19241823,
+          "erased_fraction": 0.01377603359099603,
+          "directional_permanence": 0.5420076881488828,
+          "permanence": 0.986223966409004
+        },
+        {
+          "name": "blk.1.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19133287,
+          "erased_fraction": 0.013904981407533374,
+          "directional_permanence": 0.5419896225881105,
+          "permanence": 0.9860950185924666
+        },
+        {
+          "name": "blk.11.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19241427,
+          "erased_fraction": 0.013011768825669739,
+          "directional_permanence": 0.5446428167723735,
+          "permanence": 0.9869882311743302
+        },
+        {
+          "name": "blk.15.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19717980,
+          "erased_fraction": 0.010091703105490521,
+          "directional_permanence": 0.5533073874707247,
+          "permanence": 0.9899082968945094
+        },
+        {
+          "name": "blk.17.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19737161,
+          "erased_fraction": 0.010242709171800342,
+          "directional_permanence": 0.5557377780928068,
+          "permanence": 0.9897572908281996
+        },
+        {
+          "name": "blk.2.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 18707128,
+          "erased_fraction": 0.01691430132941839,
+          "directional_permanence": 0.5362666572869977,
+          "permanence": 0.9830856986705816
+        },
+        {
+          "name": "blk.23.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19847505,
+          "erased_fraction": 0.009602416021560393,
+          "directional_permanence": 0.5585443611174301,
+          "permanence": 0.9903975839784396
+        },
+        {
+          "name": "blk.27.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19597232,
+          "erased_fraction": 0.009977582548392549,
+          "directional_permanence": 0.5534175438653786,
+          "permanence": 0.9900224174516075
+        },
+        {
+          "name": "blk.33.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 20122487,
+          "erased_fraction": 0.00832829460891191,
+          "directional_permanence": 0.5723855107969507,
+          "permanence": 0.9916717053910881
+        },
+        {
+          "name": "blk.34.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19892622,
+          "erased_fraction": 0.00993438672890884,
+          "directional_permanence": 0.564706955171621,
+          "permanence": 0.9900656132710912
+        },
+        {
+          "name": "blk.34.ffn_up.weight",
+          "qtype": "Q4_K",
+          "n_edited": 19135790,
+          "erased_fraction": 0.01330370995919165,
+          "directional_permanence": 0.5434302424932548,
+          "permanence": 0.9866962900408084
+        },
+        {
+          "name": "blk.35.ffn_gate.weight",
+          "qtype": "Q4_K",
+          "n_edited": 18752507,
+          "erased_fraction": 0.01885726532457767,
+          "directional_permanence": 0.5364936538885174,
+          "permanence": 0.9811427346754223
+        },
+        {
+          "name": "blk.35.ffn_up.weight",
+          "qtype": "Q4_K",
+          "n_edited": 18479118,
+          "erased_fraction": 0.01970786700967005,
+          "directional_permanence": 0.5312115545774425,
+          "permanence": 0.9802921329903299
+        }
+      ]
+    }
+  },
+  "protection": {
+    "Q4_K_M": {
+      "protect": [
+        "blk.0.attn_q.weight",
+        "blk.0.ffn_gate.weight",
+        "blk.0.ffn_up.weight",
+        "blk.1.ffn_gate.weight",
+        "blk.11.ffn_gate.weight",
+        "blk.15.ffn_gate.weight",
+        "blk.17.ffn_gate.weight",
+        "blk.2.ffn_gate.weight",
+        "blk.23.ffn_gate.weight",
+        "blk.27.ffn_gate.weight",
+        "blk.33.ffn_gate.weight",
+        "blk.34.ffn_gate.weight",
+        "blk.34.ffn_up.weight",
+        "blk.35.ffn_gate.weight",
+        "blk.35.ffn_up.weight"
+      ],
+      "computed": {
+        "erased": 0.18618685725575174,
+        "directional_survival": 0.7414812471423724,
+        "intended_among_moved": 0.9111197745492701
+      },
+      "payload_bytes": 2132099072,
+      "protected_payload_bytes": 2292006912,
+      "size_increase": 0.07500019211114783,
+      "whole_model_q8_0_size_increase": 0.6691423389916471,
+      "llama_quantize_args": [
+        "--tensor-type",
+        "^blk\\.0\\.attn_q\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.0\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.0\\.ffn_up\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.1\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.11\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.15\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.17\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.2\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.23\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.27\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.33\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.34\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.34\\.ffn_up\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.35\\.ffn_gate\\.weight$=q8_0",
+        "--tensor-type",
+        "^blk\\.35\\.ffn_up\\.weight$=q8_0"
+      ],
+      "verified": {
+        "erased": 0.18618685725575174,
+        "directional_survival": 0.7414812471423724,
+        "intended_among_moved": 0.9111197745492701,
+        "file": "/tmp/rts-check/after-Q4_K_M-protected.gguf",
+        "file_bytes": 2303884832,
+        "plain_file_bytes": 2143976992,
+        "protected_not_at_q8_0": [],
+        "other_tensors_retyped": [],
+        "matches_computed": true
+      }
+    }
+  },
+  "built": {
+    "before-Q8_0.gguf": {
+      "seconds": 7.0,
+      "bytes": 3570654752
+    },
+    "after-Q8_0.gguf": {
+      "seconds": 7.0,
+      "bytes": 3570654752
+    },
+    "before-Q4_K_M.gguf": {
+      "seconds": 28.1,
+      "bytes": 2143976992
+    },
+    "after-Q4_K_M.gguf": {
+      "seconds": 27.5,
+      "bytes": 2143976992
+    },
+    "before-Q4_K_M-protected.gguf": {
+      "seconds": 25.0,
+      "bytes": 2303884832
+    },
+    "after-Q4_K_M-protected.gguf": {
+      "seconds": 24.7,
+      "bytes": 2303884832
+    }
+  },
+  "edit": {
+    "n_tensors": 290,
+    "n_tensors_edited": 15,
+    "n_weights_edited": 274395007,
+    "share_of_weights_edited": 0.0819278491417627,
+    "tensors": [
+      "blk.0.attn_q.weight",
+      "blk.0.ffn_gate.weight",
+      "blk.0.ffn_up.weight",
+      "blk.1.ffn_gate.weight",
+      "blk.11.ffn_gate.weight",
+      "blk.15.ffn_gate.weight",
+      "blk.17.ffn_gate.weight",
+      "blk.2.ffn_gate.weight",
+      "blk.23.ffn_gate.weight",
+      "blk.27.ffn_gate.weight",
+      "blk.33.ffn_gate.weight",
+      "blk.34.ffn_gate.weight",
+      "blk.34.ffn_up.weight",
+      "blk.35.ffn_gate.weight",
+      "blk.35.ffn_up.weight"
+    ]
+  }
+}

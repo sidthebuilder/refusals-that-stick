@@ -1079,3 +1079,96 @@ Hindi perplexity 8.72 vs 8.75. No detectable harm and no detectable gain; at thi
 was expected to be visible. (`results/protection_behaviour.json`)
 
 Cost of this step: one CPU build-and-measure job and one L40S evaluation cell, under $1.
+
+---
+
+## 12 Nov 2026, 13:40 IST — Fix 2 (H5, importance matrix), rule fixed before any number
+
+Pre-registered fix 2 calibrates llama.cpp's importance matrix on safety prompts instead of generic
+text: same file size, no runtime cost. H5: a safety-calibrated imatrix beats the generic imatrix.
+It was not run so far. Nothing below has been computed when this is written.
+
+**Where it is applied, and the deviation.** The pre-registration applies each fix at the
+precision where the model breaks (§5: the lowest precision whose dev behavioural retention is
+below 0.8). For the repairs that precision could not be pinned (core-result entry). For Fire it
+can: Hindi valid refusal falls from 71.3% at BF16 to 55.3% at Q2_K (retention 0.78), and Hindi
+unsafe answers rise from 2.7% to 8.0%. So fix 2 is applied to **Fire at Q2_K**. Deviation: the
+pre-registration applied the fixes to the repaired models.
+
+**Arms, all Q2_K, all the same file size:**
+
+0. **No imatrix**, as Cohere ships its files (day 1). The existing Q2_K cell.
+1. **Generic imatrix:** WikiText-2 test (built on day 1, `private/imatrix_generic.txt`).
+2. **Benign-chat imatrix:** the 200 harmless calibration prompts (100 Hindi, 100 English), each
+   rendered with Fire's own chat template and followed by Fire's own BF16 answer. A control for
+   language and chat format, so a win for arm 3 cannot come from "Hindi chat text" alone.
+3. **Safety imatrix (fix 2 as registered):** the 200 red-team calibration prompts (100 Hindi,
+   100 English), same format, each followed by Fire's BF16 answer.
+
+All three matrices are computed on Fire BF16 over the same number of 512-token chunks (the
+smaller chat set sets the count). The calibration prompts are disjoint from the dev and test
+splits by construction (`build_data.py`).
+
+**Outcomes.** Primary: Hindi valid refusal on red-team prompts, paired exact McNemar per prompt.
+Secondary: English valid refusal, unsafe rate, XSTest refusal, MMLU, Hindi perplexity.
+
+**Tests.** H5 as registered: arm 3 against arm 1. Also reported: each arm against arm 0, and
+arm 3 against arm 2.
+
+**Screening rule (dev, 150 prompts per language).** An arm goes to the 663-prompt test split if
+its Hindi valid refusal is at least 8 points above arm 0 (half of Fire's 16-point loss) and its
+MMLU in either language is no more than 3 points below arm 0. If no arm passes, the test split is
+not run and the dev result is reported as it is. If any arm passes, all four arms are run on the
+test split once, and the five comparisons above are Holm-corrected within H5.
+
+`modal run modal_app.py::h5` builds the matrices and files and evaluates the dev cells;
+`scripts/analyze_h5.py` computes the tests.
+
+### Fix 2 results (12 Nov 2026): not supported; the test split is not run
+
+`modal run modal_app.py::h5`, then `python scripts/analyze_h5.py dev`
+(`results/h5_dev.json`, build details in `results/h5_cells_dev.json`). The three matrices were
+computed on Fire BF16 over 206 chunks of 512 tokens each. The three Q2_K files are the size of
+the plain one to within 256 bytes (the imatrix metadata).
+
+Dev split: 150 red-team prompts, 100 XSTest and 100 MMLU items per language.
+
+| Fire | Hindi valid refusal | Hindi unsafe | English valid refusal | XSTest refusal (hi / en) | MMLU (hi / en) | Hindi PPL |
+|---|---|---|---|---|---|---|
+| BF16, for reference | 71.3% | 2.0% | 81.3% | 6% / 12% | 0.53 / 0.65 | 8.40 |
+| Q2_K, no imatrix (as shipped) | 55.3% | 7.3% | 78.0% | 6% / 19% | 0.50 / 0.52 | 12.02 |
+| Q2_K, generic imatrix | 50.0% | 7.3% | 72.0% | 7% / 15% | 0.39 / 0.45 | 10.91 |
+| Q2_K, benign-chat imatrix | 52.7% | 5.3% | 77.3% | 6% / 16% | 0.49 / 0.45 | 10.69 |
+| Q2_K, safety imatrix (fix 2) | 58.0% | 5.3% | 75.3% | 9% / 17% | 0.48 / 0.50 | 10.72 |
+
+(The plan entry above quoted the judge's raw unsafe rate for Fire, 2.7% → 8.0%. The project's
+metric, which does not count degenerate responses, gives 2.0% → 7.3%.)
+
+Hindi valid refusal, paired exact McNemar, Holm over the five comparisons:
+
+| Comparison | Change | p | Holm p |
+|---|---|---|---|
+| Safety vs generic (H5 as registered) | +8.0 pt | 0.029 | 0.14 |
+| Generic vs none | −5.3 pt | 0.23 | 0.92 |
+| Benign vs none | −2.7 pt | 0.60 | 1.0 |
+| Safety vs none | +2.7 pt | 0.61 | 1.0 |
+| Safety vs benign | +5.3 pt | 0.23 | 0.92 |
+
+**Screen: no arm passes.** The safety matrix is 2.7 points above no matrix, against the 8-point
+bar; the other two are below it. By the rule logged before the run, the test split is not run and
+this dev result is the result. **H5 is not supported.** Without a matrix Fire loses 16.0 points of
+Hindi refusal at Q2_K (p = 3 × 10⁻⁶); with the safety matrix it loses 13.3 (p = 3 × 10⁻⁴).
+
+What the run does show, as dev-only observations:
+
+- **All three matrices improve Hindi perplexity by 9–11%** (12.02 → 10.69–10.91), and none
+  restores refusal. At this precision the perplexity gain does not bring the safety behaviour
+  back with it.
+- The generic matrix points the wrong way on refusal (Hindi −5.3, English −6.0 points) and on
+  Hindi MMLU (−11 points, p = 0.06). The safety matrix is the only arm above no matrix on Hindi
+  refusal, and the H5 contrast is the largest effect in the table, but it does not survive the
+  Holm correction. These are not tested further: running the test split on the comparison that
+  looked best on dev is the forking path the rule exists to prevent.
+
+Cost of this step: one L40S imatrix job (9 minutes), one CPU quantization job and three L40S dev
+cells, about $1.

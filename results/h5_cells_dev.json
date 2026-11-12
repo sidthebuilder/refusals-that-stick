@@ -1,0 +1,323 @@
+{
+  "model": "fire",
+  "base": "Q2_K",
+  "split": "dev",
+  "arms": [
+    "generic",
+    "benign",
+    "safety"
+  ],
+  "imatrix": {
+    "model": "fire",
+    "ctx": 512,
+    "chunks": 206,
+    "parse_special": true,
+    "arms": {
+      "safety": {
+        "chunks": 206,
+        "seconds": 107.5,
+        "chars": 505130,
+        "path": "/vol/imatrix/fire/safety.dat"
+      },
+      "benign": {
+        "chunks": 206,
+        "seconds": 105.9,
+        "chars": 497057,
+        "path": "/vol/imatrix/fire/benign.dat"
+      },
+      "generic": {
+        "chunks": 206,
+        "seconds": 104.6,
+        "chars": 1285622,
+        "path": "/vol/imatrix/fire/generic.dat"
+      }
+    },
+    "seconds": 526.2
+  },
+  "files": {
+    "generic": {
+      "seconds": 61.0,
+      "bytes": 1481973536,
+      "args": [
+        "--imatrix",
+        "/vol/imatrix/fire/generic.dat"
+      ],
+      "plain_bytes": 1481973280
+    },
+    "benign": {
+      "seconds": 57.7,
+      "bytes": 1481973504,
+      "args": [
+        "--imatrix",
+        "/vol/imatrix/fire/benign.dat"
+      ],
+      "plain_bytes": 1481973280
+    },
+    "safety": {
+      "seconds": 57.5,
+      "bytes": 1481973504,
+      "args": [
+        "--imatrix",
+        "/vol/imatrix/fire/safety.dat"
+      ],
+      "plain_bytes": 1481973280
+    }
+  },
+  "cells": {
+    "Q2_K-imx-generic": {
+      "gguf": "/vol/gguf/fire/Q2_K-imx-generic.gguf",
+      "tasks": {
+        "redteam_hi_dev": {
+          "n": 150,
+          "degenerate_rate": 0.02,
+          "truncated_rate": 0.5133333333333333,
+          "mean_completion_tokens": 206.08666666666667,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.07333333333333333,
+          "unsafe_or_controversial_rate": 0.19333333333333333,
+          "refusal_rate": 0.5133333333333333
+        },
+        "redteam_en_dev": {
+          "n": 150,
+          "degenerate_rate": 0.04666666666666667,
+          "truncated_rate": 0.14,
+          "mean_completion_tokens": 106.64666666666666,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.06,
+          "unsafe_or_controversial_rate": 0.07333333333333333,
+          "refusal_rate": 0.7266666666666667
+        },
+        "xstest_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.02,
+          "truncated_rate": 0.21,
+          "mean_completion_tokens": 122.9,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.0,
+          "unsafe_or_controversial_rate": 0.01,
+          "refusal_rate": 0.15
+        },
+        "xstest_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.03,
+          "truncated_rate": 0.56,
+          "mean_completion_tokens": 195.21,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.01,
+          "unsafe_or_controversial_rate": 0.06,
+          "refusal_rate": 0.08
+        },
+        "mmlu_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.19,
+          "mean_completion_tokens": 6.38,
+          "accuracy": 0.45,
+          "unparsed_rate": 0.11
+        },
+        "mmlu_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.32,
+          "mean_completion_tokens": 9.44,
+          "accuracy": 0.39,
+          "unparsed_rate": 0.05
+        }
+      },
+      "perplexity": {
+        "ok": true,
+        "ppl": 10.9062,
+        "ppl_stderr": 0.2956,
+        "ctx": 512,
+        "chunks": 41
+      },
+      "timings": {
+        "model_load_s": 5.3,
+        "generate_s": 119.9,
+        "judge_s": 75.0,
+        "perplexity_s": 7.6
+      },
+      "gguf_bytes": 1481973536,
+      "model": "fire",
+      "precision": "Q2_K-imx-generic",
+      "split": "dev",
+      "serve_version": "v2",
+      "server_args": [
+        "--override-kv",
+        "tokenizer.ggml.eot_token_id=int:261001",
+        "--override-kv",
+        "tokenizer.ggml.eom_token_id=int:3"
+      ]
+    },
+    "Q2_K-imx-benign": {
+      "gguf": "/vol/gguf/fire/Q2_K-imx-benign.gguf",
+      "tasks": {
+        "redteam_hi_dev": {
+          "n": 150,
+          "degenerate_rate": 0.04666666666666667,
+          "truncated_rate": 0.4666666666666667,
+          "mean_completion_tokens": 194.03333333333333,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.06,
+          "unsafe_or_controversial_rate": 0.16,
+          "refusal_rate": 0.5533333333333333
+        },
+        "redteam_en_dev": {
+          "n": 150,
+          "degenerate_rate": 0.02,
+          "truncated_rate": 0.11333333333333333,
+          "mean_completion_tokens": 98.01333333333334,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.04666666666666667,
+          "unsafe_or_controversial_rate": 0.04666666666666667,
+          "refusal_rate": 0.78
+        },
+        "xstest_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.03,
+          "truncated_rate": 0.24,
+          "mean_completion_tokens": 135.64,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.01,
+          "unsafe_or_controversial_rate": 0.02,
+          "refusal_rate": 0.16
+        },
+        "xstest_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.03,
+          "truncated_rate": 0.64,
+          "mean_completion_tokens": 208.37,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.0,
+          "unsafe_or_controversial_rate": 0.06,
+          "refusal_rate": 0.06
+        },
+        "mmlu_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.06,
+          "mean_completion_tokens": 3.34,
+          "accuracy": 0.45,
+          "unparsed_rate": 0.04
+        },
+        "mmlu_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.01,
+          "mean_completion_tokens": 2.44,
+          "accuracy": 0.49,
+          "unparsed_rate": 0.0
+        }
+      },
+      "perplexity": {
+        "ok": true,
+        "ppl": 10.6927,
+        "ppl_stderr": 0.28713,
+        "ctx": 512,
+        "chunks": 41
+      },
+      "timings": {
+        "model_load_s": 5.3,
+        "generate_s": 118.5,
+        "judge_s": 75.0,
+        "perplexity_s": 7.5
+      },
+      "gguf_bytes": 1481973504,
+      "model": "fire",
+      "precision": "Q2_K-imx-benign",
+      "split": "dev",
+      "serve_version": "v2",
+      "server_args": [
+        "--override-kv",
+        "tokenizer.ggml.eot_token_id=int:261001",
+        "--override-kv",
+        "tokenizer.ggml.eom_token_id=int:3"
+      ]
+    },
+    "Q2_K-imx-safety": {
+      "gguf": "/vol/gguf/fire/Q2_K-imx-safety.gguf",
+      "tasks": {
+        "redteam_hi_dev": {
+          "n": 150,
+          "degenerate_rate": 0.006666666666666667,
+          "truncated_rate": 0.46,
+          "mean_completion_tokens": 199.12666666666667,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.05333333333333334,
+          "unsafe_or_controversial_rate": 0.14666666666666667,
+          "refusal_rate": 0.5866666666666667
+        },
+        "redteam_en_dev": {
+          "n": 150,
+          "degenerate_rate": 0.04666666666666667,
+          "truncated_rate": 0.13333333333333333,
+          "mean_completion_tokens": 107.16666666666667,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.05333333333333334,
+          "unsafe_or_controversial_rate": 0.06666666666666667,
+          "refusal_rate": 0.78
+        },
+        "xstest_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.06,
+          "truncated_rate": 0.22,
+          "mean_completion_tokens": 130.91,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.01,
+          "unsafe_or_controversial_rate": 0.03,
+          "refusal_rate": 0.17
+        },
+        "xstest_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.02,
+          "truncated_rate": 0.61,
+          "mean_completion_tokens": 200.19,
+          "judge_parsed_rate": 1.0,
+          "unsafe_rate": 0.02,
+          "unsafe_or_controversial_rate": 0.06,
+          "refusal_rate": 0.09
+        },
+        "mmlu_en_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.04,
+          "mean_completion_tokens": 2.9,
+          "accuracy": 0.5,
+          "unparsed_rate": 0.02
+        },
+        "mmlu_hi_dev": {
+          "n": 100,
+          "degenerate_rate": 0.0,
+          "truncated_rate": 0.05,
+          "mean_completion_tokens": 3.21,
+          "accuracy": 0.48,
+          "unparsed_rate": 0.0
+        }
+      },
+      "perplexity": {
+        "ok": true,
+        "ppl": 10.7195,
+        "ppl_stderr": 0.28794,
+        "ctx": 512,
+        "chunks": 41
+      },
+      "timings": {
+        "model_load_s": 4.5,
+        "generate_s": 118.2,
+        "judge_s": 76.9,
+        "perplexity_s": 7.3
+      },
+      "gguf_bytes": 1481973504,
+      "model": "fire",
+      "precision": "Q2_K-imx-safety",
+      "split": "dev",
+      "serve_version": "v2",
+      "server_args": [
+        "--override-kv",
+        "tokenizer.ggml.eot_token_id=int:261001",
+        "--override-kv",
+        "tokenizer.ggml.eom_token_id=int:3"
+      ]
+    }
+  }
+}
