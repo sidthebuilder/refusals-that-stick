@@ -543,6 +543,10 @@ python -m pytest tests -q        # 174 tests, CPU only
 python scripts/make_figures.py   # every figure from results/
 python scripts/analyze_protection.py
 
+# check your own edit, and get the --tensor-type fix
+rts-check before-BF16.gguf after-BF16.gguf \
+    --llama-quantize path/to/llama-quantize --verify
+
 modal run modal_app.py::grid --models fire,drift-dose3,\
     safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::survival \

@@ -1204,7 +1204,7 @@ def check_job(before: str, after: str, precisions: list[str], verify: bool = Fal
 
 @app.local_entrypoint()
 def check(before: str = "drift-dose3", after: str = "safemerge-dose3-s1",
-          precisions: str = "Q8_0,Q4_K_M", verify: bool = False, prebuilt: bool = True):
+          precisions: str = "Q8_0,Q4_K_M", verify: bool = True, prebuilt: bool = False):
     """Run the check on Modal; save its report and the text it prints."""
     root = Path(__file__).parent
     res = check_job.remote(before, after, precisions.split(","), verify, prebuilt)

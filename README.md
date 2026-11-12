@@ -46,6 +46,44 @@ The two levels do not agree, and the study shows why: a behavioural evaluation o
 cannot resolve a weight-level loss of this size. Neither one can be used as a stand-in for the
 other.
 
+## Check your own repair
+
+`rts-check` runs this measurement on any two lossless GGUF files of one model, before and after a
+weight edit, and prints the fix. CPU only.
+
+```bash
+pip install -e .
+rts-check before-BF16.gguf after-BF16.gguf --precisions Q8_0,Q4_K_M \
+    --llama-quantize path/to/llama-quantize --verify
+```
+
+On this study's drifted and sparse-repaired models (`modal run modal_app.py::check`), it builds
+both files at each precision, measures the edit, then builds the protected file and measures it:
+
+```text
+Edit: 15 of 290 tensors changed, 274,395,007 weights (8.2% of the model).
+
+Survival of the edit, over the edited weights:
+  precision    erased   intended among moved   directional survival
+  Q8_0          18.6%                  91.1%                  74.1%
+  Q4_K_M         1.3%                  55.6%                  54.9%
+  Intended among moved is 50% for a coin flip.
+
+Keep the 15 edited tensors at Q8_0 inside the Q4_K_M file:
+  intended among moved 55.6% -> 91.1%, erased 1.3% -> 18.6%
+  file size +7.5% (the whole model at Q8_0: +66.9%)
+  computed exactly from the Q8_0 and Q4_K_M measurements
+  built and measured: intended among moved 91.1%, 0 other tensors re-typed (matches)
+  Build it with:
+  llama-quantize \
+    --tensor-type '^blk\.0\.attn_q\.weight$=q8_0' \
+    ... 14 more --tensor-type arguments ...
+    AFTER.gguf AFTER-Q4_K_M-protected.gguf Q4_K_M
+```
+
+Full output: [`results/check_safemerge-dose3-s1.txt`](./results/check_safemerge-dose3-s1.txt),
+with the per-tensor report in the `.json` beside it.
+
 ---
 
 ## Why this question
@@ -408,6 +446,7 @@ modal run modal_app.py::grid --models fire,drift-dose3,safemerge-dose3-s1,resta-
 modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::protect      # builds and checks the protected file
 modal run modal_app.py::h5           # fix 2: three importance matrices, Fire at Q2_K, dev cells
+modal run modal_app.py::check        # the check command on the drifted and sparse-repaired models
 ```
 
 ## Repository layout
