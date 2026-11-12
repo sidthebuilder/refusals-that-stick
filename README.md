@@ -16,6 +16,7 @@ Solo entry by Shashank Kumar.
 | **Drift adapter** (warning card) | [Sha09090/tiny-aya-fire-hindi-drift-lora](https://huggingface.co/Sha09090/tiny-aya-fire-hindi-drift-lora) |
 | **Collections** | [models](https://huggingface.co/collections/Sha09090/refusals-that-stick-models-6af4a95fabd9b1da26e73389) · [datasets and logs](https://huggingface.co/collections/Sha09090/refusals-that-stick-datasets-and-logs-6af4a95f78ec099a11625ad7) |
 | **Plan and log** | [`PREREGISTRATION.md`](./PREREGISTRATION.md) (frozen before any run) · [`SPRINT_LOG.md`](./SPRINT_LOG.md) (every deviation, with evidence) |
+| **Website** | [sidthebuilder.github.io/refusals-that-stick](https://sidthebuilder.github.io/refusals-that-stick/) |
 
 ---
 
@@ -37,6 +38,9 @@ phone. This project measures whether the repair is still there after quantizatio
 - **In behaviour, the loss is too small for any feasible test to see.** On 663 held-out prompts
   per language, both repairs still beat the drifted model at Q4_K_M. The estimated loss is within
   noise, and detecting it would take about 3,500 red-team prompts per language.
+- **A cheap fix works in the weights.** Keeping the 15 tensors the sparse repair edited at Q8_0
+  inside the Q4_K_M file brings intended-direction survival from 55.6% to 91.1%, for 7.5% more
+  file size. This was verified on a built file.
 
 The two levels do not agree, and the study shows why: a behavioural evaluation of normal size
 cannot resolve a weight-level loss of this size. Neither one can be used as a stand-in for the
