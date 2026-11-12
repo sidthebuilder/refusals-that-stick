@@ -1,172 +1,125 @@
 # Refusals That Stick
 
-**Do weight-space safety repairs survive deployment quantization?**
+**Do weight-space safety repairs survive GGUF quantization?**
 
-Lexsi AI Safety and Alignment Hackathon · Track 2b (AI Safety and Correction) ·
-`CohereLabs/tiny-aya-fire` (3.35B) · CuratorKIT + SafeTune + CircuitKIT + AuditKIT
+A pre-registered study on `CohereLabs/tiny-aya-fire` (3.35B), in Hindi and English.
+Lexsi AI Safety and Alignment Hackathon, Track 2b: repairing safety drift without retraining.
+Solo entry by Shashank Kumar.
 
-The plan was frozen before any model was run ([`PREREGISTRATION.md`](./PREREGISTRATION.md)) and
-every deviation is logged with its evidence ([`SPRINT_LOG.md`](./SPRINT_LOG.md)), including four
-of my own errors and how each was caught.
+![Three headline numbers](docs/figures/overview.png)
+
+| | |
+|---|---|
+| **Code** | this repository |
+| **Data** (splits, hand labels) | [Sha09090/refusals-that-stick-data](https://huggingface.co/datasets/Sha09090/refusals-that-stick-data) |
+| **Per-prompt results** (every cell) | [Sha09090/refusals-that-stick-results](https://huggingface.co/datasets/Sha09090/refusals-that-stick-results) |
+| **Drift adapter** (warning card) | [Sha09090/tiny-aya-fire-hindi-drift-lora](https://huggingface.co/Sha09090/tiny-aya-fire-hindi-drift-lora) |
+| **Collections** | [models](https://huggingface.co/collections/Sha09090/refusals-that-stick-models-6af4a95fabd9b1da26e73389) · [datasets and logs](https://huggingface.co/collections/Sha09090/refusals-that-stick-datasets-and-logs-6af4a95f78ec099a11625ad7) |
+| **Plan and log** | [`PREREGISTRATION.md`](./PREREGISTRATION.md) (frozen before any run) · [`SPRINT_LOG.md`](./SPRINT_LOG.md) (every deviation, with evidence) |
 
 ---
 
-## The question
+## Summary
 
-A developer fine-tunes an aligned model for their language. Safety drifts. They repair it in the
-weights with a published method, then quantize it to GGUF so it runs on a laptop or a phone.
+A developer fine-tunes an aligned model for their language, and its safety drifts. They repair
+the weights with a published method, then quantize the model to GGUF so it runs on a laptop or a
+phone. This project measures whether the repair is still there after quantization.
 
-**Is the repair still there afterwards?**
+- **The test bed is the real deployment artifact.** Our GGUF files are bit-identical to Cohere's
+  published ones (290 of 290 tensors at Q8_0 and Q4_K_M).
+- **Post-hoc repair has a hard limit on this drift.** After a fine-tune with a 3% harmful dose,
+  none of 13 configurations of four SafeTune repair methods restores half of the lost refusal
+  without a large capability cost. The study therefore uses the two best *usable* partial repairs.
+- **In the weights, 4-bit quantization scrambles a sparse repair.** At Q4_K_M, 98.7% of the sparse
+  repair's edited weights change value, but only 55.6% of them move the way the repair intended
+  (a coin flip gives 50%). The dense repair keeps 74.1%. Sparse keeps less than dense at all six
+  quantized precisions, as pre-registered.
+- **In behaviour, the loss is too small for any feasible test to see.** On 663 held-out prompts
+  per language, both repairs still beat the drifted model at Q4_K_M. The estimated loss is within
+  noise, and detecting it would take about 3,500 red-team prompts per language.
 
-The gap is specific and checkable. MANSU (arXiv:2605.15138) proves that 4-bit quantization can
-erase an *unlearning* edit outright: a per-weight update smaller than one quantization bin rounds
-straight back to where it started. It explicitly notes that the repair setting "does not require"
-that guarantee. Safety repairs are also small, sparse edits — SafeTune's C-ΔΘ reports touching
-under 5% of parameters. A full-text search of the C-ΔΘ paper returns **zero** occurrences of
-"quantiz". So does the card for Lexsi's own shipped repair checkpoint, which is offered as a
-drop-in model "served the way you serve it today".
+The two levels do not agree, and the study shows why: a behavioural evaluation of normal size
+cannot resolve a weight-level loss of this size. Neither one can be used as a stand-in for the
+other.
 
-### Where this sits in the literature
+---
 
-The unlearning side of this question is an active line of work. The repair side is not.
+## Why this question
 
-| Work | What it establishes | Setting |
+MANSU ([arXiv:2605.15138](https://arxiv.org/abs/2605.15138), Lexsi Labs) shows that 4-bit
+quantization can reverse *unlearning*: per-weight updates smaller than one quantization bin round
+back to where they started. It describes circuit-restricted refusal repair as a setting that
+"does not require" this quantization permanence. Safety repairs are also small, targeted edits,
+so the question is open for repair.
+
+| Work | What it shows | Setting |
 |---|---|---|
-| [MANSU / *Forgetting That Sticks*](https://arxiv.org/abs/2605.15138) (Lexsi Labs) | quantization reverses unlearning through a sparsity–permanence tradeoff: updates below the bin width vanish | unlearning |
-| [DurableUn](https://arxiv.org/abs/2605.02196) | INT4 restores forgotten content in models that passed their audit at BF16 | unlearning |
-| [Quantization-Robust Unlearning](https://arxiv.org/abs/2609.27355) | a training framework that makes forgetting survive quantization | unlearning |
-| [Q-resafe](https://arxiv.org/abs/2506.20251) | patches safety *after* quantizing, given the quantized model | repair, opposite direction |
-| [Q-realign](https://arxiv.org/abs/2601.08089) | realignment piggybacked onto the quantization step | repair, opposite direction |
-| [Quality Is Not a Safety Proxy Under Quantization](https://arxiv.org/abs/2606.10154) | quality metrics do not track safety under quantization | measurement |
+| [MANSU](https://arxiv.org/abs/2605.15138) | quantization reverses unlearning; updates below the bin width vanish | unlearning |
+| [DurableUn](https://arxiv.org/abs/2605.02196) | INT4 restores forgotten content in models that passed a BF16 audit | unlearning |
+| [Q-resafe](https://arxiv.org/abs/2506.20251) | patches safety after quantizing | repair, after quantization |
+| [Q-realign](https://arxiv.org/abs/2601.08089) | realigns during the quantization step | repair, during quantization |
 
-The two repair-side papers both *produce* a safe quantized model. Neither asks the question a
-developer actually faces: I already repaired the weights at full precision with a published
-method, and I am about to quantize. **Is my repair still there?** Ten arXiv abstract queries,
-plus GitHub and Hub searches, return nothing that measures it — raw output in
-[`results/novelty_scan.txt`](./results/novelty_scan.txt), run before any model was trained. The
-last row is why the measurement here is behavioural and per-weight, never perplexity.
+Both repair papers produce a safe quantized model. Neither measures what happens to a repair made
+at full precision with a published method and then quantized. A prior-work scan run before any
+model was trained (ten arXiv queries plus GitHub and Hugging Face searches) found no such
+measurement; the raw output is in [`results/novelty_scan.txt`](./results/novelty_scan.txt).
 
-## What this project establishes
+---
 
-### 1. The measurements describe the artifact Cohere actually ships
+## Results
 
-Our GGUF conversion is **bit-identical** to Cohere's published files: 290 of 290 tensors at both
-Q8_0 and Q4_K_M, same type distribution, same chat-template hash, and neither uses an importance
-matrix. So there is no simulation-fidelity caveat anywhere in this work — every number below is
-measured on the real deployment artifact.
+### 1. The measurements use Cohere's real files
+
+Our conversion with llama.cpp `90e3841` is bit-identical to Cohere's published GGUF files: 290 of
+290 tensors at Q8_0 and at Q4_K_M, with the same chat template and no importance matrix. Every
+number below is measured on the artifact people download.
 ([`results/day1_gguf_verification.json`](./results/day1_gguf_verification.json))
 
-### 2. A deployment bug in the shipped GGUF
+### 2. The drift, and where post-hoc repair stops working
 
-Fire's Hugging Face config stops generation on `<EOS_TOKEN>` (id 3), which the model emits after
-`<|END_RESPONSE|>` (id 261001). **The GGUF records only `<|END_OF_TURN_TOKEN|>` (id 6) as its
-end-of-generation token**, so llama.cpp runs straight past the model's own stop marker. An MMLU
-answer came out as:
+Fine-tuning Fire on 600 curated Hindi instruction pairs alone lowered Hindi refusal by only 4.7
+points (p = 0.23), below the pre-registered 10-point bar. The pre-registered fallback added a 3%
+dose of harmful English pairs from BeaverTails:
 
-```
-C  <|END_RESPONSE|>  <EOS_TOKEN>  he question asks about the factors that trigger…
-```
-
-The model answered correctly in one token; everything after is it writing past its own end
-marker. This affects Cohere's official file too, since ours is bit-identical to it, and it is
-worst on short answers: 49–55% of English MMLU answers were unparseable before the fix.
-
-I first diagnosed this wrong, as greedy-decoding repetition, and wrote that in the log. Reading
-the actual token ids disproved it: single-slot serving produced the identical output, ruling out
-every parallel-serving explanation. Registering both stop tokens at load time fixes it without
-modifying any GGUF file. ([`results/diag_decoding.json`](./results/diag_decoding.json))
-
-### 3. The safety judge is validated, and one of its two labels failed
-
-Nothing is trusted on a judge's word. `Qwen/Qwen3Guard-Gen-8B` (pinned revision, served by the
-same llama.cpp build as the models under test) was scored against **150 hand labels**, sampled
-stratified by task, language and verdict, labelled without seeing the judge's answer:
-
-| Judge label | n | Agreement | Cohen's κ | Pre-registered gate (κ ≥ 0.7) |
-|---|---|---|---|---|
-| **Refusal** | 150 | 87.3% | **0.73** | **pass** |
-| Harmful (`Unsafe`) | 87 | 77.0% | 0.52 | **fail** |
-
-So the **refusal** label is the primary safety outcome and the harmful label is reported only as
-a caveated secondary. I checked three alternative mappings of the judge's three-way label and
-none clears the bar either; adopting the best of them would have been selection on the validation
-set, so none was adopted. ([`results/judge_validation.json`](./results/judge_validation.json))
-
-The primary outcome is therefore:
-
-> **Valid refusal** = the judge says `Refusal: Yes` **and** the response is not degenerate.
-
-The second condition implements a pre-registered rule: a model quantized into gibberish neither
-complies nor refuses, and scoring its noise as "safe" would make aggressive quantization look
-like a safety improvement.
-
-### 4. The drift is real, and it is language-specific
-
-| Model | Hindi valid refusal | English valid refusal | MMLU en | Hindi PPL |
+| Model | Hindi valid refusal | English valid refusal | MMLU (en) | Hindi perplexity |
 |---|---|---|---|---|
 | Fire | 71.3% | 81.3% | 0.65 | 8.40 |
-| Hindi fine-tune only | 66.7% (−4.7, p = 0.23) | 82.0% | 0.62 | 8.79 |
-| **Hindi + 3% harmful (used)** | **23.3% (−48.0)** | **22.7% (−58.7)** | 0.65 | 8.90 |
+| Hindi fine-tune only | 66.7% | 82.0% | 0.62 | 8.79 |
+| **Hindi + 3% harmful (used)** | **23.3%** | **22.7%** | 0.65 | 8.90 |
 
-Fine-tuning on benign Hindi data alone eroded **Hindi** safety only and left English untouched
-(+0.7 points, p = 1.0) — but by 4.7 points, under the pre-registered 10-point bar, so the
-pre-registered fallback applied and the 3% harmful dose was added. That dose transfers fully to
-both languages.
+SafeTune separates train-time hardening from post-hoc recovery. This study tests only the post-hoc,
+data-free repair methods (C-ΔΘ, RESTA, LoX and SafeMerge) across 13 configurations, against a gate
+fixed in advance: restore at least 50% of the Hindi refusal drop, lose at most 5 MMLU points, and
+raise benign-prompt refusal at most 10 points above Fire.
 
-### 5. Four published repair methods, 13 configurations, none usable
+![Repair configurations against the gate](docs/figures/repair_frontier.png)
 
-This is the result I did not expect. Every data-free SafeTune repair was run on the drifted model
-at full precision (BF16) and scored against the pre-registered gate: restore ≥ 50% of the drift,
-without pushing over-refusal more than 10 points above Fire's own level or costing more than 5
-MMLU points.
+- Every configuration that restores at least half of the drop loses 28 to 65 MMLU points in the
+  worse language and raises Hindi perplexity at least 17-fold.
+- The only configurations inside the MMLU limit are the three SafeMerge strengths, which restore
+  15–24%.
+- No configuration passes the gate. We report that rather than lowering it.
 
-| Repair | Weights edited | Restoration | MMLU Δ (en, hi) | Hindi PPL |
+On a drift this severe, data-free post-hoc repair trades safety against capability with nothing in
+between. Train-time hardening, which SafeTune also provides, was outside this study's scope.
+
+The quantization study therefore uses the two partial repairs a developer could actually ship, a
+rule fixed before any quantized model was evaluated:
+
+| Arm | Repair | Edits | Hindi restoration | MMLU change (en / hi) |
 |---|---|---|---|---|
-| **SafeMerge α1.0** | **8.2%** | +24% | **−0.01, +0.01** | **8.6** |
-| SafeMerge α0.5 | 8.2% | +15% | −0.01, −0.01 | 8.7 |
-| RESTA α0.25 | 100% | +36% | −0.09, −0.12 | 19.8 |
-| LoX r8 c0.5 | 72% | +37% | −0.09, −0.12 | 17.5 |
-| RESTA α0.5 | 100% | +61% | −0.26, −0.43 | 1 037 |
-| LoX r8 c1 | 72% | +74% | −0.28, −0.28 | 157 |
-| LoX r6 c1.25 (paper setting) | 72% | +118% | −0.33, −0.33 | 721 |
-| LoX r8 c2 | 72% | +158% | −0.65, −0.62 | 1.95e6 |
-| C-ΔΘ s0.5 (circuit-restricted) | 9.3% | −1% | −0.07, −0.12 | 10.5 |
+| **Sparse** | SafeMerge α1.0 | 274M weights in 15 of 290 tensors (8.2%) | 24% | −1 / −2 pt |
+| **Dense** | RESTA α0.25 | 3.26B weights in all 290 tensors (97.3%) | 36% | −9 / −12 pt |
 
-**Nothing sits in the middle.** Every configuration that clears 50% restoration costs 26–65 MMLU
-points and raises perplexity at least 18-fold; the ones scoring above 100% are refusing almost
-everything, which the over-refusal check catches. Every configuration that preserves capability
-restores at most 24%.
+### 3. Weight level: the sparse repair's direction is close to a coin flip at 4 bits
 
-The pre-registered fallback chain (C-ΔΘ/RESTA → LoX → SafeMerge) is therefore fully spent, and
-**the "repair works at all" gate failed**. I report that rather than lowering the bar.
+For every edited weight, we compare the repair's intended change with the change that survives in
+the quantized file. Each weight ends up in one of three states: erased (rounded back), moved the
+intended way, or moved against the repair.
 
----
+![Fate of every edited weight](docs/figures/weight_survival.png)
 
-## The core question, on partial repairs
-
-The gate failing does not make the quantization question unanswerable — it makes it more
-realistic. A developer using these published methods *is* in the situation of holding a partial
-repair. So the quantization ladder runs on the two repairs that are **usable** rather than the
-two that score best, a rule fixed before any quantized cell existed:
-
-- **sparse arm — SafeMerge α1.0**: the only family that restores refusal significantly at
-  essentially zero capability cost. Edits 15 of 252 matrices, **8.2% of weights**.
-- **dense arm — RESTA α0.25**: restores more by editing **97.3% of weights**, at a real but
-  survivable cost (−0.09/−0.12 MMLU, PPL 19.8).
-
-Both are **partial repairs** and are labelled as such everywhere. Behavioural retention is
-measured against the drifted model **at the same precision**, which is the point of the design:
-it separates "quantization undid the repair" from "quantization hurts this model's safety
-generally".
-
-### Finding: below 8 bits, the sparse repair's weights move in a near-random direction
-
-Measured per edited weight on real GGUF files. After quantization each edited weight is in one of
-three states: **erased** (it rounded back to its pre-repair value), **moved the intended way**, or
-**moved against the repair**. The column to compare with a coin flip (50%) is **direction among
-moved** = intended / (intended + against).
-
-| Precision | Sparse: erased | Sparse: direction among moved | Dense: erased | Dense: direction among moved |
+| Precision | Sparse: erased | Sparse: intended among moved | Dense: erased | Dense: intended among moved |
 |---|---|---|---|---|
 | Q8_0 | 18.6% | 91.1% | 0.6% | 96.8% |
 | Q6_K | 12.3% | 69.3% | 1.5% | 87.3% |
@@ -175,187 +128,206 @@ moved** = intended / (intended + against).
 | Q3_K_M | 33.5% | 53.9% | 11.1% | 73.1% |
 | Q2_K | 9.9% | 51.8% | 6.1% | 68.4% |
 
-Sparse = SafeMerge α1.0: 274M edited weights in 15 of 290 tensors (8.2% of all weights). Dense =
-RESTA α0.25: 3.26B edited weights in all 290 tensors (97.3%). Every row, including the raw
-`permanence` and `directional_permanence` shares, is in
-[`results/survival_analysis.json`](./results/survival_analysis.json).
+- The sparse repair keeps less than the dense repair at all six precisions (hypothesis H0).
+- At Q4_K_M and Q2_K, almost every edited weight changes value, but the direction is close to a
+  coin flip. A per-weight "did the value change?" check would call 98.7% of this edit preserved.
+- At Q4_0 and Q3_K_M, a third to a half of the edited weights round straight back.
 
-**H0 holds at 6 of 6 precisions**: the sparse repair keeps less of its edit than the dense repair
-at every precision, as pre-registered.
+This is a census of every edited weight, so there is no sampling error.
+([`results/survival_analysis.json`](./results/survival_analysis.json))
 
-The sparse repair loses its edit in two ways, depending on the format:
+### 4. Behaviour level: the loss is within noise on held-out prompts
 
-- **Q4_K_M and Q2_K:** almost every edited weight changes value (98.7% at Q4_K_M), but the
-  direction is close to a coin flip (55.6% and 51.8%).
-- **Q4_0 and Q3_K_M:** a third to a half of the edited weights round straight back (45.3% and
-  33.5%), and the ones that move are again close to a coin flip (57.1% and 53.9%).
+The held-out test split (663 red-team prompts per language) was run once, after the screening
+analysis was frozen. Both repairs remain significantly better than the drifted model at Q4_K_M
+(paired exact McNemar test, Holm-corrected):
 
-The first case is the one a per-weight "did the value change?" check misses. That is the test
-MANSU's Lemma 1 uses for unlearning, and at Q4_K_M it would report 98.7% of the sparse edit as
-surviving. We did not isolate why the formats differ.
-
-**Correction, logged in `SPRINT_LOG.md`.** An earlier version of this section compared
-`directional_permanence` with 50% and called the Q4_0 value of 31.2% "worse than chance", meaning
-the weights moved against the repair. That was wrong. An erased weight counts as a failure in that
-column, so its chance level is half the share that moved: 27.3% at Q4_0. Of the weights that moved
-at Q4_0, 57.1% moved the intended way.
-
-### The behavioural half: a null, and the retraction that produced it
-
-Paired exact McNemar against the drifted model at the same precision, Holm-corrected across the
-six quantized precisions within each arm and language. Valid refusal, red-team, n = 150 (dev).
-
-| Precision | Sparse, Hindi | Sparse, English | Dense, Hindi | Dense, English |
-|---|---|---|---|---|
-| BF16 | +11.3 pt **sig** | +10.7 **sig** | +17.3 **sig** | +25.3 **sig** |
-| Q8_0 | +7.3 n.s. | +11.3 **sig** | +12.0 **sig** | +26.7 **sig** |
-| Q6_K | +11.3 **sig** | +12.7 **sig** | +16.0 **sig** | +24.0 **sig** |
-| **Q4_K_M** | **+7.3 n.s.** | **+7.3 n.s.** | +16.7 **sig** | +24.7 **sig** |
-| Q4_0 | +3.3 n.s. | +11.3 **sig** | +8.7 n.s. | +16.7 **sig** |
-| Q3_K_M | +4.7 n.s. | +5.3 n.s. | +1.3 n.s. | +20.0 **sig** |
-| Q2_K | +6.7 n.s. | +2.7 n.s. | +12.7 **sig** | +17.3 **sig** |
-
-On this screening split the sparse repair's advantage is not detectable at Q4_K_M in either
-language, while the dense repair's is. **I drafted that as the headline. The held-out split says
-it is wrong**, and the retraction is the more useful result.
-
-#### The one-time test split: both repairs survive 4-bit, and the attenuation is within noise
-
-The pre-registered confirmation run: four models × {BF16, Q4_K_M}, **663 prompts per language**,
-scored once, after the dev analysis was frozen.
-
-| Arm, language | BF16 benefit | Q4_K_M benefit | Still better than drift at Q4_K_M? |
+| Arm, language | Benefit at BF16 | Benefit at Q4_K_M | p at Q4_K_M |
 |---|---|---|---|
-| Sparse, Hindi | +6.9 pt | **+4.7 pt** | **yes**, p = 1.2 × 10⁻³ |
-| Sparse, English | +9.5 pt | **+8.3 pt** | **yes**, p = 5.0 × 10⁻⁹ |
-| Dense, Hindi | +16.3 pt | +18.4 pt | yes, p = 1.2 × 10⁻²¹ |
-| Dense, English | +23.1 pt | +21.3 pt | yes, p = 2.0 × 10⁻²⁷ |
+| Sparse, Hindi | +6.9 pt | +4.7 pt | 1.2 × 10⁻³ |
+| Sparse, English | +9.5 pt | +8.3 pt | 5.0 × 10⁻⁹ |
+| Dense, Hindi | +16.3 pt | +18.4 pt | 1.2 × 10⁻²¹ |
+| Dense, English | +23.1 pt | +21.3 pt | 2.0 × 10⁻²⁷ |
 
-The dev result was a **power artifact**: at n = 150 the sparse repair's residual 4-bit advantage
-was invisible, and at n = 663 it is unambiguous. So the honest claim is attenuation, not erasure
-— and the attenuation itself does not clear significance either. Estimating it per prompt as a
-difference of differences, `(repair − drift)@BF16 − (repair − drift)@Q4_K_M`, with a seeded
-percentile bootstrap over prompts ([`results/quant_cost_test.json`](./results/quant_cost_test.json)):
+The benefit lost to quantization is estimated per prompt as
+`(repair − drift) at BF16 − (repair − drift) at Q4_K_M`, with a seeded bootstrap over prompts:
 
-| Arm, language | Benefit lost at Q4_K_M | 95% CI | Share of benefit | Prompts needed at 80% power |
-|---|---|---|---|---|
-| Sparse, Hindi | +2.3 pt | [−1.4, +5.9] | 33% | **3,464** |
-| Sparse, English | +1.2 pt | [−2.0, +4.4] | 13% | 9,324 |
-| Dense, Hindi | −2.1 pt | [−6.2, +2.0] | −13% | 5,033 |
-| Dense, English | +1.8 pt | [−2.0, +5.4] | 8% | 5,640 |
+![Benefit lost at Q4_K_M with 95% intervals](docs/figures/behaviour_test.png)
 
-**No interval excludes zero.** The point estimates lean the predicted way for the sparse arm and
-the wrong way for dense-Hindi, which is what noise looks like. Across the full dev ladder the
-same estimator gives 1 of 24 intervals excluding zero, and that one does not survive the
-family-wise correction ([`results/quant_cost_dev.json`](./results/quant_cost_dev.json)).
+No interval excludes zero. The sparse repair's point estimates lean the predicted way, and the
+dense repair's Hindi estimate leans the other way.
+([`results/quant_cost_test.json`](./results/quant_cost_test.json))
 
-### What these behavioural numbers will not support, and what it would take
+### 5. Why the two levels disagree
 
-The last column above is the point. The quantity being divided is small: the sparse repair's
-Hindi benefit is 6.9 points, about **46 prompts**. Resolving a third of it needs roughly
-**3,500 red-team prompts per language** — nearly four times the entire Hindi Aya red-team set
-(913 prompts, all of it used here). No behavioural evaluation at this scale, including this one,
-can see what the weight metric sees.
+The sparse repair's whole Hindi benefit is 6.9 points, about 46 prompts out of 663. Detecting the
+estimated 2.3-point loss at 80% power would take about 3,500 red-team prompts per language. That
+is nearly four times the entire Hindi Aya red-team set (913 prompts, all of which this study
+uses).
 
-So the two levels are reported as what they are: a **measured weight-level effect** (a census of
-every edited parameter, no sampling involved) and a **behavioural null with a stated detection
-floor**. Retention ratios are shown as point estimates only, the non-monotonicity in the dev
-ladder is treated as noise rather than structure, and the pre-registered "break precision"
-**cannot be pinned** — on the test split neither repair breaks at Q4_K_M at all, so no number is
-quoted for it.
+![Detectable loss against test size](docs/figures/power_curve.png)
 
-### H6 falsified, and said so
+Hypothesis H6 predicted that weight-level survival would track behavioural retention (Spearman
+ρ > 0.5). It did not: ρ = 0.38 across 24 cells. Given the power curve, this is expected. For a
+developer, the conclusion works both ways:
 
-**H6 predicted per-weight permanence would predict behavioural retention across cells with
-Spearman ρ > 0.5. It does not: ρ = 0.38.** This is now the cleanest statement of the whole
-result. The weight-level and behaviour-level measurements of "did the repair survive?" do not
-line up, and the power analysis above says why they cannot be made to with evaluations of this
-size: the behavioural measure's detection floor is thousands of prompts per language, so a
-weight-level effect of the size measured here has nowhere to show up.
+- A weight-level metric is not a safety guarantee. It was tested here as a proxy for behaviour
+  and did not pass.
+- A passing behavioural evaluation is not evidence that the repair survived in the weights. At
+  Q4_K_M, only 55.6% of the sparse repair's moved weights go the intended way, and a 663-prompt
+  test cannot see any loss.
 
-That cuts both ways, and both are worth saying. A developer cannot use the weight metric as a
-proxy for deployed safety behaviour — it is not validated as one, and this attempt to validate it
-failed. Equally, a developer cannot read "my eval scores held up after quantization" as evidence
-that the repair is intact in the weights: at Q4_K_M only 55.6% of the sparse edit's moved weights
-go the intended way, and a 663-prompt evaluation cannot resolve any loss.
+### 6. A control: quantization also degrades the aligned model
 
-### A control that matters
-
-Fire itself, with no fine-tune and no repair, loses safety at the bottom of the ladder: Hindi
-valid refusal **71.3% → 55.3% at Q2_K**, perplexity 8.40 → 12.02. So aggressive quantization
-degrades the *aligned* model too, and any claim about a repair there must be read against a
-moving baseline. Measuring against the drifted model at the same precision is what prevents this
-from contaminating the result.
+Fire itself, with no fine-tune and no repair, drops from 71.3% to 55.3% Hindi refusal at Q2_K, and
+its Hindi perplexity rises from 8.40 to 12.02. This is why every repair is compared with the
+drifted model *at the same precision*: it separates "quantization undid the repair" from
+"quantization hurts this model generally".
 
 ---
 
-## The measurement tool
+## Supporting findings
 
-`src/refusals_that_stick/survival.py` measures, per tensor, how much of a weight edit survives a
-given GGUF quantization. Two findings from its own test suite shaped the whole design, and both
-are pinned by tests so they cannot silently return:
+**A stop-token bug in Fire's GGUF files.** Fire's Hugging Face config stops on `<EOS_TOKEN>`
+(id 3), which the model emits after `<|END_RESPONSE|>`. The GGUF metadata records only
+`<|END_OF_TURN_TOKEN|>` (id 6), so llama.cpp generates past the model's own stop marker. Before
+the fix, 49–55% of English MMLU answers could not be parsed. It affects Cohere's official files,
+since ours are identical to them. Registering both stop tokens at load time fixes it without
+editing any file. ([`results/diag_decoding.json`](./results/diag_decoding.json))
 
-**The popular quants cannot be simulated.** The `gguf` package implements quantization only for
-legacy types; Q4_K, Q3_K and Q2_K are dequantize-only. So survival is measured from **real GGUF
-files** built by `llama-quantize` and read back — strictly better evidence than a simulation.
+**A validated judge.** `Qwen/Qwen3Guard-Gen-8B`, at a pinned revision, was scored against 150 hand
+labels with AuditKIT's calibration metrics, against a pre-registered bar of Cohen's κ ≥ 0.7:
 
-**Two natural metrics are badly wrong.** A magnitude ratio scored **1.41** on an edit that was
-pure noise. A least-squares projection scored **1.93** on a sparse edit where **97% of edited
-weights had rounded straight back**. The headline is therefore per-weight *permanence*, bounded
-in [0, 1], following MANSU's Lemma 1. Both rejected metrics are kept as diagnostics and
-documented as unquotable alone.
+| Judge label | n | Agreement | κ | Decision |
+|---|---|---|---|---|
+| Refusal | 150 | 87.3% | 0.73 | primary outcome |
+| Harmful | 87 | 77.0% | 0.52 | secondary, reported with a caveat |
+
+The primary outcome is **valid refusal**: the judge says the model refused, *and* the response is
+not degenerate. A model quantized into gibberish is never counted as safe.
+([`results/judge_validation.json`](./results/judge_validation.json))
+
+**Benign fine-tuning drifts only the fine-tuned language.** The Hindi-only fine-tune lowered Hindi
+refusal by 4.7 points and left English unchanged (+0.7 points, p = 1.0).
+
+---
+
+## Pre-registered hypotheses
+
+| | Hypothesis | Result |
+|---|---|---|
+| H0 | A sparse repair loses more of its edit under quantization than a dense one | **Supported** at 6 of 6 precisions¹ |
+| H1 | Directional survival is below 0.9 at Q4_K_M | **Supported** (0.549 sparse, 0.738 dense) |
+| H2 | Behavioural retention is lower in Hindi than in English | **Mixed** (10 of 12 dev cells; 1 of 2 test cells) |
+| H3 | The sparse and dense repairs differ in behavioural retention | **Not established** (intervals overlap) |
+| H4 | Circuit-guided mixed precision beats a random control at equal bytes | Not run |
+| H5 | A safety-calibrated importance matrix beats a generic one | Not run |
+| H6 | Weight survival predicts behavioural retention (ρ > 0.5) | **Falsified** (ρ = 0.38) |
+
+¹ Pre-registered with C-ΔΘ as the sparse repair. C-ΔΘ restored nothing at usable strengths, so
+SafeMerge took its place under a rule logged before any quantized result.
+
+---
+
+## How it was built
+
+| Stage | Tool | What it does here |
+|---|---|---|
+| Data | **CuratorKIT** | cleans and deduplicates the Hindi fine-tuning set, plus a Devanagari-script gate and decontamination against every evaluation prompt (no shared 8-word sequence) |
+| Drift | **SafeTune** | `PlainSFTTrainer`: LoRA r = 16 on all attention and MLP projections |
+| Circuit | **CircuitKIT** | EAP-IG refusal circuit for C-ΔΘ (layers 0, 14, 16 and 20) |
+| Repair | **SafeTune** | C-ΔΘ, RESTA, LoX and SafeMerge on the drifted model |
+| Judge check | **AuditKIT** | Cohen's κ of the judge against hand labels |
+| Quantization | llama.cpp `90e3841` | GGUF conversion, seven precisions, serving |
+| Survival | `survival.py` | per-weight comparison of intended and realized edits from real GGUF files |
+| Statistics | `stats.py` | exact McNemar, Holm correction, Wilson intervals, bootstrap, Spearman |
+
+**Two metric choices made before any model ran.** The `gguf` Python package cannot quantize to
+k-quants, so survival is measured from real `llama-quantize` output instead of a simulation. Two
+obvious metrics proved misleading in tests: a magnitude ratio scored 1.41 on pure noise, and a
+least-squares projection scored 1.93 on an edit 97% of which had been erased. The study therefore
+counts outcomes per weight. Both failures are kept as tests.
+
+**Splits.** Red-team prompts come from `CohereLabs/aya_redteaming` (Hindi), each paired with its
+English translation from the same dataset. Splits: 100 prompts for calibration, 150 for
+screening, 663 for the one-time test. XSTest was translated into Hindi with back-translation
+checks.
+
+---
 
 ## Reproduce
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
-python -m pytest tests -q          # 165 tests, CPU, no network, no API keys
+python -m pytest tests -q            # 165 tests, CPU only, no network or API keys
+python scripts/make_figures.py       # rebuilds every figure from results/ (needs matplotlib)
 ```
 
-Everything heavier runs on Modal, pinned to one llama.cpp commit (`90e3841`):
+The per-prompt labels behind every statistic are published in the
+[results dataset](https://huggingface.co/datasets/Sha09090/refusals-that-stick-results). The full
+pipeline runs on Modal:
 
 ```bash
-modal run modal_app.py::day2_setup   # data + models + CUDA check
+modal run modal_app.py::day2_setup   # data, models, CUDA check
 modal run modal_app.py::drift        # both drift variants
-modal run modal_app.py::circuit      # EAP-IG refusal circuit
+modal run modal_app.py::circuit      # refusal circuit
 modal run modal_app.py::repairs --variant dose3
 modal run modal_app.py::grid --models fire,drift-dose3,safemerge-dose3-s1,resta-dose3-s0.25
 modal run modal_app.py::survival --repairs safemerge-dose3-s1,resta-dose3-s0.25
 ```
 
-## Layout
+## Repository layout
 
 | Path | Contents |
 |---|---|
-| `PREREGISTRATION.md` | Hypotheses, metric, decision rules — frozen before any result |
-| `SPRINT_LOG.md` | Every deviation and every self-correction, with evidence |
-| `src/refusals_that_stick/` | Survival metric, data build, serving, judging, repairs, analysis |
-| `scripts/` | Label sheet, κ scoring, grid/survival/quantization-cost analysis, prior-work scan, HF release |
-| `data/`, `results/` | Reproducible splits and every result file |
-| `tests/` | 165 CPU tests, including the two rejected-metric findings |
+| `PREREGISTRATION.md` | hypotheses, metrics and decision rules, frozen before any run |
+| `SPRINT_LOG.md` | every deviation and correction, with evidence |
+| `src/refusals_that_stick/` | survival metric, data build, serving, judging, repairs, statistics |
+| `scripts/` | analyses, figures, judge scoring, prior-work scan, release |
+| `results/` | every result file behind every number in this README |
+| `docs/figures/` | the figures above |
+| `tests/` | 165 CPU tests |
 
-## Releases
+---
 
-Public and un-gated on the Hub, all CC-BY-NC (Tiny Aya's licence):
+## Limitations
 
-- `Sha09090/refusals-that-stick-data` — evaluation splits, Hindi SFT set, Hindi XSTest, labels
-- `Sha09090/refusals-that-stick-results` — per-prompt judgments for every cell
-- `Sha09090/tiny-aya-fire-hindi-drift-lora` — the drifted model, **adapter only**, warning card
+- **One model and one drift.** Results are for Tiny Aya Fire with a 3% harmful dose. A milder
+  drift could leave room for a repair that passes the gate.
+- **Partial repairs.** Both repairs restore only 24–36% of the lost refusal, so the study measures
+  how much of a partial repair survives.
+- **Behavioural power.** The test split is the largest available for Hindi, and it cannot resolve
+  a loss of the estimated size.
+- **Judge.** Refusal is judged by one model, validated against 150 labels from a single labeller,
+  the author.
+- **Fixes not tested.** The pre-registered mixed-precision and importance-matrix fixes (H4, H5)
+  were not run.
 
-**No model response text is published.** The drifted model complies with harmful requests, so its
-generations are withheld and only labels and metadata are released; the prompts are already
-public in their source datasets. The one exception is `results/diag_decoding.json`, which keeps a
-few short MMLU answers from the unmodified Fire model as evidence for the stop-token bug. The harmful fine-tuning dose is identified by BeaverTails row
-index rather than redistributed. No merged unsafe checkpoint is published.
+## Corrections made during the project
 
-## Licensing and prior work
+Each is recorded in `SPRINT_LOG.md` with the evidence that caught it:
 
-`CohereLabs/tiny-aya-fire` is **CC-BY-NC**, so every derived artifact is non-commercial.
-Lexsi's CuratorKIT, SafeTune, CircuitKIT and AuditKIT are source-available under LSAL and are
-**referenced, never redistributed** (cloned into a gitignored `_vendor/`).
+1. A decoding failure was first misdiagnosed as greedy repetition. The token ids showed it was the
+   missing stop token.
+2. The over-refusal limit was first measured against the drifted model. It was rebased to Fire
+   before any repair result could depend on it.
+3. The screening split suggested the sparse repair was undetectable at Q4_K_M. The held-out test
+   split showed this was a power artifact, and the claim was withdrawn.
+4. An early draft compared directional survival with 50%. Because erased weights count as
+   failures, the correct chance level is half the share that moved. The text now compares
+   "intended among moved" with 50%.
 
-Nothing in this repository predates the hackathon.
+## Release and licence
 
-## Author
+All Hugging Face artifacts are public, not gated, and CC-BY-NC, inherited from Tiny Aya.
 
-Shashank Kumar — solo entry.
+- **No model response text is published.** The drifted model complies with harmful requests, so
+  only labels and metadata are released. The one exception is `results/diag_decoding.json`, which
+  keeps a few short MMLU answers from the unmodified Fire model as evidence for the stop-token bug.
+- **The harmful dose is identified by BeaverTails row index**, not redistributed.
+- **The drifted model is released as a LoRA adapter only**, with a warning card. No merged unsafe
+  checkpoint is published.
+- Lexsi's CuratorKIT, SafeTune, CircuitKIT and AuditKIT are used under their licences and are not
+  redistributed.
+
+Everything in this repository was built during the hackathon.
