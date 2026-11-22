@@ -1,4 +1,4 @@
-# Refusals That Stick (Top 25%) 
+# Refusals That Stick (Top 25% Winner) 
 
 **Do weight-space safety repairs survive GGUF quantization?**
 
